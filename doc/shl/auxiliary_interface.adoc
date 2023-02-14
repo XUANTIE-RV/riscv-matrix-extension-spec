@@ -1,0 +1,382 @@
+[[chapter4]]
+
+== Auxiliary Interface
+
+CSI-NN2 provides a set of optional auxiliary functions in addition to various network layer interfaces. The additional function interface can be used to assist in constructing the process executed according to the diagram, assigning and modifying the operation structure, etc. The declaration of the auxiliary function in `csinn_runtime.h` .
+
+### csinn_alloc_session
+
+[source,c]
+----
+struct csinn_session *csinn_alloc_session();
+----
+
+* *description:*
+** allocate a session. This operation allocates only memory space.
+Initialization is completed by csinn_session_init. Each session
+represents an instance of a model.
+* *return:*
+** pointing to the newly assigned session
+
+### csinn_free_session
+
+[source,c]
+----
+void csinn_free_session(struct csinn_session *session);
+----
+* *description:*
+** release a csi session
+* *parameter:*
+** session:indicates the session to be released
+
+### csinn_session_init
+
+[source,c]
+----
+void csinn_session_init(struct csinn_session *session);
+----
+* *description:*
+** session initialization function, you can perform board-level
+initialization in the interface, such as calling some NPU initialization
+function.
+* *parameter:*
+** session:the session to be session
+
+### csinn_session_deinit
+
+[source,c]
+----
+void csinn_session_deinit(struct csinn_session *session);
+----
+* *description:*
+** the interface corresponding to csinn_session_init to uninitialized
+session
+* *parameter:*
+** session:the session to be uninitialized
+
+### csinn_session_setup
+
+[source,c]
+----
+int csinn_session_setup(struct csinn_session *session);
+----
+* *description:*
+** the interface used to build a graph when executing by graph. For
+example, you can call the compilation interface in the NPU driver
+* *parameter:*
+** session:indicates the session to be processed
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_session_run
+
+[source,c]
+----
+int csinn_session_run(struct csinn_session *session);
+----
+* *description:*
+** the interface for executing the graph when the graph is executed.
+* *parameter:*
+** session:indicates the session to be executed
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_load_binary_model
+
+[source,c]
+----
+int csinn_load_binary_model(struct csinn_session *session);
+----
+* *description:*
+** load the binary model. Do not need to call csinn_session_setup when
+you run the binary model.
+* *parameter:*
+** session: indicates the session to be executed
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_import_binary_model
+
+[source,c]
+----
+struct csinn_session *__attribute__((weak)) csinn_import_binary_model(char *bm_addr)
+----
+* *description:*
+** the hhb model interface is a further encapsulation of csinn_load_binary_model. It is defined as a weak function and can be overwritten by a custom function with the same name.
+* *parameter:*
+** bm_addr:indicates the memory address where the hhb model file is stored.
+* *return:*
+** if successful, return session
+
+### csinn_set_input_number
+
+[source,c]
+----
+void csinn_set_input_number(int number, struct csinn_session *sess);
+----
+* *description:*
+** set the number of input
+* *parameter:*
+** number: the number of input
+** sess: the session to be set
+
+### csinn_set_output_number
+
+[source,c]
+----
+void csinn_set_output_number(int number, struct csinn_session *sess);
+----
+* *description:*
+** set the number of output
+* *parameter:*
+** number:the number of output
+** sess: the session to be set
+
+### csinn_get_input_number
+
+[source,c]
+----
+int csinn_get_input_number(struct csinn_session *sess);
+----
+
+* *description:*
+** get the number of input
+* *parameter:*
+** sess: the session to be get
+* *return:*
+** return the number of input
+
+### csinn_get_output_number
+
+[source,c]
+----
+int csinn_get_output_number(struct csinn_session *sess);
+----
+* *description:*
+** get the number of output
+* *parameter:*
+** sess: the session to be get
+* *return:*
+** return the number of output
+
+### csinn_set_input
+
+[source,c]
+----
+int csinn_set_input(int index, struct csinn_tensor *input, struct csinn_session *sess);
+----
+* *description:*
+** set the input of the model
+* *parameter:*
+** index: the index of input
+** input: input tensor
+** sess: the session to be set
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_set_output
+
+[source,c]
+----
+int csinn_set_output(int index, struct csinn_tensor *output, struct csinn_session *sess);
+----
+* *description:*
+** set the output of the model
+* *parameter:*
+** index: the index of output
+** output: output tensor
+** sess: the session to be set
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_get_input
+
+[source,c]
+----
+int csinn_get_input(int index, struct csinn_tensor *input, struct csinn_session *sess);
+----
+* *description:*
+** obtains the input of the model. The API modifies the input
+information of the specified sequence number to the parameter input
+* *parameter:*
+** index: the index of input
+** input: input tensor
+** sess: the session to be get
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_get_output
+
+[source,c]
+----
+int csinn_get_output(int index, struct csinn_tensor *output, struct csinn_session *sess);
+----
+* *description:*
+** obtains the output of the model. The API modifies the output information of the specified sequence number to the parameter output.
+* *parameter:*
+** index: the index of output
+** output: output tensor
+** sess: the session to be get
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_update_input
+
+[source,c]
+----
+int csinn_update_input(int index, struct csinn_tensor *input, struct csinn_session *sess);
+----
+* *description:*
+** updates the input information. Generally, it is used to update
+different input addresses before the model is executed
+* *parameter:*
+** index: the index of input
+** input: input tensor
+** sess: the session to be set
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_update_output
+
+[source,c]
+----
+int csinn_update_output(int index, struct csinn_tensor *output, struct csinn_session *sess);
+----
+* *description:*
+** updates the output information. Generally, different output addresses
+are updated before the model is executed.
+* *parameter:*
+** index: the index of output
+** output: output tensor
+** sess: the session to be set
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_set_tensor_entry
+
+[source,c]
+----
+int csinn_set_tensor_entry(struct csinn_tensor *tensor, struct csinn_session *sess);
+----
+* *description:*
+** set an input node
+* *parameter:*
+** tensor: indicates the tensor to be set as input
+** sess: the session to be set
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_tensor_size
+
+[source,c]
+----
+int csinn_tensor_size(struct csinn_tensor *tensor);
+----
+* *description:*
+** obtains the number of elements in a tensor
+* *parameter:*
+** tensor: the tensor to be counted
+* *return:*
+** number of elements
+
+### csinn_tensor_byte_size
+
+[source,c]
+----
+int csinn_tensor_byte_size(struct csinn_tensor *tensor);
+----
+* *description:*
+** obtains the number of bytes of elements in a tensor
+* *parameter:*
+** tensor: the tensor to be counted
+* *return:*
+** return byte size
+
+### csinn_alloc_tensor
+
+[source,c]
+----
+struct csinn_tensor *csinn_alloc_tensor(struct csinn_session *session);
+----
+* *description:*
+** assign a tensor structure
+* *parameter:*
+** session: The reference session. If you do not need a reference, you
+can enter NULL.
+* *return:*
+** assigned tensor
+
+### csinn_free_tensor
+
+[source,c]
+----
+void csinn_free_tensor(struct csinn_tensor *tensor);
+----
+* *description:*
+** release a tensor structure
+* *parameter:*
+** tensor: the tensor to be released
+
+### csinn_realloc_quant_info
+
+[source,c]
+----
+void csinn_realloc_quant_info(struct csinn_tensor *tensor, int quant_info_num);
+----
+* *description:*
+** reallocate a specified number of quantization information
+* *parameter:*
+** tensor: the tensor to be operated
+** quant_info_num: the number of quantized information
+
+### csinn_tensor_copy
+
+[source,c]
+----
+void csinn_tensor_copy(struct csinn_tensor *dest, struct csinn_tensor *src);
+----
+* *description:*
+** copy tensors, excluding data in tensors
+* *parameter:*
+** dest: target tensor
+** src: source tensor
+
+### csinn_tensor_data_convert
+
+[source,c]
+----
+int csinn_tensor_data_convert(struct csinn_tensor *dest, struct csinn_tensor *src);
+----
+* *description:*
+** perform numerical conversion based on the data types of the source
+and target tensors
+* *parameter:*
+** dest: target tensor
+** src: source tensor
+* *return:*
+** if successful, return value greater than 0
+
+### csinn_alloc_params
+
+[source,c]
+----
+void *csinn_alloc_params(int params_size, struct csinn_session *session);
+----
+* *description:*
+** assign a basic structure that is common to all operators
+* *parameter:*
+** params_size: structure size
+** session: the session to be alloc
+* *return:*
+** points to the allocated base structure
+
+### csinn_free_params
+
+[source,c]
+----
+void csinn_free_params(void *params);
+----
+* *description:*
+** releases the structure of an operator parameter description
+* *parameter:*
+** params: indicates the operator parameter description structure to be released

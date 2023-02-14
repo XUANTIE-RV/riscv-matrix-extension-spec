@@ -1,0 +1,1969 @@
+[[chapter5]]
+
+== Data Structure
+
+### data type
+
+CSI-NN defines a set of enumerations to identify different data types.
+
+[source,c]
+----
+enum csinn_dtype_enum {
+    CSINN_DTYPE_BOOL = 0,
+    CSINN_DTYPE_INT4,
+    CSINN_DTYPE_UINT8,
+    CSINN_DTYPE_INT8,
+    CSINN_DTYPE_UINT16,
+    CSINN_DTYPE_INT16,
+    CSINN_DTYPE_UINT32,
+    CSINN_DTYPE_INT32,
+    CSINN_DTYPE_FLOAT16,
+    CSINN_DTYPE_BFLOAT16,
+    CSINN_DTYPE_FLOAT32,
+    CSINN_DTYPE_FLOAT64,
+    CSINN_DTYPE_SIZE,
+};
+----
+
+Enumeration description
+
+* CSINN_DTYPE_BOOL: Boolean
+* CSINN_DTYPE_INT4: Signed 4-bit
+* CSINN_DTYPE_UINT8: unsigned 8-bit
+* CSINN_DTYPE_INT8: signed 8-bit
+* CSINN_DTYPE_UINT16: unsigned 16-bit
+* CSINN_DTYPE_INT16: signed 16-bit
+* CSINN_DTYPE_UINT32: unsigned 32-bit
+* CSINN_DTYPE_INT32:  signed 32-bit
+* CSINN_DTYPE_FLOAT16: half precision floating
+* CSINN_DTYPE_BFLOAT16: brain floating point
+* CSINN_DTYPE_FLOAT32: single precision floating
+* CSINN_DTYPE_FLOAT64: double precision floating
+
+### storage type
+CSI-NN defines a set of enumerations to identify different storage type
+
+[source,c]
+----
+enum csinn_mem_type_enum {
+    CSINN_MEM_TYPE_CPU_NOT_ALIGNED = 0,
+    CSINN_MEM_TYPE_CPU_ALIGNED,
+    CSINN_MEM_TYPE_DMABUF,
+    CSINN_MEM_TYPE_ASP42, /* structed sparsity 4:2 */
+    CSINN_MEM_TYPE_ASP41, /* structed sparsity 4:1 */
+};
+----
+
+Enumeration description
+
+* CSINN_MEM_TYPE_CPU_NOT_ALIGNED: default storage
+* CSINN_MEM_TYPE_CPU_ALIGNED: stores that have been aligned
+* CSINN_MEM_TYPE_DMABUF: DMA buf
+* CSINN_MEM_TYPE_ASP42: Structured sparse 4:2
+* CSINN_MEM_TYPE_ASP41: Structured sparse 4:1
+
+### quantization type
+CSI-NN defines a set of enumerations to identify different quantization
+type
+
+[source,c]
+----
+enum csinn_quant_enum {
+    CSINN_QUANT_UNSET = 0,
+    CSINN_QUANT_INT4_SYM,
+    CSINN_QUANT_UINT8_ASYM,
+    CSINN_QUANT_UINT8_SYM,
+    CSINN_QUANT_INT8_ASYM,
+    CSINN_QUANT_INT8_SYM,
+    CSINN_QUANT_INT16_SYM,
+    CSINN_QUANT_FLOAT16,
+    CSINN_QUANT_BFLOAT16,
+    CSINN_QUANT_FLOAT32,
+    CSINN_QUANT_SIZE,
+};
+----
+
+Enumeration description
+
+* CSINN_QUANT_UNSET: the quantization type is not set
+* CSINN_QUANT_INT4_SYM: symmetric signed 4-bit fixed-point quantization
+* CSINN_QUANT_UINT8_ASYM: asymmetric unsigned 8-bit fixed-point
+quantization
+* CSINN_QUANT_UINT8_SYM: symmetric unsigned 8-bit fixed-point
+quantization
+* CSINN_QUANT_INT8_ASYM: asymmetric signed 8-bit fixed-point
+quantization
+* CSINN_QUANT_INT8_SYM: symmetric signed 8-bit fixed-point quantization
+* CSINN_QUANT_INT16_SYM: symmetric signed 16-bit fixed-point
+quantization
+* CSINN_QUANT_FLOAT16: 16-bit floating point quantization
+* CSINN_QUANT_BFLOAT16: bf16 floating point quantization
+* CSINN_QUANT_FLOAT32: 32-bit floating point not quantized
+
+### different target type
+CSI-NN defines a set of enumerations to identify different target types.
+
+[source,c]
+----
+enum csinn_api_enum {
+    CSINN_REF = 0,
+    CSINN_GREF,
+    CSINN_C860,
+    CSINN_C906,
+    CSINN_C910,
+    CSINN_ANOLE,
+    CSINN_CH8601,
+    CSINN_LIGHT,
+    CSINN_DP1K,
+    CSINN_I805,
+    CSINN_E804,
+    CSINN_REF_I805,
+    CSINN_C908,
+    CSINN_TVMGEN,
+    CSINN_ASP,
+    CSINN_RVV,
+    CSINN_API_SIZE,
+};
+----
+
+Enumeration description
+
+* CSINN_REF: reference c
+* CSINN_GREF: reference graph
+* CSINN_C860: C860 CPU platform
+* CSINN_C906: C906 CPU platform
+* CSINN_C910: C910 CPU platform
+* CSINN_ANOLE: anole NPU platform
+* CSINN_CH8601: ch8601 NPU platform
+* CSINN_LIGHT: light NPU platform
+* CSINN_DP1K: dp1000 NPU platform
+* CSINN_I805: I805 CPU platform
+* CSINN_E804: E804 CPU platform
+* CSINN_REF_I805: I805 CPU platform
+* CSINN_C908: c908 CPU platform
+* CSINN_TVMGEN: TVM generate platform
+* CSINN_ASP: ASP platform
+* CSINN_RVV: RISC-V V extension general platform
+* CSINN_API_SIZE: platform size
+
+### execution type
+CSI-NN defines a set of enumerations to identify different execution.
+
+[source,c]
+----
+enum csinn_rmode_enum {
+    CSINN_RM_LAYER = 0,
+    CSINN_RM_CPU_GRAPH,
+    CSINN_RM_NPU_GRAPH,
+    CSINN_RUN_MODE_SIZE,
+};
+----
+
+Enumeration description
+
+* CSINN_RM_LAYER: run by layer
+* CSINN_RM_CPU_GRAPH: cpu Graph Execution
+* CSINN_RM_NPU_GRAPH: npu Graph Execution
+
+### model saving type
+CSI-NN defines a set of enumerations to identify different model saving types.
+
+[source,c]
+----
+enum csinn_mode_save_enum {
+    CSINN_SAVE_AND_RUN = 0,
+    CSINN_SAVE_ONLY,
+    CSINN_RUN_ONLY,
+};
+----
+
+Enumeration description
+
+* CSINN_SAVE_AND_RUN: save the model and run it
+* CSINN_SAVE_ONLY: save the model only
+* CSINN_RUN_ONLY: run the model only
+
+### convolution optimization type
+CSI-NN defines a set of enumerations to identify different convolution
+implementation types (mainly for CPU optimization acceleration)
+
+[source,c]
+----
+enum csinn_conv_mode_enum {
+    CSINN_DIRECT = 0x0,   /* using direct optimizational convolution */
+    CSINN_WINOGRAD = 0x1, /* using winograd fast convolution */
+    CSINN_GEMM = 0x2,     /* using im2col + gemm convolution, im2col is optional */
+};
+----
+
+Enumeration description
+
+* CSINN_DIRECT: direct convolution
+* CSINN_WINOGRAD: winograd fast convolution, used for 3x 3 Convolution
+kernel
+* CSINN_GEMM: im2col+gemm convolution. im2col is optional. It is omitted
+when the convolution kernel size is 1x 1
+
+### pad type
+CSI-NN defines a set of enumerations to identify different fill types.
+
+[source,c]
+----
+enum csinn_pad_enum {
+    CSINN_PAD_CONSTANT = 0x0, /* pads with constant_value pad_value */
+    CSINN_PAD_EDGE = 0x1,     /* pads using the edge values of the input array */
+    CSINN_PAD_REFLECT = 0x2,  /* pads by reflecting values with respect to the edge */
+};
+----
+
+Enumeration description
+
+* CSINN_PAD_CONSTANT: pad constant value
+* CSINN_PAD_EDGE: pad edges value
+* CSINN_PAD_REFLECT: pad the reflect value
+
+### resize type
+CSI-NN defines a set of enumerations to identify different resize types and methods
+
+[source,c]
+----
+enum csinn_resize_enum {
+    CSINN_RESIZE_BILINEAR = 0x0,
+    CSINN_RESIZE_NEAREST_NEIGHBOR = 0x1,
+    CSINN_RESIZE_NEAREST_BICUBIC = 0x2,
+};
+----
+
+Enumeration description
+
+* CSINN_RESIZE_BILINEAR: Bilinear interpolation
+* CSINN_RESIZE_NEAREST_NEIGHBOR: Nearest neighbor interpolation
+* CSINN_RESIZE_NEAREST_BICUBIC: bicubic interpolation
+
+### depth_to_space type
+CSI-NN defines a set of enumerations to identify different types and modes of depth_to_space.
+
+[source,c]
+----
+enum csinn_depth2space_enum {
+    CSINN_DEPTHTOSPACE_DCR = 0x0,
+    CSINN_DEPTHTOSPACE_CRD = 0x1,
+};
+----
+
+Enumeration description
+
+* CSINN_DEPTHTOSPACE_DCR: arranges data in the order of
+(depth,column,row)
+* CSINN_DEPTHTOSPACE_CRD: arranges data in the order of
+(column,row,depth)
+
+### LRN type
+CSI-NN defines a set of enumerations to identify different LRN types and methods.
+
+[source,c]
+----
+enum csinn_lrn_enum {
+    CSINN_LRN_ACROSS_CHANNELS = 0x0,
+    CSINN_LRN_WITHIN_CHANNEL,
+};
+----
+
+Enumeration description
+
+* CSINN_LRN_ACROSS_CHANNELS: local response normalization across
+channels/channels
+* CSINN_LRN_WITHIN_CHANNEL: local response normalization within the same
+channel
+
+### layout type
+CSI-NN defines a set of enumerations to identify different layout types.
+
+[source,c]
+----
+enum csinn_layout_enum {
+    CSINN_LAYOUT_NULL = 0x0,
+    // NCHW
+    // ACTIVITION
+    CSINN_LAYOUT_N,
+    CSINN_LAYOUT_NC,
+    CSINN_LAYOUT_NCW,
+    CSINN_LAYOUT_NCHW,
+    CSINN_LAYOUT_NCDHW,
+    // WEIGHT
+    CSINN_LAYOUT_O,
+    CSINN_LAYOUT_OI,
+    CSINN_LAYOUT_O16I16,
+    CSINN_LAYOUT_O32I32,
+    CSINN_LAYOUT_OIW,
+    CSINN_LAYOUT_OIHW,
+    CSINN_LAYOUT_OIDHW,
+    CSINN_LAYOUT_O1HW,  // depthwise kernel
+
+    // NHWC
+    // ACTIVITION
+    CSINN_LAYOUT_NWC,
+    CSINN_LAYOUT_NHWC,
+    CSINN_LAYOUT_NDHWC,
+    // WEIGHT
+    CSINN_LAYOUT_OWI,
+    CSINN_LAYOUT_OHWI,
+    CSINN_LAYOUT_O16HWI16,
+    CSINN_LAYOUT_O32HWI32,
+    CSINN_LAYOUT_ODHWI,
+    CSINN_LAYOUT_1HWO,  // depthwise kernel
+    CSINN_LAYOUT_1HW16O16,
+    CSINN_LAYOUT_1HW32O32,
+
+    // NCXHWX
+    // ACTIVITION
+    CSINN_LAYOUT_NC1HWC0,  // rvv: c0=4/8/8 for fp32/fp16/int8 when vlen=128
+};
+----
+
+Enumeration description
+
+* CSINN_LAYOUT_NULL: not set
+* CSINN_LAYOUT_N: NCHW input and output, 1 dimension
+* CSINN_LAYOUT_NC: NCHW input and output, 2 dimensions
+* CSINN_LAYOUT_NCW: NCHW input and output, 3 dimensions
+* CSINN_LAYOUT_NCHW: NCHW input and output, 4 dimensions
+* CSINN_LAYOUT_NCDHW: NCHW input and output, 5 dimensions
+* CSINN_LAYOUT_O: NCHW constant, 1 dimension
+* CSINN_LAYOUT_OI: NCHW constant, 2 dimensions
+* CSINN_LAYOUT_O16I16: 16 bytes in parallel for ASP platform
+* CSINN_LAYOUT_O32I32: 32 bytes in parallel for ASP platform
+* CSINN_LAYOUT_OIW: NCHW constant, 3 dimension
+* CSINN_LAYOUT_OIHW: NCHW constant, 4 dimension
+* CSINN_LAYOUT_OIDHW: NCHW constant, 5 dimension
+* CSINN_LAYOUT_O1HW: NCHW constant, depthwise convolution only
+* CSINN_LAYOUT_NWC: NHWC input and output, 3 dimensions
+* CSINN_LAYOUT_NHWC: NHWC input and output, 4 dimensions
+* CSINN_LAYOUT_NDHWC : NHWC input and output, 5 dimensions
+* CSINN_LAYOUT_OWI: NHWC constant, 3 dimensions
+* CSINN_LAYOUT_OHWI: NHWC constant, 4 dimensions
+* CSINN_LAYOUT_O16HWI16:  16 bytes in parallel for ASP platform
+* CSINN_LAYOUT_O32HWI32: 32 bytes in parallel for ASP platform
+* CSINN_LAYOUT_ODHWI: NHWC constant, 5 dimensions
+* CSINN_LAYOUT_1HWO: NHWC constant, depthwise convolution only
+* CSINN_LAYOUT_1HW16O16: 16 bytes in parallel for ASP platform
+* CSINN_LAYOUT_1HW32O32: 32 bytes in parallel for ASP platform
+* CSINN_LAYOUT_NC1HWC0: RVV optimization format
+
+### return type
+CSI-NN defines a set of enumerations to identify different return value types.
+
+[source,c]
+----
+enum csinn_status_enum {
+    CSINN_UNSUPPORT_LAYOUT = -3,
+    CSINN_UNSUPPORT_DTYPE = -2,
+    CSINN_CALLBACK_UNSET = -1,
+    CSINN_FALSE = 0,
+    CSINN_TRUE = 1,
+};
+----
+
+Enumeration description
+
+* CSINN_UNSUPPORT_LAYOUT: An error occurred while executing the
+function. An unsupported layout is used.
+* CSINN_UNSUPPORT_DTYPE: An error occurred while executing the function.
+An unsupported data type is used.
+* CSINN_CALLBACK_UNSET: An error occurred while executing the function.
+The callback function is not set.
+* CSINN_FALSE: An error occurred while executing the function.
+* CSINN_TRUE: The function runs successfully.
+
+### profile type
+CSI-NN defines a set of enumerations to identify different performance analysis types.
+
+[source,c]
+----
+enum csinn_profiler_enum {
+    CSI_PROFILER_LEVEL_UNSET = 0,
+    CSI_PROFILER_LEVEL_TIMER,  // print time
+};
+----
+
+Enumeration description
+
+* CSI_PROFILER_LEVEL_UNSET: the performance analysis mode is not set.
+* CSI_PROFILER_LEVEL_TIMER: the performance analysis mode, which prints
+some time information.
+
+### debug level
+CSI-NN defines a set of enumerations to identify different debugging levels, which are equivalent to log levels.
+
+[source,c]
+----
+enum csinn_debug_enum {
+    CSINN_DEBUG_LEVEL_DEBUG = -2,
+    CSINN_DEBUG_LEVEL_INFO,
+    CSINN_DEBUG_LEVEL_WARNING,
+    CSINN_DEBUG_LEVEL_ERROR,
+    CSINN_DEBUG_LEVEL_FATAL,
+};
+----
+
+Enumeration description
+
+* CSINN_DEBUG_LEVEL_DEBUG: developer debugging level
+* CSINN_DEBUG_LEVEL_INFO:  details level
+* CSINN_DEBUG_LEVEL_WARNING: warning message
+* CSINN_DEBUG_LEVEL_ERROR: error message
+* CSINN_DEBUG_LEVEL_FATAL: program crash
+
+### session
+CSI-NN defines a structure named csinn_session to describe the structure of a model.
+
+[source,c]
+----
+struct csinn_session {
+    int32_t base_dtype;
+    int32_t base_layout;
+    int32_t base_api;
+    int32_t base_run_mode;
+    enum csinn_quant_enum base_quant_type;
+    struct csinn_model model;
+    int32_t debug_level;
+    int32_t profiler_level;
+    int32_t input_num;
+    int32_t output_num;
+    struct csinn_tensor **input;
+    struct csinn_tensor **output;
+    void *td;
+};
+----
+
+*Structure member description*
+
+* base_dtype: the basic data type, which is used as the default data
+type for subsequent tensor allocation.
+* base_layout: the basic data layout is used as the default data layout
+for subsequent tensor allocation.
+* base_api: the basic operator type, which is used as the basic
+attribute of subsequent operators.
+* base_run_mode: the basic execution mode of subsequent operators.
+* base_quant_type:  basic quantization type
+* model: model information
+* debug_level: Debugging level
+* profiler_level: Performance Analysis level
+* input_num: the number of input
+* output_num: the number of output
+* input: point to all inputs.
+* output: point to all outputs.
+* td: refers to private data, which can generally point to the structure
+representing the graph in the driver
+
+### csinn model
+CSI-NN defines a structure named csinn_model to describe the overall information of the model.
+
+[source,c]
+----
+struct csinn_model {
+    char *bm_path;
+    void *bm_addr;
+    size_t bm_size;
+    int32_t save_mode;
+    int32_t priority;
+};
+----
+
+*Structure member description*
+
+* bm_path: the path of the model. Select one from the address of the
+model.
+* bm_addr: the address of the model. Select one from the path of the
+model.
+* bm_size: the size of the model, which is used with the model address.
+* save_mode: save mode
+* priority: the priority of model execution.
+
+### quant info
+CSI-NN defines a structure named csinn_quant_info to describe and be compatible with different quantization methods.
+
+[source,c]
+----
+struct csinn_quant_info {
+    int32_t zero_point;
+    float scale;
+    int32_t multiplier;
+    int32_t shift;
+    float min;
+    float max;
+};
+----
+
+*Structure member description*
+
+* zero_point: zero point
+* scale: scale value
+* multiplier: a multiplier that forms a scale together with shift.
+* shift: the number of shifts, which forms a scale together with the
+multiplier.
+* min: the minimum value of the tensor value.
+* max: the maximum value of the tensor value.
+
+### tensor
+
+CSI-NN defines a structure named csinn_tensor to describe different tensor information.
+
+[source,c]
+----
+#define MAX_DIM 8
+struct csinn_tensor {
+    void *data;
+    enum csinn_dtype_enum dtype;
+    enum csinn_mem_type_enum mtype;
+    int32_t dim[MAX_DIM];
+    int32_t dim_count;
+    uint32_t is_const;
+    char *name;
+    int32_t layout;
+    int32_t quant_channel;
+    struct csinn_quant_info *qinfo;
+    struct csinn_session *sess;
+};
+----
+
+*Structure member description*
+
+* data: real data pointing to tensors
+* dtype: description the data type of the tensor.
+* mtype: describes the storage type of the tensor.
+* dim: describes the size of each dimension in the tensor.
+* dim_count: the number of tensor dimensions. The current version
+supports a maximum of eight dimensions.
+* is_const: whether the marker tensor is a constant
+* name: the name of the current tensor.
+* layout: describes the data layout type of the tensor.
+* quant_channel: specifies the number of qinfo. 0 indicates
+non-quantization, 1 indicates normal quantization, and greater than 1
+indicates channel quantization.
+* qinfo: an array pointing to the quantization information
+* sess: indicates the data structure of the current session.
+
+### csinn_callback
+
+CSI-NN2 defines a structure named csinn_callback to describe different callback functions.
+
+[source,c]
+----
+struct csinn_callback {
+    int (*init)();  // initialization
+    int (*est)();   // establish graph
+    int (*exec)();  // execute real compute
+    int (*caps)();  // capabilities
+    int (*perf)();  // profiling
+};
+----
+
+*Structure member description*
+
+* init: initializes a function
+* est: composition function
+* exec: compute function
+* caps: operator capability, boundary description
+* perf: performance monitoring
+
+### csinn_params_base
+CSI-NN2 defines a structure named csinn_params_base to describe the information used by all operators
+
+[source,c]
+----
+struct csinn_params_base {
+    struct csinn_callback *cb;
+    char *name;
+    int32_t layout;
+    int32_t api;
+    enum csinn_quant_enum quant_type;
+    struct csinn_session *sess;
+};
+----
+
+*Structure member description*
+
+* cb: the callback function pointing to the operator
+* name: the name of the operator.
+* layout: the data layout that is suitable for calculation.
+* api: tag different platform interfaces
+* quant_type: the quantization type of the operator.
+* sess: indicates the data structure of the current session.
+
+### conv2d_params
+The structure used for convolution, which describes some parameters required for convolution calculation.
+
+[source,c]
+----
+struct csinn_conv2d_params {
+    struct csinn_params_base base;
+    int32_t group;
+    int32_t stride_height;
+    int32_t stride_width;
+    int32_t pad_top;
+    int32_t pad_left;
+    int32_t pad_down;
+    int32_t pad_right;
+    int32_t dilation_height;
+    int32_t dilation_width;
+    int32_t out_pad_height;
+    int32_t out_pad_width;
+    struct {
+        struct csinn_tensor *kernel_tm;
+        enum csinn_conv_mode_enum conv_mode;
+        int32_t fuse_zp2bias;
+    } conv_extra;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator.
+* group: the number of convolutional groups.
+* stride_height: vertical step
+* stride_width: horizontal step
+* pad_top: the number of padding at the top.
+* pad_left: the number of left-side padding.
+* pad_down: the number of padding at the bottom.
+* pad_right: the number of padding on the right
+* dilation_height:  longitudinal expansion coefficient
+* dilation_width: horizontal expansion coefficient
+* conv_extra: the structure used for cpu convolution optimization,
+including intermediate conversion weight and convolution type
+(gemm/winograd)
+
+### conv3d_params
+The structure used for 3d convolution, which describes some parameters required for 3d convolution calculation.
+
+[source,c]
+----
+struct csinn_conv3d_params {
+    struct csinn_params_base base;
+    int32_t group;
+    int32_t stride_depth;
+    int32_t stride_height;
+    int32_t stride_width;
+    int32_t pad_top;
+    int32_t pad_left;
+    int32_t pad_down;
+    int32_t pad_right;
+    int32_t pad_front;
+    int32_t pad_back;
+    int32_t dilation_depth;
+    int32_t dilation_height;
+    int32_t dilation_width;
+    int32_t out_pad_depth;
+    int32_t out_pad_height;
+    int32_t out_pad_width;
+};
+----
+
+*Structure member description*
+
+* base: basic information of operators
+* group: the number of convolutional groups.
+* stride_height: vertical step
+* stride_width: horizontal step
+* stride_depth: step in the depth direction
+* pad_top: the number of padding at the top
+* pad_left: the number of left-side padding
+* pad_front: number of front padding
+* pad_down: the number of padding at the bottom
+* pad_right: the number of padding on the right
+* pad_back: the number of backfills
+* dilation_height: longitudinal expansion coefficient
+* dilation_width: horizontal expansion coefficient
+* dilation_depth: expansion coefficient in depth direction
+
+### fsmn_params
+The structure used by the feedforward sequence memory neural network fsmn describes some parameters required for fsmn calculation.
+
+[source,c]
+----
+struct csinn_fsmn_params {
+    struct csinn_params_base base;
+    int32_t l_order;
+    int32_t r_order;
+    int32_t l_stride;
+    int32_t r_stride;
+    int32_t unavailable_frames;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator.
+* l_order: number of frames in the past (l_order-1)
+* r_order: the number of future frames to be computed
+* l_stride: the sampling frequency of past frames involved in the
+calculation
+* r_stride: the sampling frequency of future frames involved in the
+calculation
+* unavailable_frames: the number of invalid frames
+
+### fc_params
+The structure used for full connection, which describes some parameters required for full connection calculation
+
+[source,c]
+----
+struct csinn_fc_params {
+    struct csinn_params_base base;
+    int32_t units;
+    struct {
+        int32_t fuse_zp2bias;
+    } fc_extra;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* units: the number of output nodes at the current layer
+
+### pool_params
+The structure used by the pooling function, which describes some
+parameters required for pooling calculation.
+
+[source,c]
+----
+struct csinn_pool_params {
+    struct csinn_params_base base;
+    int32_t pool_type;
+    int32_t filter_height;
+    int32_t filter_width;
+    int32_t filter_depth;
+    int32_t stride_height;
+    int32_t stride_width;
+    int32_t stride_depth;
+    int32_t pad_top;
+    int32_t pad_left;
+    int32_t pad_down;
+    int32_t pad_right;
+    int32_t pad_front;
+    int32_t pad_back;
+    int32_t ceil_mode;
+    bool count_include_pad;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator.
+* pool_type: pool type
+* filter_height: pool height
+* filter_width: pool width
+* filter_depth: pooling depth
+* stride_height: vertical step
+* stride_width: horizontal step
+* stride_depth: step in the depth direction
+* pad_top: the number of padding at the top
+* pad_left: the number of padding at the left
+* pad_front: the number of padding at the front
+* pad_down: the number of padding at the down
+* pad_right: the number of padding at the right
+* pad_back: the number of padding at the back
+* count_include_pad: specifies whether to include the edge pad during
+pooling, which usually occurs in mean pooling
+
+### unpooling_params
+The structure used by the unpooling function, which describes some parameters required for the anti-pooling calculation.
+
+[source,c]
+----
+struct csinn_unpooling_params {
+    struct csinn_params_base base;
+    int32_t scale_height;
+    int32_t scale_width;
+    int32_t pad_out_height;
+    int32_t pad_out_width;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator.
+* scale_height: vertical scale
+* scale_width: horizontal scale
+* pad_out_height: vertical padding
+* pad_out_width: horizontal padding
+
+### roi_pool_params
+The structure used by the roipool function, which describes some parameters required for roipool calculation
+
+[source,c]
+----
+struct csinn_roi_pool_params {
+    struct csinn_params_base base;
+    int32_t pooled_size_h;
+    int32_t pooled_size_w;
+    float spatial_scale;
+    int32_t spatial_scale_multiplier;
+    int32_t spatial_scale_shift;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* pooled_size_h: vertical height of pooled_size_h
+* pooled_size_w: horizontal width of pooling core
+* spatial_scale: roipool separate scaling for calculation
+* spatial_scale_multiplier: the multiplier used for fixed-point
+calculation, which is composed of spatial_scale_shift spatial_scale
+* spatial_scale_shift: number of shifts , and spatial_scale_multiplier
+together spatial_scale
+
+### roi_align_params
+The structure used by the roi_align function, which describes some parameters required for roi_align calculation.
+
+[source,c]
+----
+struct csinn_roi_align_params {
+    struct csinn_params_base base;
+    int32_t pooled_size_h;
+    int32_t pooled_size_w;
+    float spatial_scale;
+    int32_t spatial_scale_multiplier;
+    int32_t spatial_scale_shift;
+    int32_t sample_ratio;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* pooled_size_h: vertical height of pooled_size_h
+* pooled_size_w: horizontal width of pooling core
+* spatial_scale: roipool separate scaling for calculation
+* spatial_scale_multiplier: the multiplier used for fixed-point
+calculation, which is composed of spatial_scale_shift spatial_scale
+* spatial_scale_shift: number of shifts , and spatial_scale_multiplier
+together spatial_scale
+* sample_ratio: Interpolation proportional coefficient
+
+### siso_params
+The structure used by a single input/output function. It describes some parameters required to calculate a single input/output function.
+
+[source,c]
+----
+struct csinn_siso_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### scatter_nd_params
+The structure used by the scatter_nd function, which describes some parameters required to calculate the scatter_nd function.
+
+[source,c]
+----
+struct csinn_scatter_nd_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### diso_params
+The structure used by two input-output functions, which describes some parameters required to calculate two input-output functions.
+
+[source,c]
+----
+struct csinn_diso_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### sigmoid_params
+The structure used by the sigmoid function, which describes some parameters required to calculate the sigmoid.
+
+[source,c]
+----
+struct csinn_sigmoid_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### relu_params
+The structure used by the relu function, which describes some parameters required to calculate the relu.
+
+[source,c]
+----
+struct csinn_relu_params {
+    struct csinn_params_base base;
+
+    /* n / alpha / threshold */
+    float n;
+    int32_t n_multiplier;
+    int32_t n_shift;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* n: coefficient used by relu variants such as leaky relu
+* n_multiplier: the multiplier used in decimal point calculation, which
+is composed of n together with n_shift
+* n_shift: used for fixed-point calculation number of shifts , and n
+together with n_multiplier
+
+### prelu_params
+The structure used by the prelu function, which describes some parameters required to calculate prelu.
+
+[source,c]
+----
+struct csinn_prelu_params {
+    struct csinn_params_base base;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* axis: the axis used to calculate prelu
+
+### softmax_params
+The structure used by the softmax function, which describes some parameters required to calculate softmax.
+
+[source,c]
+----
+struct csinn_softmax_params {
+    struct csinn_params_base base;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* axis: the axis used to calculate softmax.
+
+### bn_params
+The structure used by the batch normalization function, which describes some parameters required to calculate batch normalization.
+
+[source,c]
+----
+struct csinn_bn_params {
+    struct csinn_params_base base;
+    float epsilon;
+    int32_t epsilon_multiplier;
+    int32_t epsilon_shift;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* epsilon: batch normalization calculation of epsilon coefficient
+* epsilon_multiplier: the multiplier used in decimal point calculation,
+which is composed together with epsilon_shift. epsilon
+* epsilon_shift: used for fixed-point calculation number of shifts , and
+epsilon_multiplier epsilon
+
+### l2n_params
+The structure used by the l2 normalization function, which describes some parameters required for calculating l2 normalization.
+
+[source,c]
+----
+struct csinn_l2n_params {
+    struct csinn_params_base base;
+    float epsilon;
+    int32_t epsilon_multiplier;
+    int32_t epsilon_shift;
+    int32_t *axis;
+    int32_t n;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* epsilon: batch normalization calculation of epsilon coefficient
+* epsilon_multiplier: the multiplier used in decimal point calculation,
+which is composed together with epsilon_shift. epsilon
+* epsilon_shift: used for fixed-point calculation number of shifts , and
+epsilon_multiplier epsilon
+* axis: axis
+* n: number of axes
+
+### lrn_params
+
+The structure used by the function which describes the calculation Local Response Nomalization the required parameters
+
+[source,c]
+----
+struct csinn_lrn_params {
+    struct csinn_params_base base;
+    int32_t range;
+    double bias;
+    int32_t bias_multiplier;
+    int32_t bias_shift;
+    double alpha;
+    int32_t alpha_multiplier;
+    int32_t alpha_shift;
+    double beta;
+    int32_t beta_multiplier;
+    int32_t beta_shift;
+    enum csinn_lrn_enum norm_region;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* range: compute the number of channels used
+* bias: bias coefficient
+* bias_multiplier: the multiplier used for decimal point calculation,
+which is composed together with bias_shift
+* bias_shift: the shift used for decimal point calculation
+* alpha: alpha coefficient
+* alpha_multiplier: the multiplier used for decimal point calculation,
+which is composed together with alpha_shift
+* alpha_shift: the shift used for decimal point calculation
+* beta: beta coefficient
+* beta_multiplier: the multiplier used for decimal point calculation,
+which is composed together with beta_shift
+* beta_shift: the shift used for decimal point calculation
+
+### matmul_params
+The structure used by the matmul function, which describes some parameters required for calculating matmul.
+
+[source,c]
+----
+struct csinn_matmul_params {
+    struct csinn_params_base base;
+    bool trans_a;
+    bool trans_b;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* trans_a: indicates whether the first input is transposed.
+* trans_b: indicates whether the second input is transposed.
+
+### select_params
+the structure used by the select function, which describes some parameters required for calculating select.
+
+[source,c]
+----
+struct csinn_select_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### pad_params
+The structure used by the pad function, which describes some parameters required to calculate the pad.
+
+[source,c]
+----
+struct csinn_pad_params {
+    struct csinn_params_base base;
+    int32_t *pad_before;
+    int32_t *pad_after;
+    int32_t pad_num;
+    float pad_value;
+    enum csinn_pad_enum pad_mode;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* pad_before: number of front padding
+* pad_after: number of after padding
+* pad_num: pad length
+* pad_value: pad value
+* pad_mode: pad mode
+
+### resize_params
+The structure used by the resize function, which describes some parameters required for resizing.
+
+[source,c]
+----
+struct csinn_resize_params {
+    struct csinn_params_base base;
+    enum csinn_resize_enum resize_mode;
+    bool align_corners;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* resize_mode: resize mode
+* align_corners: angle alignment
+
+### concat_params
+The structure used by the concat function, which describes some parameters required for calculating concat.
+
+[source,c]
+----
+struct csinn_concat_params {
+    struct csinn_params_base base;
+    int32_t inputs_count;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* inputs_count: the number of inputs.
+* axis: spliced axis
+
+### proposal_params
+the structure used by the proposal function, which describes some parameters required to calculate the proposal.
+
+[source,c]
+----
+struct csinn_proposal_params {
+    struct csinn_params_base base;
+    float *scales;
+    int32_t *scale_multipliers;
+    int32_t *scale_shifts;
+    int32_t scales_num;
+    float *ratios;
+    int32_t *ratio_multipliers;
+    int32_t *ratio_shifts;
+    int32_t ratios_num;
+    int32_t feature_stride;
+    float threshold;
+    int32_t threshold_multiplier;
+    int32_t threshold_shift;
+    int rpn_pre_nms_top_n;
+    int rpn_post_nms_top_n;
+    int rpn_min_size;
+    bool iou_loss;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* scales: the scale parameter used for proposal calculation
+* scale_multipliers: the multiplier used for fixed-point calculation
+* scale_shifts: the number of shifts used in the fixed-point calculation
+* scales_num: the number of scale parameters
+* ratios: the ratio parameter used for proposal calculation
+* ratio_multipliers: the multiplier used for fixed-point calculation
+* ratio_shifts: the number of shifts used in the fixed-point calculation
+* ratios_num: number of ratio parameters
+* feature_stride: feature step
+* threshold: the threshold parameter used for proposal calculation.
+* threshold_multiplier: the multiplier used for fixed-point calculation
+* threshold_shift: the number of shifts used in the fixed-point
+calculation
+* rpn_pre_nms_top_n: nms post-processing top
+* rpn_post_nms_top_n: nms pre-processing top
+* rpn_min_size: rpn minimum
+* iou_loss: iou loss
+
+### psroipooling_params
+the structure used by the psroipooling function, which describes some parameters required for calculating psroipooling.
+
+[source,c]
+----
+struct csinn_psroipooling_params {
+    struct csinn_params_base base;
+    int32_t output_dim;
+    int32_t group_size;
+    float spatial_scale;
+    int32_t spatial_scale_multiplier;
+    int32_t spatial_scale_shift;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* output_dim: output dimension
+* group_size: number of groups
+* spatial_scale: psroipooling separate scaling for calculation
+* spatial_scale_multiplier: the multiplier used for fixed-point
+calculation
+* spatial_scale_shift: umber of shifts
+
+### transpose_params
+
+the structure used by the transpose function, which describes some parameters needed to calculate transpose.
+
+[source,c]
+----
+struct csinn_transpose_params {
+    struct csinn_params_base base;
+    int32_t *permute;
+    int32_t permute_num;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* permute: order of output dimensions
+* permute_num: size of output dimensions
+
+### reshape_params
+the structure used by the reshape function, which describes some parameters needed to calculate reshape.
+
+[source,c]
+----
+struct csinn_reshape_params {
+    struct csinn_params_base base;
+    int32_t *shape;
+    int32_t shape_num;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* shape: the output dimension after reshape.
+* shape_num: the length of the reshape
+
+### shape_params
+the structure used by the shape function, which describes some parameters required to calculate the shape.
+
+[source,c]
+----
+struct csinn_shape_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### expand_dims_params
+The structure used by the expand_dims function, which describes some parameters required to calculate expand_dims.
+
+[source,c]
+----
+struct csinn_expand_dims_params {
+    struct csinn_params_base base;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* axis: axis
+
+### reverse_params
+the structure used by the reverse function, which describes some parameters required for calculating the reverse.
+
+[source,c]
+----
+struct csinn_reverse_params {
+    struct csinn_params_base base;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* axis: axis
+
+### flatten_params
+the structure used by the flatten function, which describes some parameters required for calculating flatten.
+
+[source,c]
+----
+struct csinn_flatten_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### crop_params The
+structure used by the crop function, which describes some parameters
+required to calculate the crop.
+
+[source,c]
+----
+struct csinn_crop_params {
+    struct csinn_params_base base;
+    int32_t axis;
+    int32_t *offset;
+    int32_t offset_num;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* axis: axis
+* offset: offset value
+* offset_num: the length of the offset.
+
+### slice_params
+the structure used by the slice function, which describes some parameters required to calculate the slice.
+
+[source,c]
+----
+struct csinn_slice_params {
+    struct csinn_params_base base;
+    int32_t *begin;
+    int32_t *end;
+    int32_t *strides;
+    int32_t slice_num;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* begin: begin
+* end: end
+* strides: step
+* slice_num: indicates the dim length of the slice.
+
+### split_params
+the structure used by the split function, which describes some parameters required for calculating the split
+
+[source,c]
+----
+struct csinn_split_params {
+    struct csinn_params_base base;
+    int32_t *split_index;
+    int32_t output_num;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* split_index: the split sequence
+* output_num: the number of outputs
+* axis: axis
+
+### stack_params
+the structure used by the stack function, which describes some parameters required to calculate the stack.
+
+[source,c]
+----
+struct csinn_stack_params {
+    struct csinn_params_base base;
+    int32_t inputs_count;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* inputs_count: input number
+* axis: axis
+
+### tile_params
+the structure used by the tile function, which describes some parameters required for tile calculation.
+
+[source,c]
+----
+struct csinn_tile_params {
+    struct csinn_params_base base;
+    int32_t *reps;
+    int32_t reps_num;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* reps:  number of duplicates
+* reps_num: the number of repeated latitudes.
+
+### arange_params
+the structure used by the arange function, which describes some parameters required to calculate arange.
+
+[source,c]
+----
+struct csinn_arange_params {
+    struct csinn_params_base base;
+    float start;
+    int32_t start_multiplier;
+    int32_t start_shift;
+    float stop;
+    int32_t stop_multiplier;
+    int32_t stop_shift;
+    float step;
+    int32_t step_multiplier;
+    int32_t step_shift;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* start: start position
+* start_multiplier: the multiplier used for decimal point calculation
+* start_shift: the shift used for decimal point calculation
+* stop: end position
+* stop_multiplier: the multiplier used for decimal point calculation
+* stop_shift: the shift used for decimal point calculation
+* step: step
+* step_multiplier: the multiplier used for decimal point calculation
+* step_shift: the shift used for decimal point calculation
+
+### where_params
+the structure used by the where function, which describes some parameters required to calculate where.
+
+[source,c]
+----
+struct csinn_where_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### unstack_params
+The structure used by the unstack function, which describes some parameters required to calculate unstack.
+
+[source,c]
+----
+struct csinn_unstack_params {
+    struct csinn_params_base base;
+    int32_t outputs_count;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* outputs_count: output number
+* axis: axis
+
+### gather_params
+the structure used by the gather function, which describes some parameters required to calculate gather.
+
+[source,c]
+----
+struct csinn_gather_params {
+    struct csinn_params_base base;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* axis: gather indices axis
+
+### gather_nd_params
+the structure used by the gather_nd function, which describes some parameters required to calculate gather_nd.
+
+[source,c]
+----
+struct csinn_gather_nd_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### squeeze_params the
+structure used by the squeeze function, which describes some parameters
+required to calculate squeeze.
+
+[source,c]
+----
+struct csinn_squeeze_params {
+    struct csinn_params_base base;
+    int32_t *axis;
+    int32_t axis_num;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* axis: axis
+* axis_num: the length of the axis
+
+### ndarray_size_params
+the structure used by the ndarray_size function, which describes some parameters required to calculate ndarray_size.
+
+[source,c]
+----
+struct csinn_ndarray_size_params {
+    struct csinn_params_base base;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+
+### space_to_batch_params
+the structure used by the space_to_batch function, which describes some parameters required to calculate space_to_batch.
+
+[source,c]
+----
+struct csinn_space_to_batch_params {
+    struct csinn_params_base base;
+    int32_t pad_top;
+    int32_t pad_bottom;
+    int32_t pad_left;
+    int32_t pad_right;
+    int32_t block_size;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* pad_top: the number of padding at the top
+* pad_left: the number of padding at the left
+* pad_down: the number of padding at the down
+* pad_right: the number of padding at the right
+* block_size: block size
+
+### space_to_batch_nd_params
+the structure used by the space_to_batch_nd function, which describes some parameters required to calculate space_to_batch_nd.
+
+[source,c]
+----
+struct csinn_space_to_batch_nd_params {
+    struct csinn_params_base base;
+    int32_t *paddings;
+    int32_t *block_shape;
+    int32_t spatial_dim_cnt;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* paddings: the number of padding points to each spatial dimension
+* block_shape: indicates the block size of each dimension
+* spatial_dim_cnt: the size of the spatial dimension
+
+### batch_to_space_params
+the structure used by the batch_to_space function, which describes some parameters required to calculate batch_to_space.
+
+[source,c]
+----
+struct csinn_batch_to_space_params {
+    struct csinn_params_base base;
+    int32_t crop_top;
+    int32_t crop_bottom;
+    int32_t crop_left;
+    int32_t crop_right;
+    int32_t block_size;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* crop_top: the number of cropings at the top.
+* crop_bottom: the number of cropings at the bottom
+* crop_left: the number of cropings at the left
+* crop_right: the number of cropings at the right
+* block_size: block size
+
+### batch_to_space_nd_params
+the structure used by the batch_to_space_nd function, which describes some parameters required to calculate batch_to_space_nd.
+
+[source,c]
+----
+struct csinn_batch_to_space_nd_params {
+    struct csinn_params_base base;
+    int32_t *crops;
+    int32_t *block_shape;
+    int32_t spatial_dim_cnt;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* crops: indicates the number of crops to be cropped in each spatial
+dimension.
+* block_shape: indicates the block size of each dimension.
+* spatial_dim_cnt: the size of the spatial dimension.
+
+### space_to_depth_params
+the structure used by the space_to_depth function, which describes some parameters required to calculate space_to_depth.
+
+[source,c]
+----
+struct csinn_space_to_depth_params {
+    struct csinn_params_base base;
+    int32_t block_size;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* block_size: block size
+
+### depth_to_space_params
+the structure used by the depth_to_space function, which describes some parameters required to calculate depth_to_space.
+
+[source,c]
+----
+struct csinn_depth_to_space_params {
+    struct csinn_params_base base;
+    enum csinn_depth2space_enum mode;
+    int32_t block_size;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* mode: depth_to_space mode
+* block_size: block size
+
+### one_hot_params
+the structure used by the one_hot function, which describes some parameters required to calculate one_hot.
+
+[source,c]
+----
+struct csinn_one_hot_params {
+    struct csinn_params_base base;
+    float f_on_value;
+    float f_off_value;
+    int32_t on_value;
+    int32_t off_value;
+    int32_t depth;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* f_on_value: float on value
+* f_off_value: float off value
+* on_value: int on value
+* off_value: int off value
+* depth: the size of the output tensor.
+* axis: axis
+
+### sequence_mask_params
+the structure used by the sequence_mask function, which describes some parameters required to calculate sequence_mask.
+
+[source,c]
+----
+struct csinn_sequence_mask_params {
+    struct csinn_params_base base;
+    float mask_value;
+    int32_t mask_value_multiplier;
+    int32_t mask_value_shift;
+    int32_t axis;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* mask_value: mask value
+* mask_value_multiplier: multiplier
+* mask_value_shift: shift
+* axis: axis
+
+### im2col_params
+the structure used by the im2col function, which describes some parameters required to calculate im2col.
+
+[source,c]
+----
+struct csinn_im2col_params {
+    struct csinn_params_base base;
+    int32_t pad_top;
+    int32_t pad_down;
+    int32_t pad_left;
+    int32_t pad_right;
+    int32_t stride_h;
+    int32_t stride_w;
+    int32_t kernel_h;
+    int32_t kernel_w;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* pad_top: top number of padding
+* pad_down: down number of padding
+* pad_left: left number of padding
+* pad_right: right number of padding
+* stride_h: vertical step
+* stride_w: horizontal step
+* kernel_h: kernel height
+* kernel_w: kernel width
+
+### col2im_params
+the structure used by the col2im function, which describes some parameters required to calculate col2im.
+
+[source,c]
+----
+struct csinn_col2im_params {
+    struct csinn_params_base base;
+    int32_t pad_h;
+    int32_t pad_w;
+    int32_t stride_h;
+    int32_t stride_w;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* pad_h: vertical number of padding
+* pad_w: horizontal number of padding
+* stride_h: vertical step
+* stride_w: horizontal step
+
+### reduce_params
+the structure used by the reduce function, which describes some parameters required to calculate reduce. Two sets of parameters are prepared for different implementations: out_strides, out_extents, n, inner_strides, inner_extents, m and axis, axis_count, keepdims.
+
+[source,c]
+----
+struct csinn_reduce_params {
+    struct csinn_params_base base;
+    int32_t *out_strides;
+    int32_t *out_extents;
+    int32_t n;
+    int32_t *inner_strides;
+    int32_t *inner_extents;
+    int32_t m;
+
+    int32_t *axis;
+    int32_t axis_count;
+    bool keepdims;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* out_strides: outer step
+* out_extents:  outer extension
+* n:  the number of latitudes on the outer layer.
+* inner_strides: inner step
+* inner_extents: inner extension
+* m: the number of latitudes in the inner layer.
+* axis: axis
+* axis_count: the number of axes.
+* keepdims: the number of latitude saved.
+
+### reorg_params
+the structure used by the reorg function, which describes some parameters required to calculate reorg.
+
+[source,c]
+----
+struct csinn_reorg_params {
+    struct csinn_params_base base;
+    int32_t stride;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* stride: the step size during reorg recombination.
+
+### segment_params
+the structure used by the segment function, which describes some
+parameters required to calculate segment.
+
+[source,c]
+----
+struct csinn_segment_params {
+    struct csinn_params_base base;
+    int32_t num_segments;
+    bool unsorted;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* num_segments: number of segments
+* unsorted: indicates whether to sort
+
+### cumsum_params
+
+the structure used by the cumsum function, which describes some parameters required to calculate cumsum.
+
+[source,c]
+----
+struct csinn_cumsum_params {
+    struct csinn_params_base base;
+    int32_t axis;
+    bool exclusive;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* axis: axis
+* exclusive: exclusive
+
+### cumprod_params
+the structure used by the cumprod function, which describes some parameters required to calculate cumprod.
+
+[source,c]
+----
+struct csinn_cumprod_params {
+    struct csinn_params_base base;
+    int32_t axis;
+    bool exclusive;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* axis: axis
+* exclusive: exclusive
+
+### broadcast_to_params
+the structure used by the broadcast_to function, which describes some parameters required to calculate broadcast_to.
+
+[source,c]
+----
+struct csinn_broadcast_to_params {
+    struct csinn_params_base base;
+    int32_t *shape;
+    int32_t shape_count;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* shape: output shape
+* shape_count: the number of output latitudes.
+
+### clip_params
+the structure used by the clip function, which describes some parameters required to calculate clip.
+
+[source,c]
+----
+struct csinn_clip_params {
+    struct csinn_params_base base;
+    float min_value;
+    float max_value;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* min_value: minimum value
+* max_value: maximum value
+
+### strided_slice_params
+
+the structure used by the strided_slice function, which describes some parameters required to calculate strided_slice.
+
+[source,c]
+----
+struct csinn_strided_slice_params {
+    struct csinn_params_base base;
+    int32_t *begin;
+    int32_t *end;
+    int32_t *stride;
+    int32_t slice_count;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* begin: start position
+* end: end position
+* stride: step
+* slice_count: number of slice
+
+### shuffle_channel_params
+
+the structure used by the shuffle_channel function, which describes some parameters required to calculate shuffle_channel.
+
+[source,c]
+----
+struct csinn_shuffle_channel_params {
+    struct csinn_params_base base;
+    int32_t group;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* group: the number of convolution groups.
+
+### topk_params
+
+the structure used by the topk function, which describes some parameters required to calculate topk.
+
+[source,c]
+----
+struct csinn_topk_params {
+    struct csinn_params_base base;
+    int32_t k;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* k: top k
+
+### non_max_suppression_params
+
+the structure used by the non_max_suppression function, which describes some parameters required to calculate non_max_suppression.
+
+[source,c]
+----
+struct csinn_non_max_suppression_params {
+    struct csinn_params_base base;
+    int32_t max_output_size;
+    float iou_threshold;
+};
+----
+
+*Structure member description*
+
+* base: the basic information of the operator
+* max_output_size: the maximum number of outputs
+* iou_threshold: iou threshold

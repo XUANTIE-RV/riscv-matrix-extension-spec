@@ -1,0 +1,697 @@
+[[boby]]
+== Introduction
+This document introduces the intrinsics for RISC-V matrix programming, including the general naming rules for intrinsics, the data types of matrix, and the full set of intrinsics.
+
+== Naming Rules
+
+- Data type naming rules: add the prefix'm' to the basic data type. Exception: `mfloat16x2_ t`, `mfloat32x2_ t`, `mfloat64x2_ t`;
+- Function interface naming rules: For simplicity, the interface is named by the instruction name plus the function input parameter abbreviation type(such as `int8_t` -> `i8`). When the input parameter types are the same, they can be merged without conflicts with other interface names.
+
+== Data Types
+.Matrix data types
+[cols="2,2,4"]
+[width=100%]
+|===
+| Type | Name | Description
+
+| matrix int | mint8_t | All elements of the matrix are int8_t
+|  | mint16_t |
+|  | mint32_t |
+|  | mint64_t |
+|  | muint8_t | All elements of the matrix are uint8_t
+|  | muint16_t |
+|  | muint32_t |
+|  | muint64_t |
+| matrix float | mfloat16_t | All elements of the matrix are float16_t
+|  | mfloat32_t |
+|  | mfloat64_t |
+|  | mfloat16x2_t |
+|  | mfloat32x2_t |
+|  | mfloat64x2_t |
+| matrix vector | [line-through]#mint8v_t# | There is no special register to store the vector type of the matrix (for example, mint8v_t cannot be represented by a register). At present, the method of matrix register+line number is tentatively used instead, such as mint8v_ t -> (mint8_t,uinit8_t)
+|  | [line-through]#mint16v_t# |
+|  | [line-through]#mint32v_t# |
+|  | [line-through]#mint64v_t# |
+|  | [line-through]#muint8v_t# |
+|  | [line-through]#muint16v_t# |
+|  | [line-through]#muint32v_t# |
+|  | [line-through]#muint64v_t# |
+|  | [line-through]#mfloat16v_t# |
+|  | [line-through]#mfloat32v_t# |
+|  | [line-through]#mfloat64v_t# |
+|===
+
+== Intrinsic interface
+=== Configuration instructions:
+Instructions
+```
+mcfg    rd,rs1
+
+mcfgi<m/n/k>  rd,uimm7
+mcfg<m/n/k>    rd,rs1
+```
+Intrinsic functions list
+```c
+uint32_t mcfg (uint32_t);
+uint32_t mcfgm (uint8_t);
+uint32_t mcfgn (uint8_t);
+uint32_t mcfgk (uint16_t);
+```
+NOTE: Set msize register: m[7:0],n[15:8],k[32:16].
+
+=== Read/Write Matrix CSRs
+Instructions
+```
+csrr	rd,xmrstart
+csrr	rd,xmcsr
+csrr	rd,xmxrm
+csrr	rd,xmxsat
+csrr	rd,xmsize
+csrr	rd,xmregsize
+csrr	rd,xmlenb
+csrr	rd,xmisa
+
+csrw	xmrstart,rs1
+csrw	xmxrm,rs1
+csrw	xmxsat,rs1
+csrw	xmsize,rs1
+```
+
+Intrinsic functions list
+```c
+enum RVM_CSR
+{
+  RVM_MRSTART = 0,
+  RVM_MCSR,
+  RVM_MXRM,
+  RVM_MXSAT,
+  RVM_MSIZE,
+  RVM_MREGSIZE,
+  RVM_MLENB,
+  RVM_MISA,
+};
+
+unsigned long mread_csr(enum RVM_CSR csr);
+void mwrite_csr(enum RVM_CSR csr, unsigned long value)
+```
+
+=== Load and store instructions
+==== Load
+Instructions
+```
+#matrix load
+mld<b/h/w/d> md, rs2, (rs1)
+
+#stream matrix load
+msld<b/h/w/d>  md, rs2, (rs1)
+
+#whole matrix load
+mld<1/2/4/8>m md,  (rs1)
+```
+Intrinsic functions list
+```c
+//matrix load
+mint8_t mld_i8(int8_t *, long);
+muint8_t mld_ui8(uint8_t *, long);
+mint16_t mld_i16(int16_t *, long);
+muint16_t mld_ui16(uint16_t *, long);
+mint32_t mld_i32(int32_t *, long);
+muint32_t mld_ui32(uint32_t *, long);
+mint64_t mld_i64(int64_t *, long);
+muint64_t mld_ui64(uint64_t *, long);
+mfloat16_t mld_f16(float16_t *, long);
+mfloat32_t mld_f32(float32_t *, long);
+mfloat64_t mld_f64(float64_t *, long);
+mfloat16x2_t mld_f16x2(float16_t *, float16_t *, long);
+mfloat32x2_t mld_f32x2(float32_t *, float32_t *, long);
+mfloat64x2_t mld_f64x2(float64_t *, float64_t *, long);
+
+//stream matrix load
+mint8_t msld_i8(int8_t *, long);
+muint8_t msld_ui8(uint8_t *, long);
+mint16_t msld_i16(int16_t *, long);
+muint16_t msld_ui16(uint16_t *, long);
+mint32_t msld_i32(int32_t *, long);
+muint32_t msld_ui32(uint32_t *, long);
+mint64_t msld_i64(int64_t *, long);
+muint64_t msld_ui64(uint64_t *, long);
+mfloat16_t msld_f16(float16_t *, long);
+mfloat32_t msld_f32(float32_t *, long);
+mfloat64_t msld_f64(float64_t *, long);
+mfloat16x2_t msld_f16x2(float16_t *, float16_t *, long);
+mfloat32x2_t msld_f32x2(float32_t *, float32_t *, long);
+mfloat64x2_t msld_f64x2(float64_t *, float64_t *, long);
+
+//whole matrix load
+mint8_t mld1m_i8(int8_t *);
+muint8_t mld1m_ui8(uint8_t *);
+mint16_t mld1m_i16(int16_t *);
+muint16_t mld1m_ui16(uint16_t *);
+mint32_t mld1m_i32(int32_t *);
+muint32_t mld1m_ui32(uint32_t *);
+mint64_t mld1m_i64(int64_t *);
+muint64_t mld1m_ui64(uint64_t *);
+mfloat16_t mld1m_f16(float16_t *);
+mfloat32_t mld1m_f32(float32_t *);
+mfloat64_t mld1m_f64(float64_t *);
+mfloat16x2_t mld2m_f16(float16_t *);
+mfloat32x2_t mld2m_f32(float32_t *);
+mfloat64x2_t mld2m_f64(float64_t *);
+```
+NOTE: Read from the memory to the matrix register: The input parameter is the memory base address, stride, and the return value is the target matrix.
+
+==== Store
+Instructions
+```
+#matrix store
+mst<b/h/w/d>  ms3, rs2, (rs1)
+
+#stream matrix store
+msst<b/h/w/d>  ms3, rs2, (rs1)
+
+#whole matrix store
+mst<1/2/4/8>m ms3, (rs1)
+```
+Intrinsic functions list
+```c
+//matrix store
+void mst_i8_mi8(int8_t *, long, mint8_t);
+void mst_ui8_mui8(uint8_t *, long, muint8_t);
+void mst_i16_mi16(int16_t *, long, mint16_t);
+void mst_ui16_mui16(uint16_t *, long, muint16_t);
+void mst_i32_mi32(int32_t *, long, mint32_t);
+void mst_ui32_mui32(uint32_t *, long, muint32_t);
+void mst_i64_mi64(int64_t *, long, mint64_t);
+void mst_ui64_mui64(uint64_t *, long, muint64_t);
+void mst_f16_mf16(float16_t *, long, mfloat16_t);
+void mst_f32_mf32(float32_t *, long, mfloat32_t);
+void mst_f64_mf64(float64_t *, long, mfloat64_t);
+void mst_f16x2_mf16x2(float16_t *, float16_t *, long, mfloat16x2_t);
+void mst_f32x2_mf32x2(float32_t *, float32_t *, long, mfloat32x2_t);
+void mst_f64x2_mf64x2(float64_t *, float64_t *, long, mfloat64x2_t);
+
+//stream matrix store
+void msst_i8_mi8(int8_t *, long, mint8_t);
+void msst_ui8_mui8(uint8_t *, long, muint8_t);
+void msst_i16_mi16(int16_t *, long, mint16_t);
+void msst_ui16_mui16(uint16_t *, long, muint16_t);
+void msst_i32_mi32(int32_t *, long, mint32_t);
+void msst_ui32_mui32(uint32_t *, long, muint32_t);
+void msst_i64_mi64(int64_t *, long, mint64_t);
+void msst_ui64_mui64(uint64_t *, long, muint64_t);
+void msst_f16_mf16(float16_t *, long, mfloat16_t);
+void msst_f32_mf32(float32_t *, long, mfloat32_t);
+void msst_f64_mf64(float64_t *, long, mfloat64_t);
+void msst_f16x2_mf16x2(float16_t *, float16_t *, long, mfloat16x2_t);
+void msst_f32x2_mf32x2(float32_t *, float32_t *, long, mfloat32x2_t);
+void msst_f64x2_mf64x2(float64_t *, float64_t *, long, mfloat16x2_t);
+
+//whole matrix store
+void mst1m_i8_mi8(int8_t *, mint8_t);
+void mst1m_ui8_mui8(uint8_t *, muint8_t);
+void mst1m_i16_mi16(int16_t *, mint16_t);
+void mst1m_ui16_mui16(uint16_t *, muint16_t);
+void mst1m_i32_mi32(int32_t *, mint32_t);
+void mst1m_ui32_mui32(uint32_t *, muint32_t);
+void mst1m_i64_mi64(int64_t *, mint64_t);
+void mst1m_ui64_mui64(uint64_t *, muint64_t);
+void mst1m_f16_mf16(float16_t *, mfloat16_t);
+void mst1m_f32_mf32(float32_t *, mfloat32_t);
+void mst1m_f64_mf64(float64_t *, mfloat64_t);
+void mst2m_f16_mf16x2(float16_t *, mfloat16x2_t);
+void mst2m_f32_mf32x2(float32_t *, mfloat32x2_t);
+void mst2m_f64_mf64x2(float64_t *, mfloat64x2_t);
+
+```
+NOTE: Write the matrix register data into the memory, and the input parameter is the destination base address, stride, and the original operand.
+
+=== Mov instructions
+Instructions
+```
+#matrix-matrix mov
+mmov.mm md, ms1
+
+#matrix-vector add,rs1/uimm6
+mmov.mv.x md, ms1[rs1]
+mmov.mv.i md, ms1[uimm3]
+
+#matrix-scalar mov
+mmov.mx md, rs1
+```
+Intrinsic functions list
+```c
+//matrix-matrix mov
+mint8_t mmov_mi8(mint8_t);
+muint8_t mmov_mui8(muint8_t);
+mint16_t mmov_mi16(mint16_t);
+muint16_t mmov_mui16(muint16_t);
+mint32_t mmov_mi32(mint32_t);
+muint32_t mmov_mui32(muint32_t);
+mint64_t mmov_mi64(mint64_t);
+muint64_t mmov_mui64(muint64_t);
+mfloat16_t mmov_mf16(mfloat16_t);
+mfloat32_t mmov_mf32(mfloat32_t);
+mfloat64_t mmov_mf64(mfloat64_t);
+mfloat16x2_t mmov_mf16x2(mfloat16_t, mfloat16_t);
+mfloat64x2_t mmov_mf64x2(mfloat64_t, mfloat64_t);
+
+//matrix-vector mov,rs1/uimm3
+mint8_t mmov_mi8v(mint8_t, uint8_t);
+muint8_t mmov_mui8v(muint8_t, uint8_t);
+mint16_t mmov_mi16v(mint16_t, uint8_t);
+muint16_t mmov_mui16v(muint16_t, uint8_t);
+mint32_t mmov_mi32v(mint32_t, uint8_t);
+muint32_t mmov_mui32v(muint32_t, uint8_t);
+mint64_t mmov_mi64v(mint64_t, uint8_t);
+muint64_t mmov_mui64v(muint64_t, uint8_t);
+mfloat16_t mmov_mf16v(mfloat16_t, uint8_t);
+mfloat32_t mmov_mf32v(mfloat32_t, uint8_t);
+mfloat64_t mmov_mf64v(mfloat64_t, uint8_t);
+
+//matrix-scalar mov
+mint8_t mmov_i8(int8_t);
+muint8_t mmov_ui8(uint8_t);
+mint16_t mmov_i16(int16_t);
+muint16_t mmov_ui16(uint16_t);
+mint32_t mmov_i32(int32_t);
+muint32_t mmov_ui32(uint32_t);
+mint64_t mmov_i64(int64_t);
+muint64_t mmov_ui64(uint64_t);
+mfloat16_t mmov_f16(float16_t);
+mfloat32_t mmov_f32(float32_t);
+mfloat64_t mmov_f64(float64_t);
+```
+
+=== Matrix Integer Operation Instruction
+==== Add
+Instructions
+```
+#matrix-matrix add
+madd.<s/d>.mm md, ms2, ms1
+
+#matrix-vector add,rs1/uimm6
+madd.<s/d>.mv.x md, ms2, ms1[rs1]
+madd.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-scalar add
+madd.<s/d>.mx md, ms2, rs1
+```
+Intrinsic functions list
+```c
+//matrix-matrix add
+mint32_t madd_mi32(mint32_t, mint32_t);
+mint64_t madd_mi64(mint64_t, mint64_t);
+
+//matrix-vector add,rs1/uimm6
+mint32_t madd_mi32_mi32v(mint32_t, mint32_t, uint8_t);
+mint64_t madd_mi64_mi64v(mint64_t, mint64_t, uint8_t);
+
+//matrix-scalar add
+mint32_t madd_mi32_i32(mint32_t, int32_t);
+mint64_t madd_mi64_i64(mint64_t, int64_t);
+```
+==== Sub
+Instructions
+```
+#matrix-matrix sub
+msub.<s/d>.mm md, ms2, ms1
+
+#matrix-vector sub,rs1/uimm6
+msub.<s/d>.mv.x md, ms2, ms1[rs1]
+msub.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-scalar sub
+msub.<s/d>.mx md, ms2, rs1
+```
+Intrinsic functions list
+```c
+//matrix-matrix sub
+mint32_t msub_mi32(mint32_t, mint32_t);
+mint64_t msub_mi64(mint64_t, mint64_t);
+
+//matrix-vector sub,rs1/uimm6
+mint32_t msub_mi32_mi32v(mint32_t, mint32_t, uint8_t);
+mint64_t msub_mi64_mi64v(mint64_t, mint64_t, uint8_t);
+
+//matrix-scalar sub
+mint32_t msub_mi32_i32(mint32_t, int32_t);
+mint64_t msub_mi64_i64(mint64_t, int64_t);
+```
+==== Shift
+===== Msra
+Instructions
+```
+#matrix-matrix shift
+msra.<s/d>.mm md, ms2, ms1
+
+#matrix-vector shift,rs1
+msra.<s/d>.mv.x md, ms2, ms1[rs1]
+msra.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-scalar shift
+msra.<s/d>.mx md, ms2, rs1
+```
+Intrinsic functions list
+```c
+//matrix-matrix sra
+mint8_t msra_mi32_mui32(mint32_t, muint32_t);
+mint8_t msra_mi64_mui64(mint64_t, mint64_t);
+
+//matrix-vector sra,rs1/uimm6
+mint8_t msra_mi32_mui32v(mint32_t, muint32_t, uint8_t);
+mint8_t msra_mi64_mui64v(mint64_t, muint64_t, uint8_t);
+
+//matrix-scalar sra
+mint8_t msra_mi32_ui32(mint32_t, uint32_t);
+mint8_t msra_mi64_ui64(mint64_t, uint64_t);
+```
+===== Mn4clip/Mn4clipu
+Instructions
+```
+#matrix-matrix signed clip
+mn4clip.<s/d>.mm md, ms2, ms1
+
+#matrix-vector clip,rs0
+mn4clip.<s/d>.mv.x md, ms2, ms1[rs1]
+mn4clip.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-scalar clip
+mn4clip.<s/d>.mx md, ms2, rs1
+
+
+#matrix-matrix unsigned clip
+mn4clipu.<s/d>.mm md, ms2, ms1
+
+#matrix-vector clip,rs0
+mn4clipu.<s/d>.mv.x md, ms2, ms1[rs1]
+mn4clipu.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-scalar clip
+mn4clipu.<s/d>.mx md, ms2, rs1
+```
+Intrinsic functions list
+```c
+//matrix-matrix signed clip
+mint8_t mn4clip_mi32_mui32(mint32_t, muint32_t);
+mint8_t mn4clip_mi64_mui64(mint64_t, muint64_t);
+
+//matrix-vector clip,rs1/uimm3
+mint8_t mn4clip_mi32_mui32v(mint32_t, muint32_t, uint8_t);
+mint8_t mn4clip_mi64_mui64v(mint64_t, muint64_t, uint8_t);
+
+//matrix-scalar clip
+mint8_t mn4clip_mi32_ui32(mint32_t, uint32_t);
+mint8_t mn4clip_mi64_ui64(mint64_t, uint64_t);
+
+
+//matrix-matrix unsigned clip
+muint8_t mn4clipu_mui32(muint32_t, muint32_t);
+muint8_t mn4clipu_mui64(muint64_t, muint64_t);
+
+//matrix-vector clip,rs1/uimm3
+muint8_t mn4clipu_mui32_mui32v(muint32_t, muint32_t, uint8_t);
+muint8_t mn4clipu_mui64_mui64v(muint64_t, muint64_t, uint8_t);
+
+//matrix-scalar clip
+muint8_t mn4clipu_mui32_ui32(muint32_t, uint32_t);
+muint8_t mn4clipu_mui64_ui64(muint64_t, uint64_t);
+```
+==== Multiply Instruction
+==== Low-half-reserved multiplication 
+Instructions
+```
+#matrix-matrix mul
+mmul.<s/d>.mx md, ms2, ms1
+
+#matrix-vector mul, rs1
+mmul.<s/d>.mv.x md, ms2, ms1[rs1]
+mmul.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-scalar mul
+mmul.<s/d>.mx md, ms2, rs1
+```
+Intrinsic functions list
+```c
+//matrix-matrix mul
+mint32_t mmul_mi32(mint32_t, mint32_t);
+mint64_t mmul_mi64(mint64_t, mint64_t);
+
+//matrix-vector mul,rs1/uimm3
+mint32_t mmul_mi32_mi32v(mint32_t, mint32_t, uint8_t);
+mint64_t mmul_mi64_mi64v(mint64_t, mint64_t, uint8_t);
+
+//matrix-scalar mul
+mint32_t mmul_mi32_i32(mint32_t, int32_t);
+mint64_t mmul_mi64_i64(mint64_t, int64_t);
+```
+NOTE: keep the low-half of the 64-bit result.
+
+==== High-half-reserved multiplication
+Instructions
+```
+#matrix-matrix mul
+mmulh.s.mx md, ms2, ms1
+
+#matrix-vector mul, rs1
+mmulh.s.mv.x md, ms2, ms1[rs1]
+mmulh.s.mv.i md, ms2, ms1[uimm3]
+
+#matrix-scalar mul
+mmulh.s.mx md, ms2, rs1
+```
+Intrinsic functions list
+```c
+//matrix-matrix mulh
+mint32_t mmulh_mi32(mint32_t, mint32_t);
+
+//matrix-vector mulh,rs1/uimm3
+mint32_t mmulh_mi32_mi32v(mint32_t, mint32_t, uint8_t);
+
+//matrix-scalar mulh
+mint32_t mmulh_mi32_i32(mint32_t, int32_t);
+```
+NOTE: high-half of the 64-bit result reserved.
+
+=== Matrix Multiplication Instruction
+NOTE: Parameter 1 is the old value of the return value (initialization is required if there is no old value, otherwise unknown data will appear), and parameters 1 and 2 are multipliers.
+
+==== Floating point Matrix Multiplication
+===== Fmmacc
+Instructions
+```
+#matrix-matrix
+fmmacc.<h/s/d> md, ms2, ms1
+```
+Intrinsic functions list
+```c
+//matrix-matrix
+mfloat16_t fmmacc_mf16x2_mf16(mfloat16_t, mfloat16x2_t, mfloat16_t);
+mfloat32_t fmmacc_mf32(mfloat32_t, mfloat32_t, mfloat32_t);
+mfloat64x2_t fmmacc_mf64(mfloat64x2_t, mfloat64_t, mfloat64_t);
+```
+===== Fwmmacc
+Instructions
+```
+#matrix-matrix
+fwmmacc.<h/s> md, ms2, ms1
+```
+Intrinsic functions list
+```c
+//matrix-matrix
+mfloat32_t fwmmacc_mf16(mfloat32_t, mfloat16_t, mfloat16_t);
+mfloat64x2_t fwmmacc_mf32(mfloat64x2_t, mfloat32_t, mfloat32_t);
+```
+==== Integer 4x Extension Matrix Multiplication
+===== Mmaqa
+Instructions
+```
+#8bit data width
+#signed matrix multiply
+mmaqa.<b/h> md, ms2, ms1
+
+#unsigned matrix multiply
+mmaqau.<b/h> md, ms2, ms1
+
+#unsigned-signed matrix multiply
+mmaqaus.<b/h> md, ms2, ms1
+
+#signed-unsigned matrix multiply
+mmaqasu.<b/h> md, ms2, ms1
+```
+Intrinsic functions list
+```c
+//signed matrix multiply
+mint32_t mmaqa_mi8(mint32_t, mint8_t, mint8_t);
+mint64_t mmaqa_mi16(mint64_t, mint16_t, mint16_t);
+
+//unsigned matrix multiply
+mint32_t mmaqau_mui8(mint32_t, muint8_t, muint8_t);
+mint64_t mmaqau_mui16(mint64_t, muint16_t, muint16_t);
+
+//unsigned-signed matrix multiply
+mint32_t mmaqaus_mui8_mi8(mint32_t, muint8_t, mint8_t);
+mint64_t mmaqaus_mui16_mi16(mint64_t, muint16_t, mint16_t);
+
+//signed-unsigned matrix multiply
+mint32_t mmaqasu_mi8_mui8(mint32_t, mint8_t, muint8_t);
+mint64_t mmaqasu_mi16_mui16(mint64_t, mint16_t, muint16_t);
+```
+===== Pmmaqa
+Instructions
+```
+#4bit data width
+#signed matrix multiply
+pmmaqa.b md, ms2, ms1
+
+#unsigned matrix multiply
+pmmaqau.b md, ms2, ms1
+
+#unsigned-signed matrix multiply
+pmmaqaus.b md, ms2, ms1
+
+#signed-unsigned matrix multiply
+pmmaqasu.b md, ms2, ms1
+```
+Intrinsic functions list
+```c
+//signed matrix multiply
+mint32_t pmmaqa_mi8(mint32_t, mint8_t, mint8_t);
+
+//unsigned matrix multiply
+mint32_t pmmaqau_mui8(mint32_t, muint8_t, muint8_t);
+
+//unsigned-signed matrix multiply
+mint32_t pmmaqaus_mui8_mi8(mint32_t, muint8_t, mint8_t);
+
+//signed-unsigned matrix multiply
+mint32_t pmmaqasu_mi8_mui8(mint32_t, mint8_t, muint8_t);
+```
+=== Mzero/Mrelease
+Instructions
+```
+mzero rd
+
+mrelease
+```
+Intrinsic functions list
+```c
+void mzero_mi8(mint8_t);
+void mzero_mi16(mint16_t);
+void mzero_mi32(mint32_t);
+void mzero_mi64(mint64_t);
+void mzero_mui8(muint8_t);
+void mzero_mui16(muint16_t);
+void mzero_mui32(muint32_t);
+void mzero_mui64(muint64_t);
+void mzero_mf16(mfloat16_t);
+void mzero_mf32(mfloat32_t);
+void mzero_mf64(mfloat64_t);
+void mzero_mf16x2(mfloat16x2_t);
+void mzero_mf32x2(mfloat32x2_t);
+void mzero_mf64x2(mfloat64x2_t);
+
+void mrelease();
+```
+NOTE: mzero: Zero all elements of matrix register.
+
+== Example
+Take the following matrix integral multiplication matrix mul. c as an example.
+
+- In the program, the data type of matrix element is set to `int32_t`, and m, n, k in `msize` are set to 2, 2, and 8 respectively. In other words, matrices ma and mb are defined as matrices whose elements are int32_t and whose size is 2*2
+- In function `test_mmul`, perform matrix multiplication matrix `ma * mb` and call `print_data` to output the results
+- Qemu related parameters: `xmregsize = 64`,`xmlenb = 16`
+
+Source:
+
+```
+#include <stdio.h>
+#include <riscv_matrix.h>
+#define N 16
+
+void __attribute__((inline))
+print_data(const char *fmt, mint32_t ma, mint32_t mb, mint32_t ans)
+{
+  unsigned int row, col;
+  int32_t tmp_ma[N];
+  int32_t tmp_mb[N];
+  int32_t tmp_ans[N];
+
+  printf("%s:\n", fmt);
+
+  mst_i32_mi32(tmp_ma, 8, ma);
+  mst_i32_mi32(tmp_mb, 8, mb);
+  mst_i32_mi32(tmp_ans, 8, ans);
+
+  printf("ma:\t\tmb:\t\tans:\n");
+  for (row = 0; row < 2; row++)
+  {
+    for (col = 0; col < 2; col++)
+    {
+      printf("%-3d ", tmp_ma[row + col]);
+    }
+    printf("\t");
+    for (col = 0; col < 2; col++)
+    {
+      printf("%-3d ", tmp_mb[row + col]);
+    }
+    printf("\t");
+    for (col = 0; col < 2; col++)
+    {
+      if (tmp_ans[0] == 0)
+        printf("%-2d ", tmp_ans[row + col]);
+      else
+        printf("%-2d = %-2d * %-2d  ", tmp_ans[row + col], tmp_ma[row + col], tmp_mb[row + col]);
+    }
+    printf("\n");
+  }
+}
+
+int main()
+{
+  /* init data */
+  int32_t x[N] = {16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+  int32_t y[N] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+  int32_t z[N] = {0};
+
+  uint8_t msize_m = 2;
+  uint8_t msize_n = 2;
+  uint16_t msize_k = 8; // sizeof(int32_t) * 2;
+  long stride = 8;      // sizeof(int32_t) * 2;
+
+  /* Configuration matrix size */
+  mcfgm(msize_m);
+  mcfgn(msize_n);
+  mcfgk(msize_k);
+
+  /* init matrix value*/
+  mint32_t ma = mld_i32(x, stride);
+  mint32_t mb = mld_i32(y, stride);
+  mint32_t ans = mld_i32(z, stride);
+
+  print_data("Initial value of matrix", ma, mb, ans);
+
+  ans = mmul_mi32(ma, mb);
+  print_data("Results of multiplication", ma, mb, ans);
+
+  return 0;
+}
+```
+Compile:
+```
+riscv64-unknown-linux-gnu-gcc -static -O2 -mtune=c908v -march=rv64g_xtheadmatrix matrix-mul.c -o matrix-mul
+```
+Result:
+```
+$ qemu-riscv64 -cpu c908v,x-matrix=on ./matrix-mul
+Initial value of matrix:
+ma:             mb:             ans:
+16  15          1   2           0  0
+15  14          2   3           0  0
+Results of multiplication:
+ma:             mb:             ans:
+16  15          1   2           16 = 16 * 1   30 = 15 * 2
+15  14          2   3           30 = 15 * 2   42 = 14 * 3
+```
+
+== Reference
+

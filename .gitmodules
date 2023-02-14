@@ -1,0 +1,19 @@
+[submodule "shl"]
+	path = shl
+	url = git@github.com:T-head-Semi/csi-nn2.git
+	branch = matrix-extension
+[submodule "hhb"]
+	path = hhb
+	url = git@github.com:T-head-Semi/tvm.git
+	branch = matrix-extension
+[submodule "qemu"]
+	path = qemu
+	url = git@github.com:T-head-Semi/qemu.git
+	branch = thead-open-matrix-v0.2
+[submodule "doc/docs-resources"]
+	path = doc/docs-resources
+	url = git@github.com:riscv/docs-resources.git
+[submodule "xuantie-gnu-toolchain"]
+	path = xuantie-gnu-toolchain
+	url = git@github.com:T-head-Semi/xuantie-gnu-toolchain.git
+	branch = xuantie-gnu-toolchain-matrix

@@ -1,0 +1,2318 @@
+[[chapter2]]
+
+== NN Interface
+
+CSI-NN2 provides various network layer interfaces. All network layer interfaces are declared in `csi_nn.h`.
+
+### csinn_conv2d
+
+[source,c]
+----
+int csinn_conv2d(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_tensor *kernel, struct csinn_tensor *bias,
+                 struct csinn_conv2d_params *params);
+----
+
+* *description:*
+** support floating point and 8-bit fixed point
+** support NCHW and NHWC formats.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** kernel: pointer to the weight tensor
+** bias: pointer to the offset tensor
+** params: convolution parameter descriptor
+
+### csinn_conv3d
+
+[source,c]
+----
+int csinn_conv3d(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_tensor *kernel, struct csinn_tensor *bias,
+                 struct csinn_conv3d_params *params);
+----
+* *description:*
+** 3d convolution
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** kernel: pointer to the weight tensor
+** bias: pointer to the offset tensor
+** params: convolution parameter descriptor
+
+### csinn_conv2d_relu
+
+[source,c]
+----
+int csinn_conv2d_relu(struct csinn_tensor *input, struct csinn_tensor *output,
+                      struct csinn_tensor *kernel, struct csinn_tensor *bias,
+                      struct csinn_conv2d_params *params);
+----
+* *description:*
+** op of conv2d and relu fusion
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** kernel: pointer to the weight tensor
+** bias: pointer to the offset tensor
+** params: convolution parameter descriptor
+
+### csinn_conv2d_relu6
+
+[source,c]
+----
+int csinn_conv2d_relu6(struct csinn_tensor *input, struct csinn_tensor *output,
+                       struct csinn_tensor *kernel, struct csinn_tensor *bias,
+                       struct csinn_conv2d_params *params);
+----
+* *description:*
+** op of conv2d and relu6 fusion
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** kernel: pointer to the weight tensor
+** bias: pointer to the offset tensor
+** params: convolution parameter descriptor
+
+### csinn_deconv2d
+
+[source,c]
+----
+int csinn_deconv2d(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_tensor *kernel, struct csinn_tensor *bias,
+                 struct csinn_conv2d_params *params);
+----
+* *description:*
+** deconvotion
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** kernel: pointer to the weight tensor
+** bias: pointer to the offset tensor
+** params: convolution parameter descriptor
+
+### csinn_deconv3d
+
+[source,c]
+----
+int csinn_deconv3d(struct csinn_tensor *input, struct csinn_tensor *output,
+                   struct csinn_tensor *kernel, struct csinn_tensor *bias,
+                   struct csinn_conv3d_params *params);
+----
+* *description:*
+** 3d deconvotion
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** kernel: pointer to the weight tensor
+** bias: pointer to the offset tensor
+** params: convolution parameter descriptor
+
+### csinn_fsmn
+
+[source,c]
+----
+int csinn_fsmn(struct csinn_tensor *frame, struct csinn_tensor *l_filter,
+               struct csinn_tensor *r_filter, struct csinn_tensor *frame_sequence,
+               struct csinn_tensor *frame_counter, struct csinn_tensor *output,
+               struct csinn_fsmn_params *params);
+----
+* *description:*
+** FSMN is essentially a feedforward fully connected Network (FNN)
+* *parameter:*
+** frame: pointer to the data of the current input frame
+** l_filter:The left coefficient matrix, which is used for matrix calculation with past frames.
+** r_filter:right coefficient matrix, used for matrix calculation with future frames
+** frame_sequence:pointer to all currently calculated frame data
+** frame_counter:frame counter
+** output:pointer the output tensor
+** params: fsmn parameter descriptor
+
+### csinn_fullyconnected
+
+[source,c]
+----
+int csinn_fullyconnected(struct csinn_tensor *input, struct csinn_tensor *output,
+                         struct csinn_tensor *weights, struct csinn_tensor *bias,
+                         struct csinn_fc_params *params);
+----
+* *description:*
+** fullyconnected
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** weights: pointer to the weight tensor
+** bias: pointer to the offset tensor
+** params: fullyconnected parameter descriptor
+
+### csinn_fullyconnected_relu
+
+[source,c]
+----
+int csinn_fullyconnected_relu(struct csinn_tensor *input, struct csinn_tensor *output,
+                              struct csinn_tensor *weights, struct csinn_tensor *bias,
+                              struct csinn_fc_params *params);
+----
+* *description:*
+** op of conv2d and relu6 fusion
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** weights: pointer to the weight tensor
+** bias: pointer to the offset tensor
+** params: fullyconnected parameter descriptor
+
+### csinn_maxpool2d
+
+[source,c]
+----
+int csinn_maxpool2d(struct csinn_tensor *input, struct csinn_tensor *output,
+                    struct csinn_pool_params *params);
+----
+* *description:*
+** maximum pooling
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pooling parameter descriptor
+
+### csinn_maxpool3d
+
+[source,c]
+----
+int csinn_maxpool3d(struct csinn_tensor *input, struct csinn_tensor *output,
+                    struct csinn_pool_params *params);
+----
+* *description:*
+** 3d maximum pooling
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pooling parameter descriptor
+
+### csinn_avgpool2d
+
+[source,c]
+----
+int csinn_avgpool2d(struct csinn_tensor *input, struct csinn_tensor *output,
+                    struct csinn_pool_params *params);
+----
+* *description:*
+** average pooling
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pooling parameter descriptor
+
+### csinn_avgpool3d
+
+[source,c]
+----
+int csinn_avgpool3d(struct csinn_tensor *input, struct csinn_tensor *output,
+                    struct csinn_pool_params *params);
+----
+* *description:*
+** 3d average pooling
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pooling parameter descriptor
+
+### csinn_global_maxpool2d
+
+[source,c]
+----
+int csinn_global_maxpool2d(struct csinn_tensor *input, struct csinn_tensor *output,
+                           struct csinn_pool_params *params);
+----
+* *description:*
+** global maximum pooling. csinn_global_maxpool2d is a special case for csinn_maxpool2d.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pooling parameter descriptor
+
+### csinn_global_avgpool2d
+
+[source,c]
+----
+int csinn_global_avgpool2d(struct csinn_tensor *input, struct csinn_tensor *output,
+                           struct csinn_pool_params *params);
+----
+* *description:*
+** global average pooling. csinn_global_maxpool2d is a special case for csinn_maxpool2d.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pooling parameter descriptor
+
+### csinn_l2pool
+
+[source,c]
+----
+int csinn_l2pool(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_pool_params *params);
+----
+* *description:*
+** l2 pooling
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pooling parameter descriptor
+
+### csinn_pool_with_argmax
+
+[source,c]
+----
+int csinn_pool_with_argmax(struct csinn_tensor *input, struct csinn_tensor *output,
+                           struct csinn_pool_params *params);
+----
+* *description:*
+** the integration op of pool and argmax.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pooling parameter descriptor
+
+### csinn_maxpool2d_locat
+
+[source,c]
+----
+int csinn_maxpool2d_locat(struct csinn_tensor *input, struct csinn_tensor *output,
+                          struct csinn_pool_params *params);
+----
+* *description:*
+** maximum pooling with location information
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pooling parameter descriptor
+
+### csinn_unpooling
+
+[source,c]
+----
+int csinn_unpooling(struct csinn_tensor *input, struct csinn_tensor *mask,
+                    struct csinn_tensor *output, struct csinn_unpooling_params *params);
+----
+* *description:*
+** unpooling
+* *parameter:*
+** input: pointer to the input tensor
+** mask : location information
+** output: pointer to the output tensor
+** params: unpooling parameter descriptor
+
+### csinn_negative
+
+[source,c]
+----
+int csinn_negative(struct csinn_tensor *input, struct csinn_tensor *output,
+                   struct csinn_siso_params *params);
+----
+
+* *description:*
+** input tensor calculate negtive for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: negtive parameter descriptor
+
+### csinn_floor
+
+[source,c]
+----
+int csinn_floor(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate floor for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: floor parameter descriptor
+
+### csinn_ceil
+
+[source,c]
+----
+int csinn_ceil(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate ceil for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: ceil parameter descriptor
+
+### csinn_sign
+
+[source,c]
+----
+int csinn_sign(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate sign for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: sign parameter descriptor
+
+### csinn_trunc
+
+[source,c]
+----
+int csinn_trunc(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate trunc for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: trunc parameter descriptor
+
+### csinn_round
+
+[source,c]
+----
+int csinn_round(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate round for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: round parameter descriptor
+
+### csinn_abs
+
+[source,c]
+----
+int csinn_abs(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate abs for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: abs parameter descriptor
+
+### csinn_isnan_bool
+
+[source,c]
+----
+int csinn_isnan_bool(struct csinn_tensor *input, struct csinn_tensor *output,
+                     struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate isnan_bool for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: isnan_bool parameter descriptor
+
+### csinn_exp
+
+[source,c]
+----
+int csinn_exp(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate exp for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: exp parameter descriptor
+
+### csinn_expm1
+
+[source,c]
+----
+int csinn_expm1(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate expm1 for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: expm1 parameter descriptor
+
+### csinn_sin
+
+[source,c]
+----
+int csinn_sin(struct csinn_tensor *input, struct csinn_tensor *output,
+            struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate sin for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: sin parameter descriptor
+
+### csinn_asin
+
+[source,c]
+----
+int csinn_asin(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate asin for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: asin parameter descriptor
+
+### csinn_asinh
+
+[source,c]
+----
+int csinn_asinh(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate asinh for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: asinh parameter descriptor
+
+### csinn_sinh
+
+[source,c]
+----
+int csinn_sinh(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate sinh for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: sinh parameter descriptor
+
+### csinn_cos
+
+[source,c]
+----
+int csinn_cos(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate cos for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: cos parameter descriptor
+
+### csinn_acos
+
+[source,c]
+----
+int csinn_acos(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate acos for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: acos parameter descriptor
+
+### csinn_cosh
+
+[source,c]
+----
+int csinn_cosh(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate cosh for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: cosh parameter descriptor
+
+### csinn_acosh
+
+[source,c]
+----
+int csinn_acosh(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate acosh for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: acosh parameter descriptor
+
+### csinn_tan
+
+[source,c]
+----
+int csinn_tan(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate tan for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: tan parameter descriptor
+
+### csinn_tanh
+
+[source,c]
+----
+int csinn_tanh(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate tanh for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: tanh parameter descriptor
+
+### csinn_atan
+
+[source,c]
+----
+int csinn_atan(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate atan for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: atan parameter descriptor
+
+### csinn_atanh
+
+[source,c]
+----
+int csinn_atanh(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate atanh for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: atanh parameter descriptor
+
+### csinn_erf
+
+[source,c]
+----
+int csinn_erf(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate erf for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: siso parameter descriptor
+
+### csinn_log
+
+[source,c]
+----
+int csinn_log(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate log for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: log parameter descriptor
+
+### csinn_sqrt
+
+[source,c]
+----
+int csinn_sqrt(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate sqrt for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: sqrt parameter descriptor
+
+### csinn_rsqrt
+
+[source,c]
+----
+int csinn_rsqrt(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate rsqrt for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: rsqrt parameter descriptor
+
+### csinn_square
+
+[source,c]
+----
+int csinn_square(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate square for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: square parameter descriptor
+
+### csinn_sigmoid
+
+[source,c]
+----
+int csinn_sigmoid(struct csinn_tensor *input, struct csinn_tensor *output,
+                  struct csinn_sigmoid_params *params);
+----
+* *description:*
+** input tensor calculate sigmoid for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: sigmoid parameter descriptor
+
+### csinn_hard_sigmoid
+
+[source,c]
+----
+int csinn_hard_sigmoid(struct csinn_tensor *input, struct csinn_tensor *output,
+                       struct csinn_sigmoid_params *params);
+----
+* *description:*
+** input tensor calculate hard_sigmoid for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: hard_sigmoid parameter descriptor
+
+### csinn_elu
+
+[source,c]
+----
+int csinn_elu(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_relu_params *params);
+----
+* *description:*
+** input tensor calculate elu for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: elu parameter descriptor
+
+### csinn_relu
+
+[source,c]
+----
+int csinn_relu(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_relu_params *params);
+----
+* *description:*
+** input tensor calculate relu for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: relu parameter descriptor
+
+### csinn_relu1
+
+[source,c]
+----
+int csinn_relu1(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_relu_params *params);
+----
+* *description:*
+** input tensor calculate relu1 for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: relu1 parameter descriptor
+
+### csinn_relu6
+
+[source,c]
+----
+int csinn_relu6(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_relu_params *params);
+----
+* *description:*
+** input tensor calculate relu6 for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: relu6 parameter descriptor
+
+### csinn_relun
+
+[source,c]
+----
+int csinn_relun(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_relu_params *params);
+----
+* *description:*
+** input tensor calculate relun for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: relun parameter descriptor
+
+### csinn_threshold_relu
+
+[source,c]
+----
+int csinn_threshold_relu(struct csinn_tensor *input, struct csinn_tensor *output,
+                         struct csinn_relu_params *params);
+----
+* *description:*
+** input tensor calculate threshold_relu for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: threshold_relu parameter descriptor
+
+### csinn_leaky_relu
+
+[source,c]
+----
+int csinn_leaky_relu(struct csinn_tensor *input, struct csinn_tensor *output,
+                     struct csinn_relu_params *params);
+----
+* *description:*
+** input tensor calculate leaky_relu for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: leaky_relu parameter descriptor
+
+### csinn_softrelu
+
+[source,c]
+----
+int csinn_softrelu(struct csinn_tensor *input, struct csinn_tensor *output,
+                   struct csinn_relu_params *params);
+----
+* *description:*
+** input tensor calculate softrelu for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: softrelu parameter descriptor
+
+### csinn_prelu
+
+[source,c]
+----
+int csinn_prelu(struct csinn_tensor *input, struct csinn_tensor *alpha,
+                struct csinn_tensor *output,
+                struct csinn_prelu_params *params);
+----
+* *description:*
+** input tensor calculate prelu for each element
+* *parameter:*
+** input: pointer to the input tensor
+** alpha:pointer to the alpha tensor
+** output: pointer to the output tensor
+** params: prelu parameter descriptor
+
+### csinn_softsign
+
+[source,c]
+----
+int csinn_softsign(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate softsign for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: softsign parameter descriptor
+
+### csinn_softplus
+
+[source,c]
+----
+int csinn_softplus(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_siso_params *params);
+----
+* *description:*
+** input tensor calculate softplus for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: softplus parameter descriptor
+
+### csinn_softmax
+
+[source,c]
+----
+int csinn_softmax(struct csinn_tensor *input, struct csinn_tensor *output,
+                  struct csinn_softmax_params *params);
+----
+* *description:*
+** input tensor calculate softmax for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: softmax parameter descriptor
+
+### csinn_log_softmax
+
+[source,c]
+----
+int csinn_log_softmax(struct csinn_tensor *input, struct csinn_tensor *output,
+                      struct csinn_softmax_params *params);
+----
+* *description:*
+** input tensor calculate log_softmax for each element
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: log_softmax parameter descriptor
+
+### csinn_batch_normalization
+
+[source,c]
+----
+int csinn_batch_normalization(struct csinn_tensor *input, struct csinn_tensor *mean,
+                              struct csinn_tensor *variance, struct csinn_tensor *gamma,
+                              struct csinn_tensor *beta, struct csinn_tensor *output,
+                              struct csinn_bn_params *params);
+----
+* *description:*
+** input tensor calculate batch normalization
+* *parameter:*
+** input:pointer to the input tensor
+** mean:mean coefficient
+** variance:variance coefficient
+** gamma: γ coefficient
+** beta: β coefficient
+** output:pointer to the output tensor
+** params: batch normalization parameter descriptor
+
+### csinn_l2_normalization
+
+[source,c]
+----
+int csinn_l2_normalization(struct csinn_tensor *input, struct csinn_tensor *output,
+                           struct csinn_l2n_params *params);
+----
+* *description:*
+** input tensor calculate L2 normalization
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: l2_normalization parameter descriptor
+
+### csinn_lrn
+
+[source,c]
+----
+int csinn_lrn(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_lrn_params *params);
+----
+* *description:*
+** input tensor calculate Local Response Normalization
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: lrn parameter descriptor
+
+### csinn_matmul
+
+[source,c]
+----
+int csinn_matmul(struct csinn_tensor *mat0, struct csinn_tensor *mat1,
+                 struct csinn_tensor *output,
+                 struct csinn_matmul_params *params);
+----
+* *description:*
+** two inputs tensor calculate matmul。
+* *parameter:*
+** mat0: pointer to the mat0 tensor
+** mat1: pointer to the mat1 tensor
+** output: pointer to the output tensor
+** params: matmul parameter descriptor
+
+### csinn_add
+
+[source,c]
+----
+int csinn_add(struct csinn_tensor *input0, struct csinn_tensor *input1,
+              struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** two inputs tensor calculate add。
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: add parameter descriptor
+
+### csinn_sub
+
+[source,c]
+----
+int csinn_sub(struct csinn_tensor *input0, struct csinn_tensor *input1,
+              struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** two inputs tensor calculate sub
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: add parameter descriptor
+
+### csinn_mul
+
+[source,c]
+----
+int csinn_mul(struct csinn_tensor *input0, struct csinn_tensor *input1,
+              struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** two inputs tensor calculate mul
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: mul parameter descriptor
+
+### csinn_div
+
+[source,c]
+----
+int csinn_div(struct csinn_tensor *input0, struct csinn_tensor *input1,
+              struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** two inputs tensor calculate div
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: div parameter descriptor
+
+### csinn_mod
+
+[source,c]
+----
+int csinn_mod(struct csinn_tensor *input0, struct csinn_tensor *input1,
+              struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** two inputs tensor calculate mod
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: mod parameter descriptor
+
+### csinn_floor_divide
+
+[source,c]
+----
+int csinn_floor_divide(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                       struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** two inputs tensor calculate floor divide。
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: floor_divide parameter descriptor
+
+### csinn_floor_mod
+
+[source,c]
+----
+int csinn_floor_mod(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                    struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** two inputs tensor calculate floor mod。
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: floor mod parameter descriptor
+
+### csinn_maximum
+
+[source,c]
+----
+int csinn_maximum(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                  struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** two inputs tensor calculate maximum。
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: maximum parameter descriptor
+
+### csinn_minimum
+
+[source,c]
+----
+int csinn_minimum(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                  struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** two inputs tensor calculate minimum。
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: minimum parameter descriptor
+
+### csinn_power
+
+[source,c]
+----
+int csinn_power(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** for exponential calculation, the first tensor is the base number of
+exponential calculation, and the second tensor is the index of
+exponential calculation
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: power parameter descriptor
+
+### csinn_greater
+
+[source,c]
+----
+int csinn_greater(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** compare whether input tensor 0 is greater than input tensor 1
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: greater parameter descriptor
+
+### csinn_less
+
+[source,c]
+----
+int csinn_less(struct csinn_tensor *input0, struct csinn_tensor *input1,
+               struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** compare whether input tensor 0 is smaller than input tensor 1
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: less parameter descriptor
+
+### csinn_equal
+
+[source,c]
+----
+int csinn_equal(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** compare whether input tensor 0 is equal to input tensor 1
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: equal parameter descriptor
+
+### csinn_not_equal
+
+[source,c]
+----
+int csinn_not_equal(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                    struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** compare whether input tensor 0 is not equal to input tensor 1
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: not equal parameter descriptor
+
+### csinn_greater_equal
+
+[source,c]
+----
+int csinn_greater_equal(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                        struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** compare whether input tensor 0 is greater than or equal to input
+tensor 1
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: greater equal parameter descriptor
+
+### csinn_less_equal
+
+[source,c]
+----
+int csinn_less_equal(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                     struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** compare whether input tensor 0 is less than or equal to input tensor
+1
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: less equal parameter descriptor
+
+### csinn_select
+
+[source,c]
+----
+int csinn_select(struct csinn_tensor *condition, struct csinn_tensor *input0,
+                 struct csinn_tensor *input1, struct csinn_tensor *output,
+                 struct csinn_select_params *params);
+----
+* *description:*
+** select the elements from the two input tensors to the output tensors
+based on the selection tensors obtained by comparison and calculation.
+* *parameter:*
+** condition:indicates the selection tensor
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: less equal parameter descriptor
+
+### csinn_logical_and
+
+[source,c]
+----
+int csinn_logical_and(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                      struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** calculate the logical and of each element of two input tensors
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: logical and parameter descriptor
+
+### csinn_logical_or
+
+[source,c]
+----
+int csinn_logical_or(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                   struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** calculate the logical or of each element of two input tensors
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: logical or parameter descriptor
+
+### csinn_logical_not
+[source,c]
+----
+int csinn_logical_not(struct csinn_tensor input, struct csinn_tensor output,
+                      struct csinn_siso_params *params);
+
+----
+
+* **description:**
+** calculate the logical not of each element of the input tensor
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: logical not parameter descriptor
+
+
+### csinn_logical_xor
+
+[source,c]
+----
+int csinn_logical_xor(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                      struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+
+* *description:*
+** calculate the logical xor of each element of two input tensors
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: logical xor parameter descriptor
+
+### csinn_and
+
+[source,c]
+----
+int csinn_and(struct csinn_tensor *input0, struct csinn_tensor *input1,
+              struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** calculate the sum of each element of two input tensors
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: and parameter descriptor
+
+### csinn_or
+
+[source,c]
+----
+int csinn_or(struct csinn_tensor *input0, struct csinn_tensor *input1,
+             struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** calculate the or of each element of two input tensors
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: or parameter descriptor
+
+### csinn_xor
+
+[source,c]
+----
+int csinn_xor(struct csinn_tensor *input0, struct csinn_tensor *input1,
+              struct csinn_tensor *output, struct csinn_diso_params *params);
+----
+* *description:*
+** calculate the xor of each element of two input tensors
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: xor parameter descriptor
+
+### csinn_not
+
+[source,c]
+----
+int csinn_not(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_siso_params *params);
+----
+* *description:*
+** calculate the not value of each element in the input tensor
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: not parameter descriptor
+
+### csinn_broadcast_to
+
+[source,c]
+----
+int csinn_broadcast_to(struct csinn_tensor *input, struct csinn_tensor *output,
+                       struct csinn_broadcast_to_params *params);
+----
+* *description:*
+** broadcast the input tensor
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: broadcast_to parameter descriptor
+
+### csinn_scatter_nd
+
+[source,c]
+----
+int csinn_scatter_nd(struct csinn_tensor *input, struct csinn_tensor *indices,
+                     struct csinn_tensor *updates, struct csinn_tensor *output,
+                     struct csinn_scatter_nd_params *params);
+----
+* *description:*
+** the index applies sparse updates to a single value or slice in the
+zero tensor of a given shape to create a new tensor, the inverse
+operation of gather_nd
+* *parameter:*
+** input: pointer to the input tensor
+** indices:pointer to the index tensor
+** updates:a tensor that points to the distribution of updates
+** output: pointer to the output tensor
+** params: scatter_nd parameter descriptor
+
+### csinn_pad
+
+[source,c]
+----
+int csinn_pad(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_pad_params *params);
+----
+* *description:*
+** fill the input tensor
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: pad parameter descriptor
+
+### csinn_resize
+
+[source,c]
+----
+int csinn_resize(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_resize_params *params);
+----
+* *description:*
+** resize the input tensor
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: resize parameter descriptor
+
+### csinn_concat
+
+[source,c]
+----
+int csinn_concat(struct csinn_tensor **input, struct csinn_tensor *output,
+                 struct csinn_concat_params *params);
+----
+* *description:*
+** splice multiple tensors. After the remaining tensors are connected to
+the first tensor according to the specified dimension
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: concat parameter descriptor
+
+### csinn_transpose
+
+[source,c]
+----
+int csinn_transpose(struct csinn_tensor *input, struct csinn_tensor *output,
+                    struct csinn_transpose_params *params);
+----
+* *description:*
+** replace the dimension order of the tensor. transpose is basically the
+same as permute in essence. permute is not implemented temporarily and
+is replaced by transpose.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: transpose parameter descriptor
+
+### csinn_reshape
+
+[source,c]
+----
+int csinn_reshape(struct csinn_tensor *input, struct csinn_tensor *output,
+                  struct csinn_reshape_params *params);
+----
+* *description:*
+** reset the dimensions of the tensor. reshape is essentially a memcpy.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: reshape parameter descriptor
+
+### csinn_shape
+
+[source,c]
+----
+int csinn_shape(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_shape_params *params);
+----
+* *description:*
+** obtains the latitude information of the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: shape parameter descriptor
+
+### csinn_expand_dims
+
+[source,c]
+----
+int csinn_expand_dims(struct csinn_tensor *input, struct csinn_tensor *output,
+                      struct csinn_expand_dims_params *params);
+----
+* *description:*
+** extend the latitude of the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: expand dims parameter descriptor
+
+### csinn_reverse
+
+[source,c]
+----
+int csinn_reverse(struct csinn_tensor *input, struct csinn_tensor *output,
+                  struct csinn_reverse_params *params);
+----
+* *description:*
+** flip the input tensor based on the specified dimension.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: reverse parameter descriptor
+
+### csinn_flatten
+
+[source,c]
+----
+int csinn_flatten(struct csinn_tensor *input, struct csinn_tensor *output,
+                  struct csinn_flatten_params *params);
+----
+* *description:*
+** tile input tensor data.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: flatten parameter descriptor
+
+### csinn_crop
+
+[source,c]
+----
+int csinn_crop(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_crop_params *params);
+----
+* *description:*
+** intercept input tensor data.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: crop parameter descriptor
+
+### csinn_slice
+
+[source,c]
+----
+int csinn_slice(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_slice_params *params);
+----
+* *description:*
+** slice the input tensor.
+* *parameter:*
+** input: pointer to the input tensor 数据所在地址
+** output: pointer to the output tensor数据所在地址
+** params: slice parameter descriptor
+
+### csinn_split
+
+[source,c]
+----
+int csinn_split(struct csinn_tensor *input, struct csinn_tensor **output,
+                struct csinn_split_params *params);
+----
+* *description:*
+** splits input tensors into multiple tensors by specified dimension.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: split parameter descriptor
+
+### csinn_stack
+
+[source,c]
+----
+int csinn_stack(struct csinn_tensor **inputs, struct csinn_tensor *output,
+                struct csinn_stack_params *params);
+----
+* *description:*
+** stack and splice several input tensors. Note that the concat output
+tensor and input tensor dimensions remain unchanged, and the stack
+output tensor is one dimension more than the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: stack parameter descriptor
+
+### csinn_unstack
+
+[source,c]
+----
+int csinn_unstack(struct csinn_tensor *input, struct csinn_tensor **output,
+                  struct csinn_unstack_params *params);
+----
+* *description:*
+** split the input tensor. Note that it is distinguished from split, the
+split output tensor remains the same as the input tensor. The stack
+output tensor is one-dimensional less than the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: unstack parameter descriptor
+
+### csinn_tile
+
+[source,c]
+----
+int csinn_tile(struct csinn_tensor *inputs, struct csinn_tensor *output,
+               struct csinn_tile_params *params);
+----
+* *description:*
+** repeat the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: tile parameter descriptor
+
+### csinn_arange
+
+[source,c]
+----
+int csinn_arange(struct csinn_tensor *output, struct csinn_arange_params *params);
+----
+* *description:*
+** returns the location information within the range based on the
+parameter.
+* *parameter:*
+** output: pointer to the output tensor
+** params: arange parameter descriptor
+
+### csinn_where
+
+[source,c]
+----
+int csinn_where(struct csinn_tensor *condition, struct csinn_tensor *x, struct csinn_tensor *y,
+                struct csinn_tensor *output, struct csinn_where_params *params);
+----
+* *description:*
+** the output of x tensor or y tensor data is determined according to
+the condition specified by condition.
+* *parameter:*
+** condition:indicates the filter condition tensor, which is of the
+bool type.
+** x:x tensor
+** y:y tensor
+** output: pointer to the output tensor
+** params: arange parameter descriptor
+
+### csinn_gather
+
+[source,c]
+----
+int csinn_gather(struct csinn_tensor *input, struct csinn_tensor *indices,
+                 struct csinn_tensor *output, struct csinn_gather_params *params);
+----
+* *description:*
+** index by specified index extract the data in the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** indices:index tensor
+** output: pointer to the output tensor
+** params: gather parameter descriptor
+
+### csinn_gather_nd
+
+[source,c]
+----
+int csinn_gather_nd(struct csinn_tensor *input, struct csinn_tensor *indices,
+                    struct csinn_tensor *output, struct csinn_gather_nd_params *params);
+----
+* *description:*
+** extracts data from the input tensor of the specified index.
+* *parameter:*
+** input: pointer to the input tensor
+** indices:index tensor
+** output: pointer to the output tensor
+** params: gather_nd parameter descriptor
+
+### csinn_squeeze
+
+[source,c]
+----
+int csinn_squeeze(struct csinn_tensor *input, struct csinn_tensor *output,
+                  struct csinn_squeeze_params *params);
+----
+* *description:*
+** tile the data in the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: squeeze parameter descriptor
+
+### csinn_ndarray_size
+
+[source,c]
+----
+int csinn_ndarray_size(struct csinn_tensor *input, struct csinn_tensor *output,
+                       struct csinn_ndarray_size_params *params);
+----
+* *description:*
+** calculates the number of data in the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: ndarray_size parameter descriptor
+
+### csinn_batch_to_space
+
+[source,c]
+----
+int csinn_batch_to_space(struct csinn_tensor *input, struct csinn_tensor *output,
+                         struct csinn_batch_to_space_params *params);
+----
+* *description:*
+** enter the tensor batch to fill the width and height.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: batch_to_space parameter descriptor
+
+### csinn_batch_to_space_nd
+
+[source,c]
+----
+int csinn_batch_to_space_nd(struct csinn_tensor *input, struct csinn_tensor *output,
+                            struct csinn_batch_to_space_nd_params *params);
+----
+* *description:*
+** the input tensor batch is filled into spatial dimensions such as
+width and height.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: batch_to_space_nd parameter descriptor
+
+### csinn_space_to_batch
+
+[source,c]
+----
+int csinn_space_to_batch(struct csinn_tensor *input, struct csinn_tensor *output,
+                         struct csinn_space_to_batch_params *params);
+----
+* *description:*
+** enter the width and height of the tensor to fill the batch.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: space_to_batch parameter descriptor
+
+### csinn_space_to_batch_nd
+
+[source,c]
+----
+int csinn_space_to_batch_nd(struct csinn_tensor *input, struct csinn_tensor *output,
+                            struct csinn_space_to_batch_nd_params *params);
+----
+* *description:*
+** enter the spatial dimensions such as width and height of the tensor
+to fill the batch.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: space_to_batch_nd parameter descriptor
+
+### csinn_space_to_depth
+
+[source,c]
+----
+int csinn_space_to_depth(struct csinn_tensor *input, struct csinn_tensor *output,
+                         struct csinn_space_to_depth_params *params);
+----
+* *description:*
+** enter the width and height of the tensor to fill the depth.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: space_to_depth parameter descriptor
+
+### csinn_depth_to_space
+
+[source,c]
+----
+int csinn_depth_to_space(struct csinn_tensor *input, struct csinn_tensor *output,
+                         struct csinn_depth_to_space_params *params);
+----
+* *description:*
+** input tensor depth filling width and height.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: depth_to_space parameter descriptor
+
+### csinn_one_hot
+
+[source,c]
+----
+int csinn_one_hot(struct csinn_tensor *input, struct csinn_tensor *output,
+                  struct csinn_one_hot_params *params);
+----
+* *description:*
+** find the one_hot eigenvector.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: one_hot parameter descriptor
+
+### csinn_sequence_mask
+
+[source,c]
+----
+int csinn_sequence_mask(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                      struct csinn_tensor *output, struct csinn_sequence_mask_params *params);
+----
+* *description:*
+** obtain the mask of a sequence sequence. The output is usually of the
+bool type and can be used to fill sentence words.
+* *parameter:*
+** input0: pointer to the input0 tensor
+** input1: pointer to the input1 tensor
+** output: pointer to the output tensor
+** params: sequence_mask parameter descriptor
+
+### csinn_proposal
+
+[source,c]
+----
+int csinn_proposal(struct csinn_tensor *cls_prob, struct csinn_tensor *bbox_pred,
+                   struct csinn_tensor *im_info, struct csinn_tensor *output,
+                   struct csinn_proposal_params *params);
+----
+* *description:*
+** special layer from faster RCNN.
+* *parameter:*
+** cls_prob:category input information
+** bbox_pred:box input information
+** im_info:graph input information
+** output:pointer to the output tensor
+** params: proposal parameter descriptor
+
+### csinn_psroipooling
+
+[source,c]
+----
+int csinn_psroipooling(struct csinn_tensor *data, struct csinn_tensor *rois,
+                       struct csinn_tensor *output, struct csinn_psroipooling_params *params);
+----
+* *description:*
+** special layer from RFCN. It is used to introduce location sensitive
+information and deal with the problem of target translation invariance.
+* *parameter:*
+** input: pointer to the input tensor
+** rois:roi information
+** output: pointer to the output tensor
+** params: psroipooling parameter descriptor
+
+### csinn_roipool
+
+[source,c]
+----
+int csinn_roipool(struct csinn_tensor *data, struct csinn_tensor *rois,
+                  struct csinn_tensor *output, struct csinn_roi_pool_params *params);
+----
+* *description:*
+** pool the regions of interest.
+* *parameter:*
+** data:pointer to the input tensor
+** rois:roi information
+** output: pointer to the output tensor
+** params: roipool parameter descriptor
+
+### csinn_roi_align
+
+[source,c]
+----
+int csinn_roi_align(struct csinn_tensor *data, struct csinn_tensor *rois,
+                    struct csinn_tensor *output, struct csinn_roi_align_params *params);
+----
+* *description:*
+** to solve the problem that the kernel_size of pooling in roipool is
+not an integer, bilinear interpolation is used instead of nearest
+neighbor interpolation to avoid losing spatial symmetry.
+* *parameter:*
+** data:pointer to the input tensor
+** rois:roi information
+** output: pointer to the output tensor
+** params: roi_align parameter descriptor
+
+### csinn_im2col
+
+[source,c]
+----
+int csinn_im2col(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_im2col_params *params);
+----
+* *description:*
+** image-to-column conversion to prepare for convolution calculation.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: im2col parameter descriptor
+
+### csinn_col2im
+
+[source,c]
+----
+int csinn_col2im(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_tensor *kernel, struct csinn_col2im_params *params);
+----
+* *description:*
+** column-to-image conversion, corresponding to im2col
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** kernel:pointer to the kernel tensor
+** params: col2im parameter descriptor
+
+### csinn_sum
+
+[source,c]
+----
+int csinn_sum(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_reduce_params *params);
+----
+* *description:*
+** sum the specified dimensions of the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: sum parameter descriptor
+
+### csinn_mean
+
+[source,c]
+----
+int csinn_mean(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_reduce_params *params);
+----
+* *description:*
+** averaging the specified dimensions of the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: mean parameter descriptor
+
+### csinn_max
+
+[source,c]
+----
+int csinn_max(struct csinn_tensor *input, struct csinn_tensor *output,
+            struct csinn_reduce_params *params);
+----
+* *description:*
+** returns the maximum value of the specified dimension of the input
+tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: max parameter descriptor
+
+### csinn_min
+
+[source,c]
+----
+int csinn_min(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_reduce_params *params);
+----
+* *description:*
+** returns the minimum value for the specified dimension of the input
+tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: min parameter descriptor
+
+### csinn_prod
+
+[source,c]
+----
+int csinn_prod(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_reduce_params *params);
+----
+* *description:*
+** calculates the tired multiplication for the specified dimension of
+the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: prod parameter descriptor
+
+### csinn_reduce_sum
+
+[source,c]
+----
+int csinn_reduce_sum(struct csinn_tensor *input, struct csinn_tensor *output,
+                     struct csinn_reduce_params *params);
+----
+* *description:*
+** reduce the sum of the specified dimensions of the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: reduce_sum parameter descriptor
+
+### csinn_reduce_mean
+
+[source,c]
+----
+int csinn_reduce_mean(struct csinn_tensor *input, struct csinn_tensor *output,
+                      struct csinn_reduce_params *params);
+----
+* *description:*
+** calculates the average value of the specified dimension of the input
+tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: reduce_mean parameter descriptor
+
+### csinn_reduce_max
+
+[source,c]
+----
+int csinn_reduce_max(struct csinn_tensor *input, struct csinn_tensor *output,
+                     struct csinn_reduce_params *params);
+----
+* *description:*
+** returns the maximum value of the specified dimension of the input
+tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: reduce_max parameter descriptor
+
+### csinn_reduce_min
+
+[source,c]
+----
+int csinn_reduce_min(struct csinn_tensor *input, struct csinn_tensor *output,
+                     struct csinn_reduce_params *params);
+----
+* *description:*
+** the minimum value is reduced for the specified dimension of the input
+tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: reduce_min parameter descriptor
+
+### csinn_reduce_prod
+
+[source,c]
+----
+int csinn_reduce_prod(struct csinn_tensor *input, struct csinn_tensor *output,
+                      struct csinn_reduce_params *params);
+----
+* *description:*
+** reduce the dimension of the input tensor to calculate the tired
+multiplication.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: reduce_prod parameter descriptor
+
+### csinn_reduce_logsumexp
+
+[source,c]
+----
+int csinn_reduce_logsumexp(struct csinn_tensor *input, struct csinn_tensor *output,
+                           struct csinn_reduce_params *params);
+----
+* *description:*
+** calculate logsumexp for the specified dimension of the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: reduce_logsumexp parameter descriptor
+
+### csinn_argmin
+
+[source,c]
+----
+int csinn_argmin(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_reduce_params *params);
+----
+* *description:*
+** specify a dimension for the input tensor returns the index value of
+the minimum value.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: argmin_min parameter descriptor
+
+### csinn_argmax
+
+[source,c]
+----
+int csinn_argmax(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_reduce_params *params);
+----
+* *description:*
+** specify a dimension for the input tensor returns the index value of
+the maximum value.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: argmin_max parameter descriptor
+
+### csinn_all
+
+[source,c]
+----
+int csinn_all(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_reduce_params *params);
+----
+* *description:*
+** reduce the sum of the specified dimensions of the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: all parameter descriptor
+
+### csinn_any
+
+[source,c]
+----
+int csinn_any(struct csinn_tensor *input, struct csinn_tensor *output,
+              struct csinn_reduce_params *params);
+----
+* *description:*
+** subtracts or for the specified dimension of the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: any parameter descriptor
+
+### csinn_reorg
+
+[source,c]
+----
+int csinn_reorg(struct csinn_tensor *input, struct csinn_tensor *output,
+                struct csinn_reorg_params *params);
+----
+* *description:*
+** cut the height and width and splice them along the channel, which
+appears in yolov2
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: reorg parameter descriptor
+
+### csinn_cumsum
+
+[source,c]
+----
+int csinn_cumsum(struct csinn_tensor *input, struct csinn_tensor *output,
+                 struct csinn_cumsum_params *params);
+----
+* *description:*
+** specify a dimension for the input tensor calculate the accumulation.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: cumsum parameter descriptor
+
+### csinn_cumprod
+
+[source,c]
+----
+int csinn_cumprod(struct csinn_tensor *input, struct csinn_tensor *output,
+                  struct csinn_cumprod_params *params);
+----
+* *description:*
+** specify a dimension for the input tensor ask for tired
+multiplication.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: cumprod parameter descriptor
+
+### csinn_yuv_rgb_scale
+
+[source,c]
+----
+int csinn_yuv_rgb_scale(struct csinn_tensor *input, struct csinn_tensor *output,
+                        struct csinn_siso_params *params);
+----
+* *description:*
+** converts the input yuv tensor to rgb.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: yuv rgb parameter descriptor
+
+### csinn_segment_max
+
+[source,c]
+----
+int csinn_segment_max(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                      struct csinn_tensor *output, struct csinn_segment_params *params);
+----
+* *description:*
+** compares the maximum value of the value at the specified position of
+the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: segment max parameter descriptor
+
+### csinn_segment_min
+
+[source,c]
+----
+int csinn_segment_min(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                      struct csinn_tensor *output, struct csinn_segment_params *params);
+----
+* *description:*
+** compares the minimum value of the value at the specified position of
+the input tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: segment min parameter descriptor
+
+### csinn_segment_sum
+
+[source,c]
+----
+int csinn_segment_sum(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                    struct csinn_tensor *output, struct csinn_segment_params *params);
+----
+* *description:*
+** the accumulation of values at the specified position of the input
+tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: segment sum parameter descriptor
+
+### csinn_segment_mean
+
+[source,c]
+----
+int csinn_segment_mean(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                       struct csinn_tensor *output, struct csinn_segment_params *params);
+----
+* *description:*
+** the average value of the specified position of the input tensor. 。
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: segment mean parameter descriptor
+
+### csinn_segment_prod
+
+[source,c]
+----
+int csinn_segment_prod(struct csinn_tensor *input0, struct csinn_tensor *input1,
+                       struct csinn_tensor *output, struct csinn_segment_params *params);
+----
+* *description:*
+** the product of the value at the specified position of the input
+tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: segment prod parameter descriptor
+
+### csinn_clip
+
+[source,c]
+----
+int csinn_clip(struct csinn_tensor *input, struct csinn_tensor *output,
+               struct csinn_clip_params *params);
+----
+* *description:*
+** saturate the input tensor
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: clip parameter descriptor
+
+### csinn_strided_slice
+
+[source,c]
+----
+int csinn_strided_slice(struct csinn_tensor *input, struct csinn_tensor *output,
+                        struct csinn_strided_slice_params *params);
+----
+* *description:*
+** the input tensor is split by step.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: strided slice parameter descriptor
+
+### csinn_topk
+
+[source,c]
+----
+int csinn_topk(struct csinn_tensor *input, struct csinn_tensor *output1,
+             struct csinn_tensor *output2, struct csinn_topk_params *params);
+----
+* *description:*
+** calculate the maximum k elements and their indexes for the input
+tensor.
+* *parameter:*
+** input: pointer to the input tensor
+** output1:pointer to the output1 tensor
+** output2:pointer to the output2 tensor
+** params: topk parameter descriptor
+
+### csinn_non_max_suppression
+
+[source,c]
+----
+int csinn_non_max_suppression(struct csinn_tensor *input0,
+                              struct csinn_tensor *input1,
+                              struct csinn_tensor *output,
+                              struct csinn_non_max_suppression_params *params);
+----
+* *description:*
+** non-maximum suppression is generally used for post-processing of detection models to filter out redundant candidate frames.
+* *parameter:*
+** input0:points to input tensor 1, indicating the coordinates of the candidate box.
+** input1:pointing to output tensor 2, indicates the confidence level of the candidate box.
+** output: pointer to the output tensor
+** params: non_max_suppression parameter descriptor
+
+### csinn_shuffle_channel
+
+[source,c]
+----
+int csinn_shuffle_channel(struct csinn_tensor *input, struct csinn_tensor *output,
+                          struct csinn_shuffle_channel_params *params);
+----
+* *description:*
+** group input tensors and mix them by group. Combined with grouping convolution, it alleviates the problem of channel locality among different groups and increases the generalization ability of the model, which is proposed in shuffelNet.
+* *parameter:*
+** input: pointer to the input tensor
+** output: pointer to the output tensor
+** params: shuffle_channel parameter descriptor

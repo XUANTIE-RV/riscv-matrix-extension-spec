@@ -1,0 +1,44 @@
+[[riscv-dwarf]]
+== RISC-V DWARF Specification
+
+=== DWARF Debugging Format
+
+The DWARF debugging format for RISC-V follows the
+https://dwarfstd.org/[standard DWARF specification]; this specification only
+describes RISC-V-specific definitions.
+
+=== DWARF Register Numbers
+
+The table below lists the mapping from DWARF register numbers to machine
+registers.
+
+.DWARF register number encodings
+[cols="2,2,4"]
+[width=80%]
+|===
+| DWARF Number | Register Name | Description
+
+| 0 - 31       | x0 - x31      | Integer Registers
+| 32 - 63      | f0 - f31      | Floating-point Registers
+| 64           |               | Alternate Frame Return Column
+| 65 - 95      |               | Reserved for future standard extensions
+| 96 - 127     | v0 - v31      | Vector Registers
+| 128 - 3071   |               | Reserved for future standard extensions
+| 3072 - 3079  | m0 - m7       | Matrix Registers
+| 3080 - 4095  |               | Reserved for custom extensions
+| 4096 - 8191  |               | CSRs
+|===
+
+The alternate frame return column is meant to be used when unwinding from
+signal handlers, and stores the address where the signal handler will return
+to.
+
+The RISC-V specification defines a total of 4096 CSRs (see <<riscv-priv>>).
+Each CSR is assigned a DWARF register number corresponding to its specified CSR
+number plus 4096.
+
+=== References
+
+* [[[riscv-priv]]] "The RISC-V Instruction Set Manual, Volume II: Privileged
+Architecture, Document", Editors Andrew Waterman, Krste Asanovi'c, and
+John Hauser, RISC-V International.

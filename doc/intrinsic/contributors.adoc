@@ -1,0 +1,6 @@
+== Contributors
+
+This RISC-V specification has been contributed to directly or indirectly by:
+
+QuXianmiao, MaJin
+[%hardbreaks]

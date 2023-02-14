@@ -1,0 +1,62 @@
+[[riscv-cc]]
+== RISC-V Calling Conventions For Matrix
+
+.Matrix Register Convention
+[%autowidth]
+|===
+| Name      | ABI Mnemonic | Meaning                      | Preserved across calls?
+
+| m0-m7     |              | Temporary registers          | No
+| xmcsr	    |              | matrix control and status register          | No
+| xmxrm	    |              | matrix fixed-point rounding mode            | No
+| xmxsat	|              | fixed-point saturation flag  | No
+| xmsize	|              | matrix size configure，matrix size          | Yes
+|===
+
+
+Matrix registers are not used for passing arguments or return values; we intend to define a new calling convention variant to allow that as a future software optimization.
+
+A matrix context status fild is defined in bit[1:0] of matrix control and status register `xmcsr`, which can be used to reduce the cost of context save and restore. Bits[XLEN-1:2] are reseved and should be written with zero. The ms fileds used  the same status encoding as `FS/VS/XS`, shown in the table.
+
+[cols="2,2,4"]
+[%autowidth]
+|===
+|status	|ms[1:0]| MS Meaning
+|0	|2'b00|	All off
+|1	|2'b01|	Initial
+|2	|2'b10|	Clean
+|3	|2'b11|	Dirty
+|===
+
+Attempts to execute any matrix instructions, or to access the matrix CSRs (excluding matrix control and status register `xmcsr`) raise an illegal instruction excetion when ms is set to off. If ms is set to initial or clean, executing any instruction that change the matrix state will change the ms to dirty.
+
+Matrix register information includes 2 read-only XLEN-bit registers, which are design-time constant in any implementation.
+
+- `xmlenb`:  MLEN in byte indicating MLEN-bits state of each matrix register row
+- `xmregsize`: matrix regitser size in byte, `mrows`*`mlenb`, mrows=MLEN/32
+
+The `xmrstart` read-write register indicates the first matrix  row index to be executed by a matrix load/store instruction. Normally xmrstart is only written by hardware on a trap of matrix load/store instructions, the unsigned value of register specifys the row at which the execution should resume after a resuamable trap is handled.
+
+`xmisa` is a XLEN-bit read-only CSR register, specifying the supported matrix instruction subset of the current hardware implementation.
+
+`xmxrm` use the same encoding and rounding algorithm with `vxrm[1:0]` as follows.Suppose the pre-rounding result is `v`, and d bits of that result areto be rounded off. Then the rounded result is `(v >> d) + r`, where r depends on the rounding mode as specified in the following table.
+
+[width="90%",cols="2,8,4",align="center",options="header",]
+|===
+|vxrm[1:0] | rounding mode |rounding increment r
+|0 0 |rnu round-to-nearest-up (add +0.5 LSB) |v[d-1]
+
+|0 1 |rne round-to-nearest-even |v[d-1] & (v[d-2:0]≠0 \| v[d])
+
+|1 0 |rdn round-down (truncate) |0
+
+|1 1 |rod round-to-odd (OR bits into LSB, aka ''jam'') |!v[d] &
+v[d-1:0]≠0
+|===
+
+The rounding functions are used to represent this operation in the instruction descriptions below:
+```
+roundoff_unsigned(v, d) = (unsigned(v) >> d) + r
+roundoff_signed(v, d) = (signed(v) >> d) + r
+```
+
