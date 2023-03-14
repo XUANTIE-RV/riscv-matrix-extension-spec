@@ -1,7 +1,7 @@
 [[header]]
 :description: RISC-V Matrix Multiplication Extension Specification
 :company: T-head-Semi
-:revdate: 11/2022
+:revdate: 02/2023
 :revnumber: 0.1
 :revremark: This document is in development. Assume everything can change.
 :url-riscv: http://riscv.org
@@ -54,7 +54,7 @@ Attribution 4.0 International License (CC-BY 4.0). The full
 license text is available at
 https://creativecommons.org/licenses/by/4.0/.
 
-Copyright 2022 by T-Head Semiconductor Corp.
+Copyright 2023 by T-Head Semiconductor Corp.
 
 [preface]
 include::contributors.adoc[]

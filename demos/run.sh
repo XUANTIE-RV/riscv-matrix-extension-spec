@@ -26,3 +26,7 @@ run gemm gemm_fp16
 run resnet50 resnet50_int8
 run resnet50 resnet50_fp16
 run intrinsic_matmul matmul
+# run gemm gemm_int8_rvv
+# run gemm gemm_fp16_rvv
+# run resnet50 resnet50_int8_rvv
+# run resnet50 resnet50_fp16_rvv

@@ -26,14 +26,14 @@ Case name can be used to make and run a specified demo.
 
 ## evaluation results
 
-We use qemu and cpf to count the number of instructions of the program. Compared with vector extension 1.0, RISC-V Matrix Extension has an improvement of 2.82x - 5.14x on resnet50, speed up 3.81x - 8.93x on gemm (160 x 160 x 160)
+We use qemu and cpf to count the number of instructions of the program. Compared with vector extension 1.0, RISC-V Matrix Extension has an improvement of 5.28x - 7.36x on resnet50, speed up 9.76x - 15.44x on gemm (160 x 160 x 160)
 
 | Case Name | vector instruction | Matrix Extension instruction | speed up |
 | ----                | ----      | ---       | ---      |
-| gemm_int8           | 291851    | 76583     | 3.81     |
-| gemm_fp16           | 917560    | 102777    | 8.93     |
-| resnet50_int8       | 316367132 | 113795401 | 2.82     |
-| resnet50_fp16       | 633397401 | 125276864 | 5.14     |
+| gemm_int8           | 1183153   | 76583     | 15.44    |
+| gemm_fp16           | 1003996   | 102782    | 9.76     |
+| resnet50_int8       | 837083987 | 113670738 | 7.36     |
+| resnet50_fp16       | 664628988 | 125793966 | 5.28     |
 
 The complete instruction distribution and function hotspots will be generated in perf_data.
 ```
