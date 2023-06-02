@@ -1,7 +1,7 @@
 [[chapter2]]
 == Programmer's Model
 
-Matrix extension adds eight two-dimensional matrix registers and eight CSRs.
+Matrix extension adds eight two-dimensional matrix registers and six CSRs.
 
 [width="90%",cols="2,2,3,5,align="center",options="header"]
 |===
