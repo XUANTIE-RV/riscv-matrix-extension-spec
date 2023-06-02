@@ -62,39 +62,52 @@ NOTE: Set msize register: m[7:0],n[15:8],k[32:16].
 === Read/Write Matrix CSRs
 Instructions
 ```
-csrr	rd,xmrstart
-csrr	rd,xmcsr
-csrr	rd,xmxrm
-csrr	rd,xmxsat
-csrr	rd,xmsize
-csrr	rd,xmregsize
-csrr	rd,xmlenb
-csrr	rd,xmisa
+csrr rd,xmrstart
+csrr    rd,xmcsr
+csrr    rd,xmsize
+csrr    rd,xmlenb
+csrr    rd,xrlenb
+csrr    rd,xmisa
 
-csrw	xmrstart,rs1
-csrw	xmxrm,rs1
-csrw	xmxsat,rs1
-csrw	xmsize,rs1
+csrw    xmrstart,rs1
+csrw    xmcsr,rs1
+csrw    xmsize,rs1
 ```
 
 Intrinsic functions list
 ```c
 enum RVM_CSR
 {
-  RVM_MRSTART = 0,
-  RVM_MCSR,
-  RVM_MXRM,
-  RVM_MXSAT,
-  RVM_MSIZE,
-  RVM_MREGSIZE,
-  RVM_MLENB,
-  RVM_MISA,
+  RVM_XMRSTART = 0,
+  RVM_XMCSR,
+  RVM_XMSIZE,
+  RVM_XMLENB,
+  RVM_XRLENB,
+  RVM_XMISA,
+  RVM_NULL
 };
 
 unsigned long mread_csr(enum RVM_CSR csr);
 void mwrite_csr(enum RVM_CSR csr, unsigned long value)
 ```
-
+=== Undefined
+Intrinsic functions list
+```
+mint8_t mundefined_mi8();
+mint16_t mundefined_mi16();
+mint32_t mundefined_mi32();
+mint64_t mundefined_mi64();
+muint8_t mundefined_mui8();
+muint16_t mundefined_mui16();
+muint32_t mundefined_mui32();
+muint64_t mundefined_mui64();
+mfloat16_t mundefined_mf16();
+mfloat32_t mundefined_mf32();
+mfloat64_t mundefined_mf64();
+mfloat16x2_t mundefined_mf16x2();
+mfloat32x2_t mundefined_mf32x2();
+mfloat64x2_t mundefined_mf64x2();
+```
 === Load and store instructions
 ==== Load
 Instructions
@@ -106,57 +119,51 @@ mld<b/h/w/d> md, rs2, (rs1)
 msld<b/h/w/d>  md, rs2, (rs1)
 
 #whole matrix load
-mld<1/2/4/8>m md,  (rs1)
+mld<1/2>m md,  (rs1)
 ```
 Intrinsic functions list
 ```c
 //matrix load
-mint8_t mld_i8(int8_t *, long);
-muint8_t mld_ui8(uint8_t *, long);
-mint16_t mld_i16(int16_t *, long);
-muint16_t mld_ui16(uint16_t *, long);
-mint32_t mld_i32(int32_t *, long);
-muint32_t mld_ui32(uint32_t *, long);
-mint64_t mld_i64(int64_t *, long);
-muint64_t mld_ui64(uint64_t *, long);
-mfloat16_t mld_f16(float16_t *, long);
-mfloat32_t mld_f32(float32_t *, long);
-mfloat64_t mld_f64(float64_t *, long);
-mfloat16x2_t mld_f16x2(float16_t *, float16_t *, long);
-mfloat32x2_t mld_f32x2(float32_t *, float32_t *, long);
-mfloat64x2_t mld_f64x2(float64_t *, float64_t *, long);
+mint8_t mld_i8(int8_t *base, long stride);
+muint8_t mld_ui8(uint8_t *base, long stride);
+mint16_t mld_i16(int16_t *base, long stride);
+muint16_t mld_ui16(uint16_t *base, long stride);
+mint32_t mld_i32(int32_t *base, long stride);
+muint32_t mld_ui32(uint32_t *base, long stride);
+mint64_t mld_i64(int64_t *base, long stride);
+muint64_t mld_ui64(uint64_t *base, long stride);
+mfloat16_t mld_f16(float16_t *base, long stride);
+mfloat32_t mld_f32(float32_t *base, long stride);
+mfloat64_t mld_f64(float64_t *base, long stride);
 
 //stream matrix load
-mint8_t msld_i8(int8_t *, long);
-muint8_t msld_ui8(uint8_t *, long);
-mint16_t msld_i16(int16_t *, long);
-muint16_t msld_ui16(uint16_t *, long);
-mint32_t msld_i32(int32_t *, long);
-muint32_t msld_ui32(uint32_t *, long);
-mint64_t msld_i64(int64_t *, long);
-muint64_t msld_ui64(uint64_t *, long);
-mfloat16_t msld_f16(float16_t *, long);
-mfloat32_t msld_f32(float32_t *, long);
-mfloat64_t msld_f64(float64_t *, long);
-mfloat16x2_t msld_f16x2(float16_t *, float16_t *, long);
-mfloat32x2_t msld_f32x2(float32_t *, float32_t *, long);
-mfloat64x2_t msld_f64x2(float64_t *, float64_t *, long);
+mint8_t msld_i8(int8_t *base, long stride);
+muint8_t msld_ui8(uint8_t *base, long stride);
+mint16_t msld_i16(int16_t *base, long stride);
+muint16_t msld_ui16(uint16_t *base, long stride);
+mint32_t msld_i32(int32_t *base, long stride);
+muint32_t msld_ui32(uint32_t *base, long stride);
+mint64_t msld_i64(int64_t *base, long stride);
+muint64_t msld_ui64(uint64_t *base, long stride);
+mfloat16_t msld_f16(float16_t *base, long stride);
+mfloat32_t msld_f32(float32_t *base, long stride);
+mfloat64_t msld_f64(float64_t *base, long stride);
 
 //whole matrix load
-mint8_t mld1m_i8(int8_t *);
-muint8_t mld1m_ui8(uint8_t *);
-mint16_t mld1m_i16(int16_t *);
-muint16_t mld1m_ui16(uint16_t *);
-mint32_t mld1m_i32(int32_t *);
-muint32_t mld1m_ui32(uint32_t *);
-mint64_t mld1m_i64(int64_t *);
-muint64_t mld1m_ui64(uint64_t *);
-mfloat16_t mld1m_f16(float16_t *);
-mfloat32_t mld1m_f32(float32_t *);
-mfloat64_t mld1m_f64(float64_t *);
-mfloat16x2_t mld2m_f16(float16_t *);
-mfloat32x2_t mld2m_f32(float32_t *);
-mfloat64x2_t mld2m_f64(float64_t *);
+mint8_t mld1m_i8(int8_t *base);
+muint8_t mld1m_ui8(uint8_t *base);
+mint16_t mld1m_i16(int16_t *base);
+muint16_t mld1m_ui16(uint16_t *base);
+mint32_t mld1m_i32(int32_t *base);
+muint32_t mld1m_ui32(uint32_t *base);
+mint64_t mld1m_i64(int64_t *base);
+muint64_t mld1m_ui64(uint64_t *base);
+mfloat16_t mld1m_f16(float16_t *base);
+mfloat32_t mld1m_f32(float32_t *base);
+mfloat64_t mld1m_f64(float64_t *base);
+mfloat16x2_t mld2m_f16(float16_t *base);
+mfloat32x2_t mld2m_f32(float32_t *base);
+mfloat64x2_t mld2m_f64(float64_t *base);
 ```
 NOTE: Read from the memory to the matrix register: The input parameter is the memory base address, stride, and the return value is the target matrix.
 
@@ -170,7 +177,7 @@ mst<b/h/w/d>  ms3, rs2, (rs1)
 msst<b/h/w/d>  ms3, rs2, (rs1)
 
 #whole matrix store
-mst<1/2/4/8>m ms3, (rs1)
+mst<1/2>m ms3, (rs1)
 ```
 Intrinsic functions list
 ```c
@@ -186,9 +193,6 @@ void mst_ui64_mui64(uint64_t *, long, muint64_t);
 void mst_f16_mf16(float16_t *, long, mfloat16_t);
 void mst_f32_mf32(float32_t *, long, mfloat32_t);
 void mst_f64_mf64(float64_t *, long, mfloat64_t);
-void mst_f16x2_mf16x2(float16_t *, float16_t *, long, mfloat16x2_t);
-void mst_f32x2_mf32x2(float32_t *, float32_t *, long, mfloat32x2_t);
-void mst_f64x2_mf64x2(float64_t *, float64_t *, long, mfloat64x2_t);
 
 //stream matrix store
 void msst_i8_mi8(int8_t *, long, mint8_t);
@@ -202,9 +206,6 @@ void msst_ui64_mui64(uint64_t *, long, muint64_t);
 void msst_f16_mf16(float16_t *, long, mfloat16_t);
 void msst_f32_mf32(float32_t *, long, mfloat32_t);
 void msst_f64_mf64(float64_t *, long, mfloat64_t);
-void msst_f16x2_mf16x2(float16_t *, float16_t *, long, mfloat16x2_t);
-void msst_f32x2_mf32x2(float32_t *, float32_t *, long, mfloat32x2_t);
-void msst_f64x2_mf64x2(float64_t *, float64_t *, long, mfloat16x2_t);
 
 //whole matrix store
 void mst1m_i8_mi8(int8_t *, mint8_t);
@@ -231,55 +232,76 @@ Instructions
 #matrix-matrix mov
 mmov.mm md, ms1
 
-#matrix-vector add,rs1/uimm6
-mmov.mv.x md, ms1[rs1]
+#matrix-vector add,rs1'/uimm3
+mmov.mv.x md, ms1[rs1']
 mmov.mv.i md, ms1[uimm3]
 
+#matrix-scalar mov with duplicate
+mdup<b/h/w/d>.m.x md, rs2
+
 #matrix-scalar mov
-mmov.mx md, rs1
+mmov<b/h/w/d>.m.x md, rs2, rs1
+
+mmov<b/h/w/d>.x.m rd, ms2, rs1
 ```
 Intrinsic functions list
 ```c
 //matrix-matrix mov
-mint8_t mmov_mi8(mint8_t);
-muint8_t mmov_mui8(muint8_t);
-mint16_t mmov_mi16(mint16_t);
-muint16_t mmov_mui16(muint16_t);
-mint32_t mmov_mi32(mint32_t);
-muint32_t mmov_mui32(muint32_t);
-mint64_t mmov_mi64(mint64_t);
-muint64_t mmov_mui64(muint64_t);
-mfloat16_t mmov_mf16(mfloat16_t);
-mfloat32_t mmov_mf32(mfloat32_t);
-mfloat64_t mmov_mf64(mfloat64_t);
-mfloat16x2_t mmov_mf16x2(mfloat16_t, mfloat16_t);
-mfloat64x2_t mmov_mf64x2(mfloat64_t, mfloat64_t);
+mint8_t mmov_mi8(mint8_t src);
+muint8_t mmov_mui8(muint8_t src);
+mint16_t mmov_mi16(mint16_t src);
+muint16_t mmov_mui16(muint16_t src);
+mint32_t mmov_mi32(mint32_t src);
+muint32_t mmov_mui32(muint32_t src);
+mint64_t mmov_mi64(mint64_t src);
+muint64_t mmov_mui64(muint64_t src);
+mfloat16_t mmov_mf16(mfloat16_t src);
+mfloat32_t mmov_mf32(mfloat32_t src);
+mfloat64_t mmov_mf64(mfloat64_t src);
+mfloat16x2_t mmov_mf16x2(mfloat16_t src1, mfloat16_t src2);
+mfloat64x2_t mmov_mf64x2(mfloat64_t src1, mfloat64_t src2);
 
 //matrix-vector mov,rs1/uimm3
-mint8_t mmov_mi8v(mint8_t, uint8_t);
-muint8_t mmov_mui8v(muint8_t, uint8_t);
-mint16_t mmov_mi16v(mint16_t, uint8_t);
-muint16_t mmov_mui16v(muint16_t, uint8_t);
-mint32_t mmov_mi32v(mint32_t, uint8_t);
-muint32_t mmov_mui32v(muint32_t, uint8_t);
-mint64_t mmov_mi64v(mint64_t, uint8_t);
-muint64_t mmov_mui64v(muint64_t, uint8_t);
-mfloat16_t mmov_mf16v(mfloat16_t, uint8_t);
-mfloat32_t mmov_mf32v(mfloat32_t, uint8_t);
-mfloat64_t mmov_mf64v(mfloat64_t, uint8_t);
+mint8_t mmov_mi8v(mint8_t src, uint8_t index);
+muint8_t mmov_mui8v(muint8_t src, uint8_t index);
+mint16_t mmov_mi16v(mint16_t src, uint8_t index);
+muint16_t mmov_mui16v(muint16_t src, uint8_t index);
+mint32_t mmov_mi32v(mint32_t src, uint8_t index);
+muint32_t mmov_mui32v(muint32_t src, uint8_t index);
+mint64_t mmov_mi64v(mint64_t src, uint8_t index);
+muint64_t mmov_mui64v(muint64_t src, uint8_t index);
+mfloat16_t mmov_mf16v(mfloat16_t src, uint8_t index);
+mfloat32_t mmov_mf32v(mfloat32_t src, uint8_t index);
+mfloat64_t mmov_mf64v(mfloat64_t src, uint8_t index);
 
-//matrix-scalar mov
-mint8_t mmov_i8(int8_t);
-muint8_t mmov_ui8(uint8_t);
-mint16_t mmov_i16(int16_t);
-muint16_t mmov_ui16(uint16_t);
-mint32_t mmov_i32(int32_t);
-muint32_t mmov_ui32(uint32_t);
-mint64_t mmov_i64(int64_t);
-muint64_t mmov_ui64(uint64_t);
-mfloat16_t mmov_f16(float16_t);
-mfloat32_t mmov_f32(float32_t);
-mfloat64_t mmov_f64(float64_t);
+// matrix-scalar mov with duplicate
+mint8_t mdup_i8(int8_t src);
+muint8_t mdup_ui8(uint8_t src);
+mint16_t mdup_i16(int16_t src);
+muint16_t mdup_ui16(uint16_t src);
+mint32_t mdup_i32(int32_t src);
+muint32_t mdup_ui32(uint32_t src);
+mint64_t mdup_i64(int64_t src);
+muint64_t mdup_ui64(uint64_t src);
+
+// matrix-scalar mov
+mint8_t mmov_mx_i8(mint8_t dest, int8_t src, uint8_t index);
+muint8_t mmov_mx_ui8(muint8_t dest, uint8_t src, uint8_t index);
+mint16_t mmov_mx_i16(mint16_t dest, int16_t src, uint8_t index);
+muint16_t mmov_mx_ui16(muint16_t dest, uint16_t src, uint8_t index);
+mint32_t mmov_mx_i32(mint32_t dest, int32_t src, uint8_t index);
+muint32_t mmov_mx_ui32(muint32_t dest, uint32_t src, uint8_t index);
+mint64_t mmov_mx_i64(mint64_t dest, int64_t src, uint8_t index);
+muint64_t mmov_mx_ui64(muint64_t dest, uint64_t src, uint8_t index);
+
+int8_t mmov_xm_i8(mint8_t src, uint8_t index);
+uint8_t mmov_xm_ui8(muint8_t src, uint8_t index);
+int16_t mmov_xm_i16(mint16_t src, uint8_t index);
+uint16_t mmov_xm_ui16(muint16_t src, uint8_t index);
+int32_t mmov_xm_i32(mint32_t src, uint8_t index);
+uint32_t mmov_xm_ui32(muint32_t src, uint8_t index);
+int64_t mmov_xm_i64(mint64_t src, uint8_t index);
+uint64_t mmov_xm_ui64(muint64_t src, uint8_t index);
 ```
 
 === Matrix Integer Operation Instruction
@@ -299,16 +321,16 @@ madd.<s/d>.mx md, ms2, rs1
 Intrinsic functions list
 ```c
 //matrix-matrix add
-mint32_t madd_mi32(mint32_t, mint32_t);
-mint64_t madd_mi64(mint64_t, mint64_t);
+mint32_t madd_mi32(mint32_t src1, mint32_t src2);
+mint64_t madd_mi64(mint64_t src1, mint64_t src2);
 
 //matrix-vector add,rs1/uimm6
-mint32_t madd_mi32_mi32v(mint32_t, mint32_t, uint8_t);
-mint64_t madd_mi64_mi64v(mint64_t, mint64_t, uint8_t);
+mint32_t madd_mi32_mi32v(mint32_t src1, mint32_t src2, uint8_t index);
+mint64_t madd_mi64_mi64v(mint64_t src1, mint64_t src2, uint8_t index);
 
 //matrix-scalar add
-mint32_t madd_mi32_i32(mint32_t, int32_t);
-mint64_t madd_mi64_i64(mint64_t, int64_t);
+mint32_t madd_mi32_i32(mint32_t src1, int32_t src2);
+mint64_t madd_mi64_i64(mint64_t src1, int64_t src2);
 ```
 ==== Sub
 Instructions
@@ -326,16 +348,16 @@ msub.<s/d>.mx md, ms2, rs1
 Intrinsic functions list
 ```c
 //matrix-matrix sub
-mint32_t msub_mi32(mint32_t, mint32_t);
-mint64_t msub_mi64(mint64_t, mint64_t);
+mint32_t msub_mi32(mint32_t src1, mint32_t src2);
+mint64_t msub_mi64(mint64_t src1, mint64_t src2);
 
 //matrix-vector sub,rs1/uimm6
-mint32_t msub_mi32_mi32v(mint32_t, mint32_t, uint8_t);
-mint64_t msub_mi64_mi64v(mint64_t, mint64_t, uint8_t);
+mint32_t msub_mi32_mi32v(mint32_t src1, mint32_t src2, uint8_t index);
+mint64_t msub_mi64_mi64v(mint64_t src1, mint64_t src2, uint8_t index);
 
 //matrix-scalar sub
-mint32_t msub_mi32_i32(mint32_t, int32_t);
-mint64_t msub_mi64_i64(mint64_t, int64_t);
+mint32_t msub_mi32_i32(mint32_t src1, int32_t src2);
+mint64_t msub_mi64_i64(mint64_t src1, int64_t src2);
 ```
 ==== Shift
 ===== Msra
@@ -354,16 +376,16 @@ msra.<s/d>.mx md, ms2, rs1
 Intrinsic functions list
 ```c
 //matrix-matrix sra
-mint8_t msra_mi32_mui32(mint32_t, muint32_t);
-mint8_t msra_mi64_mui64(mint64_t, mint64_t);
+mint32_t msra_mi32_mui32(mint32_t src1, muint32_t src2);
+mint64_t msra_mi64_mui64(mint64_t src1, muint64_t src2);
 
 //matrix-vector sra,rs1/uimm6
-mint8_t msra_mi32_mui32v(mint32_t, muint32_t, uint8_t);
-mint8_t msra_mi64_mui64v(mint64_t, muint64_t, uint8_t);
+mint32_t msra_mi32_mui32v(mint32_t src1, muint32_t src2, uint8_t index);
+mint64_t msra_mi64_mui64v(mint64_t src1, muint64_t src2, uint8_t index);
 
 //matrix-scalar sra
-mint8_t msra_mi32_ui32(mint32_t, uint32_t);
-mint8_t msra_mi64_ui64(mint64_t, uint64_t);
+mint32_t msra_mi32_ui32(mint32_t src1, uint32_t src2);
+mint64_t msra_mi64_ui64(mint64_t src1, uint64_t src2);
 ```
 ===== Mn4clip/Mn4clipu
 Instructions
@@ -392,29 +414,29 @@ mn4clipu.<s/d>.mx md, ms2, rs1
 Intrinsic functions list
 ```c
 //matrix-matrix signed clip
-mint8_t mn4clip_mi32_mui32(mint32_t, muint32_t);
-mint8_t mn4clip_mi64_mui64(mint64_t, muint64_t);
+mint8_t mn4clip_mi32_mui32(mint32_t src1, muint32_t src2);
+mint8_t mn4clip_mi64_mui64(mint64_t src1, muint64_t src2);
 
 //matrix-vector clip,rs1/uimm3
-mint8_t mn4clip_mi32_mui32v(mint32_t, muint32_t, uint8_t);
-mint8_t mn4clip_mi64_mui64v(mint64_t, muint64_t, uint8_t);
+mint8_t mn4clip_mi32_mui32v(mint32_t src1, muint32_t src2, uint8_t index);
+mint8_t mn4clip_mi64_mui64v(mint64_t src1, muint64_t src2, uint8_t index);
 
 //matrix-scalar clip
-mint8_t mn4clip_mi32_ui32(mint32_t, uint32_t);
-mint8_t mn4clip_mi64_ui64(mint64_t, uint64_t);
+mint8_t mn4clip_mi32_ui32(mint32_t src1, uint32_t src2);
+mint8_t mn4clip_mi64_ui64(mint64_t src1, uint64_t src2);
 
 
 //matrix-matrix unsigned clip
-muint8_t mn4clipu_mui32(muint32_t, muint32_t);
-muint8_t mn4clipu_mui64(muint64_t, muint64_t);
+muint8_t mn4clipu_mui32(muint32_t src1, muint32_t src2);
+muint8_t mn4clipu_mui64(muint64_t src1, muint64_t src2);
 
 //matrix-vector clip,rs1/uimm3
-muint8_t mn4clipu_mui32_mui32v(muint32_t, muint32_t, uint8_t);
-muint8_t mn4clipu_mui64_mui64v(muint64_t, muint64_t, uint8_t);
+muint8_t mn4clipu_mui32_mui32v(muint32_t src1, muint32_t src2, uint8_t index);
+muint8_t mn4clipu_mui64_mui64v(muint64_t src1, muint64_t src2, uint8_t index);
 
 //matrix-scalar clip
-muint8_t mn4clipu_mui32_ui32(muint32_t, uint32_t);
-muint8_t mn4clipu_mui64_ui64(muint64_t, uint64_t);
+muint8_t mn4clipu_mui32_ui32(muint32_t src1, uint32_t src2);
+muint8_t mn4clipu_mui64_ui64(muint64_t src1, uint64_t src2);
 ```
 ==== Multiply Instruction
 ==== Low-half-reserved multiplication 
@@ -433,16 +455,16 @@ mmul.<s/d>.mx md, ms2, rs1
 Intrinsic functions list
 ```c
 //matrix-matrix mul
-mint32_t mmul_mi32(mint32_t, mint32_t);
-mint64_t mmul_mi64(mint64_t, mint64_t);
+mint32_t mmul_mi32(mint32_t src1, mint32_t src2);
+mint64_t mmul_mi64(mint64_t src1, mint64_t src2);
 
 //matrix-vector mul,rs1/uimm3
-mint32_t mmul_mi32_mi32v(mint32_t, mint32_t, uint8_t);
-mint64_t mmul_mi64_mi64v(mint64_t, mint64_t, uint8_t);
+mint32_t mmul_mi32_mi32v(mint32_t src1, mint32_t src2, uint8_t index);
+mint64_t mmul_mi64_mi64v(mint64_t src1, mint64_t src2, uint8_t index);
 
 //matrix-scalar mul
-mint32_t mmul_mi32_i32(mint32_t, int32_t);
-mint64_t mmul_mi64_i64(mint64_t, int64_t);
+mint32_t mmul_mi32_i32(mint32_t src1, int32_t src2);
+mint64_t mmul_mi64_i64(mint64_t src1, int64_t src2);
 ```
 NOTE: keep the low-half of the 64-bit result.
 
@@ -462,13 +484,13 @@ mmulh.s.mx md, ms2, rs1
 Intrinsic functions list
 ```c
 //matrix-matrix mulh
-mint32_t mmulh_mi32(mint32_t, mint32_t);
+mint32_t mmulh_mi32(mint32_t src1, mint32_t src2);
 
 //matrix-vector mulh,rs1/uimm3
-mint32_t mmulh_mi32_mi32v(mint32_t, mint32_t, uint8_t);
+mint32_t mmulh_mi32_mi32v(mint32_t src1, mint32_t src2, uint8_t index);
 
 //matrix-scalar mulh
-mint32_t mmulh_mi32_i32(mint32_t, int32_t);
+mint32_t mmulh_mi32_i32(mint32_t src1, int32_t src2);
 ```
 NOTE: high-half of the 64-bit result reserved.
 
@@ -485,9 +507,9 @@ fmmacc.<h/s/d> md, ms2, ms1
 Intrinsic functions list
 ```c
 //matrix-matrix
-mfloat16_t fmmacc_mf16x2_mf16(mfloat16_t, mfloat16x2_t, mfloat16_t);
-mfloat32_t fmmacc_mf32(mfloat32_t, mfloat32_t, mfloat32_t);
-mfloat64x2_t fmmacc_mf64(mfloat64x2_t, mfloat64_t, mfloat64_t);
+mfloat16_t fmmacc_mf16x2_mf16(mfloat16_t dest, mfloat16x2_t src1, mfloat16_t src2);
+mfloat32_t fmmacc_mf32(mfloat32_t dest, mfloat32_t src1, mfloat32_t src2);
+mfloat64x2_t fmmacc_mf64(mfloat64x2_t dest, mfloat64_t src1, mfloat64_t src2);
 ```
 ===== Fwmmacc
 Instructions
@@ -498,8 +520,8 @@ fwmmacc.<h/s> md, ms2, ms1
 Intrinsic functions list
 ```c
 //matrix-matrix
-mfloat32_t fwmmacc_mf16(mfloat32_t, mfloat16_t, mfloat16_t);
-mfloat64x2_t fwmmacc_mf32(mfloat64x2_t, mfloat32_t, mfloat32_t);
+mfloat32_t fwmmacc_mf16(mfloat32_t dest, mfloat16_t src1, mfloat16_t src2);
+mfloat64x2_t fwmmacc_mf32(mfloat64x2_t dest, mfloat32_t src1, mfloat32_t src2);
 ```
 ==== Integer 4x Extension Matrix Multiplication
 ===== Mmaqa
@@ -521,20 +543,20 @@ mmaqasu.<b/h> md, ms2, ms1
 Intrinsic functions list
 ```c
 //signed matrix multiply
-mint32_t mmaqa_mi8(mint32_t, mint8_t, mint8_t);
-mint64_t mmaqa_mi16(mint64_t, mint16_t, mint16_t);
+mint32_t mmaqa_mi8(mint32_t dest, mint8_t src1, mint8_t src2);
+mint64_t mmaqa_mi16(mint64_t dest, mint16_t src1, mint16_t src2);
 
 //unsigned matrix multiply
-mint32_t mmaqau_mui8(mint32_t, muint8_t, muint8_t);
-mint64_t mmaqau_mui16(mint64_t, muint16_t, muint16_t);
+mint32_t mmaqau_mui8(mint32_t dest, muint8_t src1, muint8_t src2);
+mint64_t mmaqau_mui16(mint64_t dest, muint16_t src1, muint16_t src2);
 
 //unsigned-signed matrix multiply
-mint32_t mmaqaus_mui8_mi8(mint32_t, muint8_t, mint8_t);
-mint64_t mmaqaus_mui16_mi16(mint64_t, muint16_t, mint16_t);
+mint32_t mmaqaus_mui8_mi8(mint32_t dest, muint8_t src1, mint8_t src2);
+mint64_t mmaqaus_mui16_mi16(mint64_t dest, muint16_t src1, mint16_t src2);
 
 //signed-unsigned matrix multiply
-mint32_t mmaqasu_mi8_mui8(mint32_t, mint8_t, muint8_t);
-mint64_t mmaqasu_mi16_mui16(mint64_t, mint16_t, muint16_t);
+mint32_t mmaqasu_mi8_mui8(mint32_t dest, mint8_t src1, muint8_t src2);
+mint64_t mmaqasu_mi16_mui16(mint64_t dest, mint16_t src1, muint16_t src2);
 ```
 ===== Pmmaqa
 Instructions
@@ -555,45 +577,49 @@ pmmaqasu.b md, ms2, ms1
 Intrinsic functions list
 ```c
 //signed matrix multiply
-mint32_t pmmaqa_mi8(mint32_t, mint8_t, mint8_t);
+mint32_t pmmaqa_mi8(mint32_t dest, mint8_t src1, mint8_t src2);
 
 //unsigned matrix multiply
-mint32_t pmmaqau_mui8(mint32_t, muint8_t, muint8_t);
+mint32_t pmmaqau_mui8(mint32_t dest, muint8_t src1, muint8_t src2);
 
 //unsigned-signed matrix multiply
-mint32_t pmmaqaus_mui8_mi8(mint32_t, muint8_t, mint8_t);
+mint32_t pmmaqaus_mui8_mi8(mint32_t dest, muint8_t src1, mint8_t src2);
 
 //signed-unsigned matrix multiply
-mint32_t pmmaqasu_mi8_mui8(mint32_t, mint8_t, muint8_t);
+mint32_t pmmaqasu_mi8_mui8(mint32_t dest, mint8_t src1, muint8_t src2);
 ```
-=== Mzero/Mrelease
+=== Mzero
 Instructions
 ```
 mzero rd
-
+```
+Intrinsic functions list
+```c
+mint8_t mzero_mi8();
+mint16_t mzero_mi16();
+mint32_t mzero_mi32();
+mint64_t mzero_mi64();
+muint8_t mzero_mui8();
+muint16_t mzero_mui16();
+muint32_t mzero_mui32();
+muint64_t mzero_mui64();
+mfloat16_t mzero_mf16();
+mfloat32_t mzero_mf32();
+mfloat64_t mzero_mf64();
+mfloat16x2_t mzero_mf16x2();
+mfloat32x2_t mzero_mf32x2();
+mfloat64x2_t mzero_mf64x2();
+```
+NOTE: mzero: Zero all elements of matrix register.
+=== Mrelease
+Instructions
+```
 mrelease
 ```
 Intrinsic functions list
 ```c
-void mzero_mi8(mint8_t);
-void mzero_mi16(mint16_t);
-void mzero_mi32(mint32_t);
-void mzero_mi64(mint64_t);
-void mzero_mui8(muint8_t);
-void mzero_mui16(muint16_t);
-void mzero_mui32(muint32_t);
-void mzero_mui64(muint64_t);
-void mzero_mf16(mfloat16_t);
-void mzero_mf32(mfloat32_t);
-void mzero_mf64(mfloat64_t);
-void mzero_mf16x2(mfloat16x2_t);
-void mzero_mf32x2(mfloat32x2_t);
-void mzero_mf64x2(mfloat64x2_t);
-
 void mrelease();
 ```
-NOTE: mzero: Zero all elements of matrix register.
-
 == Example
 Take the following matrix integral multiplication matrix mul. c as an example.
 
@@ -692,6 +718,3 @@ ma:             mb:             ans:
 16  15          1   2           16 = 16 * 1   30 = 15 * 2
 15  14          2   3           30 = 15 * 2   42 = 14 * 3
 ```
-
-== Reference
-

@@ -8,33 +8,27 @@ Matrix extension adds eight two-dimensional matrix registers and eight CSRs.
 |Address|Privilege |Name |Description
 |xxxx |URW |xmrstart |matrix start row position
 |xxxx |URW |xmcsr |matrix control and status register
-|xxxx |URW |xmxrm |matrix fixed-point rounding mode
-|xxxx |URO |xmxsat |fixed-point saturation flag
-|xxxx |URO |xmsize |matrix size configure, matrix size
-|xxxx |URO |xmregsize |matrix register size in byte, mrows*mlenb
-|xxxx |URO |xmlenb |MLEN(in bytes)
+|xxxx |URW |xmsize |matrix size configure, matrix size
+|xxxx |URO |xmlenb |matrix register size in byte, mrows*xrlenb
+|xxxx |URO |xrlenb |RLEN (in bytes)
 |xxxx |URO |xmisa |matrix instruction subset
 |===
 
 === Matrix Registers
 
-If matrix extension is implemented, there are eight two-dimensional matrix
-registers named M0, M1, M2, M3, M4, M5, M6 and M7 added to architectural
-state. MLEN is the length in bits for each register row. MLEN is a
-design-time constant in any implementation, the possible MLEN values are
-128/256/512. The matrix register row is MLEN/32, e.g. 4/8/16.Thus, each
-matrix register consists of [M x K ] MSEW elements where M =MLEN/32,
-K=MLEN/MSEW, MSEW is the element size. 
+If matrix extension is implemented,  there are eight two-dimensional matrix registers named M0, M1, M2, M3, M4, M5, M6 and M7 added to architectural state. 
 
-If MSEW remains constant, when MLEN doubles, the rows and the columns both double, resulting in four times as many bits.
+RLEN is the length in bits for each register row. RLEN is a  constant in any implementation, which must be lrager than the maximum size in bits of a matrix element that any operation can produce or consume, and must be a power of 2, and must be no greater than 2^16^. The matrix register row is RLEN/32, e.g. 4/8/16.Thus, each matrix register consists of [M x K]  MSEW  elements where  M =RLEN/32, K=RLEN/MSEW, MSEW is the element size. 
+
+If MSEW remains constant, when RLEN doubles, the rows and the columns both double, resulting in four times as many bits.
 
 image:MREG_diff_MLEN.jpeg[matrix_mlen_example.jpg,width="80%"]
 
-If MLEN remains constant, when MSEW doubles, the rows remain the same while the columns halve.
+If RLEN remains constant, when MSEW doubles, the rows remain the same while the columns halve.
 
 image:MLEN_diff_msew.jpeg[matrix-sew-example.jpg,align=center]
 
-The size of the matrix registers varies as following.
+The example size of the matrix registers varies as following.
 
 [width="99%",cols="8,8,9,9,9,9",options="header",]
 |===
@@ -63,9 +57,7 @@ The size of the matrix registers varies as following.
 
 === Matrix Size Configure
 
-Matrix size configure is a XLEN-bit read-only register, which can only
-be updated by matrix configure instructions. The matrix size register
-has three fields, sizeK, sizeN and sizeM. Bits[XLEN-1:32] are reserved.
+Matrix size configure  is a XLEN-bit WARL read-write register, which can only be updated by matrix configure instructions. The matrix size register has three fields, sizeK, sizeN and sizeM. Bits[XLEN-1:32] are reserved.
 
 [width="80%",cols="4,4,7",align="center",options="header",]
 |===
@@ -76,86 +68,84 @@ has three fields, sizeK, sizeN and sizeM. Bits[XLEN-1:32] are reserved.
 |7:0 |sizeM[7:0] |row of Matrix A
 |===
 
-The sizeM/sizeN/sizeK field hold an unsigned integer specifying the
-source elements needed and the destination elements updated by a matrix
-instructions. For matrix-multiplication instructions, which computing
-C[M][N] += A[M][K]*BT[N][K], there are 3 source operands and 1
-destination operand. Only sizeM rows will be updated, each row updates
-sizeK bytes element, the other elements are set by zeros. The source
-operands deminsions are defined as follows:
+The sizeM/sizeN/sizeK field hold an unsigned integer specifying the source elements needed and the destination elements updated by a matrix instructions. The sizeK which is not the multiples of element size in byte will raise an illegal instruction exception.
 
-* Matrix A: sizeM x sizeK
-* Matrix B: sizeN x sizeK
-* Matrix C: sizeM x sizeK
+For matrix-multiplication instructions, which computing  C[M][N] += A[M][K]*B^T^[N][K], there are 3 source operands and 1 destination operand. Only sizeM x sizeN elements will be updated, the other elements are set by zeros. The source operands dimensions are defined as follows:
+
+* Matrix A: sizeM x (sizeK/element size)
+* Matrix B: sizeN x (sizeK/element size)
+* Matrix C: sizeM x sizeN
 
 Thus, there are the limitations of Matrix shape due to the matrix
 register.
 
-* sizeK <= xmlenb
-* sizeM <= MLEN/32
-* sizeN <= MLEN/32, for fmmacc.h sizeN <= 2*(MLEN/32)
+* sizeK <= xrlenb
+* sizeM <= RLEN/32
+* sizeN <= RLEN/32, for fmmacc.h sizeN <= 2*(RLEN/32)
 
-Taking 32-bit matrix-multiplication with MLEN=128 as an example, the configuration of sizeM=2 / sizeK=12 / sizeN=2 indicated MatrixA(2x3) x
-MatrixB^T^(2x3)+MatrixC(2x2), only the green block elements are used or
-updated by the instruction.
+Taking 32-bit matrix-multiplication with RLEN=128 as an example,  the configuration of  sizeM=2 / sizeK=12 / sizeN=2 indicates MatrixA(2x3) x MatrixB^T^(2x3)+MatrixC(2x2), only the green block elements are used or updated by the instruction.
 
 image:TAIL_e1.jpeg[matrix-size-1.jpg]
 
-For pointwise and load/store instructions, the matrix shapes keep during
-the execution, which are specified by sizeM and sizeK.Only sizeM rows
-will be updated, each row updates sizeK bytes element, the other
-elements are set by zeros. The size limitations are:
+For pointwise  and load/store instructions, the matrix shapes keep during the execution, which are specified by sizeM and sizeK. Only sizeM x sizeN elements will be updated, the other elements are set by zeros. The size limitations are:
 
-* sizeM <= MLEN/32
+* sizeM <= RLEN/32
 * sizeK <= max_colb
 
-Int32 matrix add as example , the configuration of
-sizeM=2 / sizeK=12indicated MatrixA(2x3) x+ MatrixB(2x3) = MatrixC(2x3), only
-the green block elements are used or updated by the instruction.
+Int32 matrix add as example , the configuration of  sizeM=2/sizeK=12 indicates MatrixA(2x3) x+MatrixB(2x3)=MatrixC(2x3), only the green block elements are used or updated by the instruction.
 
 image:TAIL_e2.jpeg[matrix_size_0.jpg]
 
 === Matrix Control and Status 
-A matrix context status field, MS, is defined to mstatus and shadowed in sstatus, which can be used to reduce the cost of context save and restore. The MS fields uses the same status encoding as FS/VS/XS, shown in the table.
+The xmcsr CSR is a WARL read-write register. Bits[XLEN-1:3] are reserved and should be written with zero. The layout of matrix control and status register is:
 
-[width="80%",cols="2,2,3",align="center",options="header",]
+[width="80%",cols="2,2,4",align="center",options="header",]
 |===
-|status |ms[1:0] |MS Meaning
-|0 |2'b00 |All off
-|1 |2'b01 |Initial
-|2 |2'b10 |Clean
-|3 |2'b11 |Dirty
+|bits |name |description
+|XLEN-1:3 |0 |reserved if non-zero
+|2 |xmsat |Fixed-point accrued saturation flag
+|1:0 |xmxrm |Fixed-point rounding mode
 |===
 
-Attempts to execute any matrix instructions, or to access the matrix
-CSRs (excluding matrix control and status register) raise an illegal
-instruction excetion when ms MS set to off. If MS is set to initial or
-clean, executing any instructions that change the matrix state will
-change the ms to dirty.
+==== Matrix fixed-point rounding mode 
 
-An implementation can use the activity of the Initial state to influence the choice of power-saving states.
+Matrix fixed-point rounding mode(xmxrm) filed is defined in bit[3:2] of matrix control and status register.  The xmxrm uses the same encoding and rounding algorithm with vxrm[1:0] as follows. Suppose the pre-rounding result is v, and d bits of that result are to be rounded off. Then the rounded result is (v >> d) + r, where r depends on the rounding mode as specified in the following table.
+
+[cols="1,1,6,5",align="center",options="header",]
+|===
+2+|vxrm[1:0] |rounding mode |rounding increment r
+|0 |0 |rnu round-to-nearest-up (add +0.5 LSB)|v[d-1]
+|0 |1 |rne round-to-nearest-even |v[d-1] & (v[d-2:0]≠0 \| v[d])
+|1 |0 |rdn round-down (truncate) |0
+|1 |1 |rod round-to-odd (OR bits into LSB, aka "jam") | !v[d] & v[d-1:0]≠0
+|===
+
+The rounding functions are used to represent this operation in the instruction descriptions below:
+....
+roundoff_unsigned(v, d) = (unsigned(v) >> d) + r
+roundoff_signed(v, d) = (signed(v) >> d) + r
+....
+==== Matrix fixed-point saturation flag
+The xmxsat filed indicates if a fixed-point instruction has had to saturate an output value to fit into a destination format.
+
 
 ===  Matrix Register Information 
 
-Matrix register information includes two read-only XLEN-bit registers, which are
-design-time constant in any implementation.
+Matrix register information includes two read-only XLEN-bit registers, which are constant in any implementation.
 
-* xmlenb: MLEN in byte indicating MLEN-bits state of each matrix
-register row
-* xmregsize: matrix register size in byte, mrows * mlenb, mrows=MLEN/32 
+* xrlenb:  RLEN in byte indicating RLEN-bits state of each matrix register row
+* xmlenb: matrix register size in byte, mrows*xrlenb, mrows=RLEN/32
 
-[cols="2,2,3,5",]
-|===
-|0xcc2 | URO | xmregsize | matrix register size in byte, mrows * mlenb 
-| 0xcc3 | URO | xmlenb | MLEN(in bytes) |
-|===
+
 === Matrix Start Row
 
-The xmrstart read-write register indicates the first matrix row index to
-be executed by a matrix load/store instruction. Normally xmrstart is
-only written by hardware on a trap of matrix load/store instructions,
-the unsigned value of register specifies the row at which the execution
-should resume after a resumable trap is handled. 
+The xmrstart read-write register indicates the first matrix  row index to be executed by a matrix load/store instruction. Normally xmrstart is only written by hardware on a trap of matrix load/store instructions, the unsigned value of register specifies the row at which the execution should resume after a resumable trap is handled. 
+
+_All matrix instructions, including mcfg/mcfgi, reset the xmrstart CSR to zero._
+
+The xmrstart CSR is defined to have only enough writable bits to hold the largest row index(one less than the max row) or log2(RLEN/32). The upper bits of the xmrstart CSR are hardwired to zero(reads zero, writes ignored)
+
+_For example, xmrstart would have 2 bits to represent row indices from 0 through 3_
 
 === Matrix ISA
 
@@ -195,35 +185,28 @@ source registers is int4 and in destination registers is int 32;
 * MATRIX_PW_I32: int32 pointwise arithmetic instructions;
 * MATRIX_PW_I64: int64 pointwise arithmetic instructions 
 
-=== Matrix Fixed-point Rounding Mode Register 
+=== State of Matrix Extension at Reset
 
-Matrix fixed-point rounding mode register is aXLEN-bit read-write register.
-Bit[XLEN-1:2] are reserved, and should be written as zeros. xmxrm
-uses the same encoding and rounding algorithm with vxrm[1:0] as
-follows. Suppose the pre-rounding result is v, and d bits of that result
-are to be rounded off. Then the rounded result is (v >> d) + r, where r
-depends on the rounding mode as specified in the following table.
+The matrix extension must have a consistent state at reset. It is recommended that at reset, CSRs are set to zero.
 
-[width="90%",cols="2,8,4",align="center",options="header",]
+=== Matrix Context Status
+A matrix context status field, MS, is defined to mstatus and shadowed in sstatus, which can be used to reduce the cost of context save and restore. The MS fields uses the same status encoding as FS/VS/XS, shown in the table.
+
+[width="90%",cols="2,2,2",align="center",options="header",]
 |===
-|vxrm[1:0] | rounding mode |rounding increment r
-|0 0 |rnu round-to-nearest-up (add +0.5 LSB) |v[d-1]
+|status |ms[1:0] |MS Meaning
+|0 |2'b00 |All off
 
-|0 1 |rne round-to-nearest-even |v[d-1] & (v[d-2:0]≠0 \| v[d])
+|1 |2'b01 |Initial
 
-|1 0 |rdn round-down (truncate) |0
+|2 |2'b10 |Clean
 
-|1 1 |rod round-to-odd (OR bits into LSB, aka ''jam'') |!v[d] &
-v[d-1:0]≠0
+|3 |2'b11 |Dirty
 |===
 
-The rounding functions are used to represent this operation in the
-instruction descriptions below:
+Attempts to execute any matrix instructions, or to access the matrix CSRs raise an illegal instruction exception when MS is set to off. If MS is set to initial or clean, executing any instructions that change the matrix state will change the ms to dirty. 
 
-.....
-roundoff_unsigned(v, d) = (unsigned(v) >> d) + r
-roundoff_signed(v, d) = (signed(v) >> d) + r
-.....
+An implementation can use the activity of the Initial state to influence the choice of power-saving states.
 
 == Instructions
 
@@ -349,11 +332,11 @@ fmmacc.d md, ms2, ms1
 
 For fmmacc.s, the max matrix shape is:
 
-* matrixA: M <= MLEN/32, K <= MLEN/16
-* matrixB: N <= MLEN/32, K <= MLEN/16
-* matrixC: M <= MLEN/32, N <= MLEN/32
+* matrixA: M <= RLEN/32, K <= RLEN/32
+* matrixB: N <= RLEN/32, K <= RLEN/32
+* matrixC: M <= RLEN/32, N <= RLEN/32
 
-The operation of fmmacc.s is shown below for MLEN=128.
+The operation of fmmacc.s is shown below for RLEN=128.
 
 image:FM_e1.jpeg[matrix-mult-fp32.jpg]
 
@@ -361,37 +344,37 @@ For fmmacc.h, 16-bit float matrix multiplication and add instruction,
 the element can be seen as fp16 or bf16 if bf16 data type is supported.
 The max matrix shape is:
 
-* matrixA: M <= MLEN/32, K <= MLEN/16
-* matrixB: N <= MLEN/16, K <= MLEN/16
-* matrixC: M <= MLEN/32, N <= MLEN/16
+* matrixA: M <= RLEN/32, K <= RLEN/16
+* matrixB: N <= RLEN/16, K <= RLEN/16
+* matrixC: M <= RLEN/32, N <= RLEN/16
 
 As data width for matrix B is twice that of matrix A and C, two matrix
-register(register-pair) are used by Matrix B specified by ms2 and ms2+1.
-Instructions specifying an odd-numbered ms2 is reserved. the operation
-is shown below for MLEN=128.
+register(register-pair) are used by Matrix B specified by ms~2~ and ms~2~+1.
+Instructions specifying an odd-numbered ms~2~ is reserved. The operation
+is shown below for RLEN=128.
 
 image:FM_e2.jpeg[matrix-mult-fp16.jpg]
 
 For fmmacc.d, 64-bit float matrix multiplication and add instruction,
 The maximum matrix shape is:
 
-* matrixA: M <= MLEN/32, K <= MLEN/64
-* matrixB: N <= MLEN/32, K <= MLEN/64
-* matrixC: M <= MLEN/32, N <= MLEN/32
+* matrixA: M <= RLEN/32, K <= RLEN/64
+* matrixB: N <= RLEN/32, K <= RLEN/64
+* matrixC: M <= RLEN/32, N <= RLEN/32
 
 As data width for matrix C is twice that of matrix A and B, two matrix
 register(register-pair) are used by MatrixC specified by md and md+1.
 Instructions specifying an odd-numbered md is reserved. the operation is
-shown below for MLEN=128.
+shown below for RLEN=128.
 
 image:FM_e3.jpeg[matrix-64bit.jpg]
 
-Summary for max Matrix size of fmmacc instructions for typical MLEN:
+Summary for max Matrix size of fmmacc instructions for typical RLEN:
 
 [width="100%",cols="3,2,2,2,3,2,2,3,2,2,3,2,2",options="header",]
 |===
 2+| 3+^|matrix A 3+^|matrix B 3+^|matrix C | | 
-| |MLEN |M |K |data width |N |K |data width |M |N |data width |Gops/GHz
+| |RLEN |M |K |data width |N |K |data width |M |N |data width |Gops/GHz
 |latency
 
 .3+^.|fmacc.s 
@@ -436,26 +419,26 @@ For fwmmacc.h, 16-bit float widen matrix multiplication and add
 instruction, the element can be seen as fp16 or bf16 if bf16 data type
 is supported. The maximum matrix shape is:
 
-* matrixA: M <= MLEN/32, K <= MLEN/16
-* matrixB: N <= MLEN/32, K <= MLEN/16
-* matrixC: M <= MLEN/32, N <= MLEN/32
+* matrixA: M <= RLEN/32, K <= RLEN/16
+* matrixB: N <= RLEN/32, K <= RLEN/16
+* matrixC: M <= RLEN/32, N <= RLEN/32
 
 For fwmmacc.s, 32-bit float widen matrix multiplication and add
 instruction, The maximum matrix shape is:
 
-* matrixA: M <= MLEN/32, K <= MLEN/32
-* matrixB: N <= MLEN/32, K <= MLEN/32
-* matrixC: M <= MLEN/32, N <= MLEN/32
+* matrixA: M <= RLEN/32, K <= RLEN/32
+* matrixB: N <= RLEN/32, K <= RLEN/32
+* matrixC: M <= RLEN/32, N <= RLEN/32
 
 As data width for matrix C is twice that of matrix A and B, two matrix
 register(register-pair) are used by MatrixC specified by md and md+1.
 Instructions specifying an odd-numbered md is reserved. Summary for max
-Matrix size of fwmmacc instructions for typical MLEN:
+Matrix size of fwmmacc instructions for typical RLEN:
 
 [width="100%",cols="2,1,1,1,2,1,1,2,1,1,2",options="header",]
 |===
 2+| 3+^|matrix A 3+^|matrix B 3+^|matrix C | |
-MLEN |M |K |data width |N |K |data width |M |N |data width
+RLEN |M |K |data width |N |K |data width |M |N |data width
 .3+^.|fwmacc.h 
 |128 |4 |8 |512 bits |4 |8 |512 bits |4 |4 |512 bits
 |256 |8 |16 |2048 bits |8 |16 |2048 bits |8 |8 |2048 bits
@@ -497,26 +480,25 @@ mmaqasu.h md, ms2, ms1
 
 For int8 four-times matrix-multiplication, the maximum matrix shape is:
 
-* matrixA: M <= MLEN/32, K <= MLEN/8
-* matrixB: N <= MLEN/32, K <= MLEN/8
-* matrixC: M <= MLEN/32, N <= MLEN/32
+* matrixA: M <= RLEN/32, K <= RLEN/8
+* matrixB: N <= RLEN/32, K <= RLEN/8
+* matrixC: M <= RLEN/32, N <= RLEN/32
 
-For int16 four-times matrix-multiplication, as data width for matrix C is four-times of
-matrix A and B, two matrix register(register-pair) are used by matrix C
+For int16 four-times matrix-multiplication, as data width for matrix C is four-times of matrix A and B, two matrix register(register-pair) are used by matrix C
 specified by md and md+1. Instructions specifying an odd-numbered md is
 reserved. the maximum matrix shape is:
 
-* matrixA: M <= MLEN/32, K <= MLEN/16
-* matrixB: N <= MLEN/32, K <= MLEN/16
-* matrixC: M <= MLEN/32, N <= MLEN/32
+* matrixA: M <= RLEN/32, K <= RLEN/16
+* matrixB: N <= RLEN/32, K <= RLEN/16
+* matrixC: M <= RLEN/32, N <= RLEN/32
 
 Summary for max Matrix size of integer matrix multiply and add
-instructions for typical MLEN:
+instructions for typical RLEN:
 
 [width="99%",cols="2,1,1,1,2,1,1,2,1,1,2,1,1",options="header",]
 |===
 2+|  3+^|matrix A 3+^|matrix B 3+^|C ||
-|| MLEN |M |K |data width |N |K |data width |M |N |data width |Gops/GHz
+|| RLEN |M |K |data width |N |K |data width |M |N |data width |Gops/GHz
 |latency
 
 .3+^.|int8 4x 
@@ -549,36 +531,20 @@ store.
 ....
 #matrix load
 mld<b/h/w/d> md, rs2, (rs1)
-#stream matrix load
-msld<b/h/w/d>  md, rs2, (rs1)
 #matrix store
 mst<b/h/w/d>  ms3, rs2, (rs1)
-#stream matrix store
-msst<b/h/w/d>  ms3, rs2, (rs1)
 #whole matrix load
 mld<1/2/4/8>m md,  (rs1)
 #whole matrix store
 mst<1/2/4/8>m ms3, (rs1)
 ....
 
-Matrix shape (MxK) is in matrix size configure register, M given by
-sizeM and K given by sizeK(in byte). M=sizeM <= MLEN/32, K=sizeK/element
-size in byte, sizeK <= MLEN/8. If sizeM < MLEN/32 or sizeK < MLEN/8, the
-matrix register data with row index > sizeM or column index > (sizeK/
-element size in byte) set zero for load, and don't write to memory for
-store. 
+Matrix shape (MxK) is in matrix size configure register, M given by sizeM and K given by sizeK(in byte). M=sizeM <= RLEN/32, K=sizeK/element size in byte, sizeK <= RLEN/8. If sizeM < RLEN/32 or sizeK < RLEN/8,  the matrix register data  with row index > sizeM or column  index > (sizeK/ element size in byte) set zero  for load, and don't write to memory for store.
 
-There are 3 versions provided: (1)normal (2)stream (3) whole
+There are 2 versions provided: (1)normal (2) whole
 register load/store. 
 
-Stream load/store instructions have the same
-function as normal matrix load/store instructions, except that the data
-may not be reused in the near future which can be potentially optimized
-by hardware implementation. 
-
-Whole register load/store data with maximum
-matrix size from/to memory with sizeM = MLEN/32 and sizeK = MLEN/8. The
-matrix size configurations are ignored. 
+Whole register load/store data with maximum matrix size from/to memory with sizeM = RLEN/32 and sizeK = RLEN/8. The matrix size configurations are ignored.
 
 ''''
 
@@ -611,36 +577,23 @@ All matrix load/store instructions may generate and accept a non-zero
 row-start value. The row-start register is reset to zero at the end of
 the matrix instruction execution. 
 
-===  Matrix Move Instructions 
+With the ZIHINTNTL extension, matrix memory access instruction can behave as stream memory access operations to fit different memory hierarchy.
+Stream memory access instructions have the same
+function as normal matrix load/store instructions, except that the data
+may not be reused in the near future which can be potentially optimized
+by hardware implementation. 
 
-Matrix move instructions copy whole matrix register , a vector or a scalar data
-to a matrix register. The vector data is a row of matrix register,
-indexed by rs1[2:0](mapped to x8-x15) or uimm3, duplicate MLEN
-data to every row of the destination matrix register. The scalar data is
-taken from the scalar x register specified by
-rs1[2:0](mapped to x8-x15) with XLEN data width. The instructions
-ignore matrix size configuration.
-
-....
-#matrix-matrix mov
-mmov.mm md, ms1
-#matrix-vector add,rs1/uimm3
-mmov.mv.x md, ms1[rs1]
-mmov.mv.i md, ms1[uimm3]
-#matrix-scalar mov
-mmov.mx md, rs1
-....
 
 === Configuration Instructions
 
-Matrix configure instructions configure a field or the whole matrix size configuration register. The field retains the value if not changed by a configuration instruction. The index field of the instruction indicates which field is updated,  sizeM/sizeK/sizeN or the entire configure register as following table shows. 
+Matrix configure instructions configure a field or the whole matrix size configuration register. The field retains the value if not changed by a configuration instruction. The index field of the instruction indicates which field is updated,  sizeM/sizeK/sizeN or the entire configure register as following table shows. The new matrix size are returned to rd.
 
 [width="80%",cols=",,",align="center",options="header",]
 |===
 |index |instruction |effect on matrix size
-|000 |mcfg(i)k |half1 = x[rs1]
-|001 |mcfg(i)m |byte0 = x[rs1]
-|010 |mcfg(i)n |byte1 = x[rs1]
+|000 |mcfgk(i) |half1 = x[rs1]
+|001 |mcfgm(i) |byte0 = x[rs1]
+|010 |mcfgn(i) |byte1 = x[rs1]
 |111 |mcfg |byte0 = x[rs1].byte0 
 
 byte1 = x[rs1].byte1 
@@ -670,11 +623,11 @@ supported.
 The matrix operands shape is M/K, provided by sizeM x (sizeK/element
 size in byte).
 
-* sizeM <= MLEN/32
-* sizeK <= MLEN/8 
+* sizeM <= RLEN/32
+* sizeK <= RLEN/8 
 [width="80%",cols=",,,",align="center",options="header",]
 |===
-| operand datawidth | MLEN (bit) | M | K 
+| operand datawidth | RLEN (bit) | M | K 
 .3+<|32bit 
 | 128 | 4 | 4 
 | 256 | 8 | 8 
@@ -687,14 +640,16 @@ size in byte).
 
 For matrix-vector instructions, one source operand is matrix and the
 other is a row of matrix. The row index is provided by rs1 or uimm3,
-index > MLEN/32 is reserved. The vector operand operates on each row
-of matrix operand as md[i, j] = ms2[i,j] op ms1[rs1/uimm3, j]. For
-matrix-scalar instruction, scalar operand is provided by rs1, if XLEN <
+The log~2~(RLEN/32) bits are used. The vector operand operates on each row
+of matrix operand as md[i, j] = ms2[i,j] op ms1[rs1/uimm3, j]. 
+
+Formatrix-scalar instruction, scalar operand is provided by rs1, if XLEN <
 matrix element size, signed-extended the scalar operand. The scalar
 operand operates on each element of matrix operand as md[i, j] =
 ms2[i,j] op rs1.The rs1 is limited to x8-x15 to encoding the gpr
-index with 3-bit. Overflow is ignored and the result wraps around for
-matrix add/sub/mul/mulh instructions.
+index with 3-bit. 
+
+Overflow is ignored and the result wraps around for matrix add/sub/mul/mulh instructions.
 
 ....
 #matrix-matrix add
@@ -770,12 +725,106 @@ mn4clipu.<s/d>.mv.i md, ms2, ms1[uimm3]
 mn4clipu.<s/d>.mx md, ms2, rs1
 
 ....
+=== Other Instructions
+
+==== Mzero Instruction
+
+Mzero instruction sets the destination register to zero.
+
+....
+#matrix-matrix
+mzero md  
+....
+
+==== Mrelease Instruction
+Mrelease Instruction sets MS to Initial state. 
+
+....
+mrelease  
+....
+_mrelease shares the encoding with mcfgi, with index filed is 3'b111._
+
+
+
+====  Matrix Move Instructions 
+
+Matrix move instructions ignore matrix size configuration.
+
+===== move between matrix registers
+
+The mmov.mm instruction moves a whole matrix register to another matrix register.
+
+The mmov.mv.x/mmov.mv.i instruction moves and duplicates a vector to every row of the destination matrix register. The vector data is a row of matrix register, indexed by rs1'(mapped to x8-x15) or uimm3.The log~2~ (RLEN/32) bits are used. 
+
+....
+#matrix-matrix mov
+mmov.mm md, ms1
+#matrix-vector add,rs1'/uimm3
+mmov.mv.x md, ms1[rs1']
+mmov.mv.i md, ms1[uimm3]
+....
+
+===== move from GPR to matrix registers
+
+The mdup<b/h/w/d>.m.x instruction moves and duplicates a scalar data to every element of the destination matrix register. 
+
+The mmov<b/h/w/d>.m.x instruction moves a scalar data to an element of the destination matrix register. The elements number within a matrix row is selected by rs1, modulo the number of such elements in a row. The row number is selected by rs1 , divided by the number of such elements in a row. The low log~2~(xmlenb/ element size) bits are used.
+
+The scalar data is taken from the scalar x register specified by rs2 with XLEN data width. If data width < XLEN, the least-significant bits are copied and the upper bits are ignored. If data width > XLEN, the value is sign-extended.
+
+....
+#matrix-scalar mov with duplicate
+mdup<b/h/w/d>.m.x md, rs2
+#matrix-scalar mov 
+mmov<b/h/w/d>.m.x md, rs2, rs1
+....
+
+===== move from matrix registers to GPR
+mmov<b/h/w/d>.x.m instruction moves a scalar data from a matrix register to a general purpose register specified by rd. 
+
+The scalar data is indexed by rs1. The elements number within a matrix row is selected by rs1, modulo the number of such elements in a row. The row number is selected by rs1, divided by the number of such elements in a row.  The low log~2~(xmlenb/ element size) bits of rs1 are used.
+
+If data width > XLEN, the least-significant XLEN bits are transferred and the upper bits are ignored. If data width < XLEN, the value is sign-extended to XLEN bits.
+
+....
+mmov<b/h/w/d>.x.m rd, ms2, rs1
+....
 
 == Instruction Format
 
 Matrix instructions use custom-1 as major opcode and the func3 is
 3'b000.
  
+Bit[27:25] is uop filed, indicating the operation type.
+
+[width="100%",cols="1,2,5",options="header",]
+|===
+|uop[2:0] |type |meaning
+|000 |Matrix-Matrix(mm)   |matrix computation, source and destination operands are matrix
+|001 |Matrix-Vector(mv.x) |matrix computation, one source operand is vector, row index provided by rs1'
+|010 |Matrix-Vector(mv.i) |matrix computation, one source operand is vector, row index provided by uimm3
+|011 |Matrix-Scalar(mx)   |matrix computation, one source operand is scalar
+|100 |Matrix load         |normal and whole register loads
+|101 |Matrix store        |normal and whole register stores
+|110 |Special instructions|move between GPR and  matrix registers
+|111 |Configuration instructions |configuration matrix size and mrelease
+|===
+
+The instruction formats are:
+
+[width="100%",cols="1,1,1,1,1,1,1,1,1,1,1,1,2,2",options="header",]
+|===
+|31 |30 28 |27 25 |24 |23 21 |20 |19 |18 |17 15 |14 12 |11 10 |9 7 |6 0| 
+2+|func |000/001/010/011 |size |ms2 3+|ms1 |md |func3 |size |rs1' |major opcode |calculation
+2+|func |000/001/010/011 |size |ms2 3+|ms1 |md |func3 |size |uimm3 |major opcode |calculation
+2+|func |100/101 3+|rs2 3+|rs1 |func3 |size |md/ms3 |major opcode |load/store
+|0|index |111 6+|{uimm7,000} |func3 2+|rd |major opcode |configuration
+|1|index |111 3+|00000 3+|rs1 |func3 2+|rd |major opcode |configuration
+2+|func |110 3+|rs2 3+|rs1 |func3 |size |md |major opcode |matrix move from GPR
+2+|func |110 |size |ms2 |size  3+|rs1 |func3 2+|rd |major opcode |matrix move to GPR
+|===
+
+
 === Arithmetic Instructions 
 
 The arithmetic instructions format:
@@ -783,25 +832,10 @@ The arithmetic instructions format:
 [width="99%",cols="1,1,1,1,1,1,1,1,1,2",options="header",]
 |===
 |31 28 |27 25 |24 |23 21 |20 18 |17 15 |14 12 |11 10 |9 7 |6 0
-|func |uop |size |ms2 |ms1 |rs1 |func3 |size |md/ms3 |major opcode
-|func |uop |size |ms2 |ms1 |uimm3 |func3 |size |md/ms3 |major opcode
+|func |uop |size |ms2 |ms1 |md/ms3 |func3 |size |rs1' |major opcode
+|func |uop |size |ms2 |ms1 |md/ms3 |func3 |size |uimm3 |major opcode
 |===
 
-Uop field indicates the operation type.
-
-[width="100%",cols="1,2,4",options="header",]
-|===
-|uop[2:0] |type |meaning
-|000 |Matrix-Matrix(mm) |source and destination operands are matrix
-
-|001 |Matrix-Vector(mv.x) |one source operand is vector, row index
-provided by rs1
-
-|010 |Matrix-Vector(mv.i) |one source operand is vector, row index
-provided by uimm3
-
-|011 |Matrix-Scalar(mx) |one source operand is scalar
-|===
 
 Size field indicates the element, set to 0 if not needed.
 
@@ -815,86 +849,87 @@ Size field indicates the element, set to 0 if not needed.
 |===
 
 The instruction encoding list is in following table.
+
+_Move between matrix instructions and mzero reuse arithmetic instruction format_
 [cols="1,1,1,1,1,1,1,1,1,2,2",options="header",]
 |===
-|31 28 | 27 25 | 24 | 23 21 | 20 18 | 17 15 | 14 12 | 11 10 | 9 7 | 6 0 | |
-0000 | 000 | 0 | 000 | ms1 | 001 | func3 | 00 | md | major opcode | mmov.mm |
-0000 | 001 | 0 | 000 | ms1 | 001 | func3 | 00 | md | major opcode | mmov.mv.x |
-0000 | 010 | 0 | 000 | ms1 | 001 | func3 | 00 | md | major opcode | mmov.mv.i |
-0000 | 011 | 0 | 000 | 000 | rs1 | func3 | 00 | md | major opcode | mmov.mx |
-0001 | 000 | 0 | ms2 | ms1 | 000 | func3 | 01 | md/ms3 | major opcode | fmmacc.h |
-0001 | 000 | 0 | ms2 | ms1 | 000 | func3 | 10 | md/ms3 | major opcode | fmmacc.s |
-0001 | 000 | 0 | ms2 | ms1 | 000 | func3 | 11 | md/ms3 | major opcode | fmmacc.d |
-0001 | 000 | 1 | ms2 | ms1 | 000 | func3 | 01 | md/ms3 | major opcode | fwmmacc.h |
-0001 | 000 | 1 | ms2 | ms1 | 000 | func3 | 10 | md/ms3 | major opcode | fwmmacc.s |
-0010 | 000 | 0 | ms2 | ms1 | 000 | func3 | 00 | md/ms3 | major opcode | mmaqa.b |
-0010 | 000 | 0 | ms2 | ms1 | 001 | func3 | 00 | md/ms3 | major opcode | mmaqau.b |
-0010 | 000 | 0 | ms2 | ms1 | 010 | func3 | 00 | md/ms3 | major opcode | mmaqaus.b |
-0010 | 000 | 0 | ms2 | ms1 | 011 | func3 | 00 | md/ms3 | major opcode | mmaqasu.b |
-0010 | 000 | 0 | ms2 | ms1 | 000 | func3 | 01 | md/ms3 | major opcode | mmaqa.h |
-0010 | 000 | 0 | ms2 | ms1 | 001 | func3 | 01 | md/ms3 | major opcode | mmaqau.h |
-0010 | 000 | 0 | ms2 | ms1 | 010 | func3 | 01 | md/ms3 | major opcode | mmaqaus.h |
-0010 | 000 | 0 | ms2 | ms1 | 011 | func3 | 01 | md/ms3 | major opcode | mmaqasu.h |
-0010 | 000 | 1 | ms2 | ms1 | 000 | func3 | 00 | md/ms3 | major opcode | pmmaqa.b |
-0010 | 000 | 1 | ms2 | ms1 | 001 | func3 | 00 | md/ms3 | major opcode | pmmaqau.b |
-0010 | 000 | 1 | ms2 | ms1 | 010 | func3 | 00 | md/ms3 | major opcode | pmmaqaus.b |
-0010 | 000 | 1 | ms2 | ms1 | 011 | func3 | 00 | md/ms3 | major opcode | pmmaqasu.b |
-0011 | 000 | 0 | ms2 | ms1 | 000 | func3 | 10 | md | major opcode | madd.s.mm |
-0011 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 10 | md | major opcode | madd.s.mv.x |
-0011 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 10 | md | major opcode | madd.s.mv.i |
-0011 | 011 | 0 | ms2 | ms1 | rs1 | func3 | 10 | md | major opcode | madd.s.mx |
-0100 | 000 | 0 | ms2 | ms1 | 000 | func3 | 10 | md | major opcode | msub.s.mm |
-0100 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 10 | md | major opcode | msub.s.mv.x |
-0100 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 10 | md | major opcode | msub.s.mv.i |
-0100 | 011 | 0 | ms2 | 000 | rs1 | func3 | 10 | md | major opcode | msub.s.mx |
-0101 | 000 | 0 | ms2 | ms1 | 000 | func3 | 10 | md | major opcode | msra.s.mm |
-0101 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 10 | md | major opcode | msra.s.mv.x |
-0101 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 10 | md | major opcode | msra.s.mv.i |
-0101 | 011 | 0 | ms2 | 000 | rs1 | func3 | 10 | md | major opcode | msra.s.mx |
-0110 | 000 | 0 | ms2 | ms1 | 000 | func3 | 10 | md | major opcode | mn4clip.s.mm |
-0110 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 10 | md | major opcode | mn4clip.s.mv.x |
-0110 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 10 | md | major opcode | mn4clip.s.mv.i |
-0110 | 011 | 0 | ms2 | 000 | rs1 | func3 | 10 | md | major opcode | mn4clip.s.mx |
-0111 | 000 | 0 | ms2 | ms1 | 000 | func3 | 10 | md | major opcode | mn4clipu.s.mm |
-0111 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 10 | md | major opcode | mn4clipu.s.mv.x |
-0111 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 10 | md | major opcode | mn4clipu.s.mv.i |
-0111 | 011 | 0 | ms2 | 000 | rs1 | func3 | 10 | md | major opcode | mn4clipu.s.mx |
-1000 | 000 | 0 | ms2 | ms1 | 000 | func3 | 10 | md | major opcode | mmul.s.mm |
-1000 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 10 | md | major opcode | mmul.s.mv.x |
-1000 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 10 | md | major opcode | mmul.s.mv.i |
-1000 | 011 | 0 | ms2 | 000 | rs1 | func3 | 10 | md | major opcode | mmul.s.mx |
-1001 | 000 | 0 | ms2 | ms1 | 000 | func3 | 10 | md | major opcode | mmulh.s.mm |
-1001 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 10 | md | major opcode | mmulh.s.mv.x |
-1001 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 10 | md | major opcode | mmulh.s.mv.i |
-1001 | 011 | 0 | ms2 | 000 | rs1 | func3 | 10 | md | major opcode | mmulh.s.mx |
-0011 | 000 | 0 | ms2 | ms1 | 000 | func3 | 11 | md | major opcode | madd.d.mm |
-0011 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 11 | md | major opcode | madd.d.mv.x |
-0011 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 11 | md | major opcode | madd.d.mv.i |
-0011 | 011 | 0 | ms2 | 000 | rs1 | func3 | 11 | md | major opcode | madd.d.mx |
-0100 | 000 | 0 | ms2 | ms1 | 000 | func3 | 11 | md | major opcode | msub.d.mm |
-0100 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 11 | md | major opcode | msub.d.mv.x |
-0100 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 11 | md | major opcode | msub.d.mv.i |
-0100 | 011 | 0 | ms2 | 000 | rs1 | func3 | 11 | md | major opcode | msub.d.mx |
-0101 | 000 | 0 | ms2 | ms1 | 000 | func3 | 11 | md | major opcode | msra.d.mm |
-0101 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 11 | md | major opcode | msra.d.mv.x |
-0101 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 11 | md | major opcode | msra.d.mv.i |
-0101 | 011 | 0 | ms2 | 000 | rs1 | func3 | 11 | md | major opcode | msra.d.mx |
-0110 | 000 | 0 | ms2 | ms1 | 000 | func3 | 11 | md | major opcode | mn4clip.d.mm |
-0110 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 11 | md | major opcode | mn4clip.d.mv.x |
-0110 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 11 | md | major opcode | mn4clip.d.mv.i |
-0110 | 011 | 0 | ms2 | 000 | rs1 | func3 | 11 | md | major opcode | mn4clip.d.mx |
-0111 | 000 | 0 | ms2 | ms1 | 000 | func3 | 11 | md | major opcode | mn4clipu.d.mm |
-0111 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 11 | md | major opcode | mn4clipu.d.mv.x |
-0111 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 11 | md | major opcode | mn4clipu.d.mv.i |
-0111 | 011 | 0 | ms2 | 000 | rs1 | func3 | 11 | md | major opcode | mn4clipu.d.mx |
-1000 | 000 | 0 | ms2 | ms1 | 000 | func3 | 11 | md | major opcode | mmul.d.mm |
-1000 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 11 | md | major opcode | mmul.d.mv.x |
-1000 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 11 | md | major opcode | mmul.d.mv.i |
-1000 | 011 | 0 | ms2 | 000 | rs1 | func3 | 11 | md | major opcode | mmul.d.mx |
-1001 | 000 | 0 | ms2 | ms1 | 000 | func3 | 11 | md | major opcode | mmulh.d.mm |
-1001 | 001 | 0 | ms2 | ms1 | rs1 | func3 | 11 | md | major opcode | mmulh.d.mv.x |
-1001 | 010 | 0 | ms2 | ms1 | uimm3 | func3 | 11 | md | major opcode | mmulh.d.mv.i |
-1001 | 011 | 0 | ms2 | 000 | rs1 | func3 | 11 | md | major opcode | mmulh.d.mx |
+|31 28 | 27 25 | 24 | 23 21 | 20 18 | 17 15 | 14 12 | 11 10 | 9 7 | 6 0 | 
+| 0000 | 000 | 0 | 000 | ms1 | md | func3 | 00 | 001 | major opcode | mmov.mm 
+| 0000 | 001 | 0 | 000 | ms1 | md | func3 | 00 | rs1' | major opcode | mmov.mv.x 
+| 0000 | 010 | 0 | 000 | ms1 | md | func3 | 00 | uimm3 | major opcode | mmov.mv.i 
+| 0001 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 01 | 000 | major opcode | fmmacc.h 
+| 0001 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 10 | 000 | major opcode | fmmacc.s 
+| 0001 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 11 | 000 | major opcode | fmmacc.d 
+| 0001 | 000 | 1 | ms2 | ms1 | md/ms3 | func3 | 01 | 000 | major opcode | fwmmacc.h 
+| 0001 | 000 | 1 | ms2 | ms1 | md/ms3 | func3 | 10 | 000 | major opcode | fwmmacc.s 
+| 0010 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 00 | 000 | major opcode | mmaqa.b 
+| 0010 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 00 | 001 | major opcode | mmaqau.b 
+| 0010 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 00 | 010 | major opcode | mmaqaus.b 
+| 0010 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 00 | 011 | major opcode | mmaqasu.b 
+| 0010 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 01 | 000 | major opcode | mmaqa.h 
+| 0010 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 01 | 001 | major opcode | mmaqau.h 
+| 0010 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 01 | 010 | major opcode | mmaqaus.h 
+| 0010 | 000 | 0 | ms2 | ms1 | md/ms3 | func3 | 01 | 011 | major opcode | mmaqasu.h 
+| 0010 | 000 | 1 | ms2 | ms1 | md/ms3 | func3 | 00 | 000 | major opcode | pmmaqa.b 
+| 0010 | 000 | 1 | ms2 | ms1 | md/ms3 | func3 | 00 | 001 | major opcode | pmmaqau.b 
+| 0010 | 000 | 1 | ms2 | ms1 | md/ms3 | func3 | 00 | 010 | major opcode | pmmaqaus.b 
+| 0010 | 000 | 1 | ms2 | ms1 | md/ms3 | func3 | 00 | 011 | major opcode | pmmaqasu.b 
+| 0011 | 000 | 0 | ms2 | ms1 | md | func3 | 10 | 000 | major opcode | madd.s.mm 
+| 0011 | 001 | 0 | ms2 | ms1 | md | func3 | 10 | rs1' | major opcode | madd.s.mv.x 
+| 0011 | 010 | 0 | ms2 | ms1 | md | func3 | 10 | uimm3 | major opcode | madd.s.mv.i 
+| 0011 | 011 | 0 | ms2 | 000 | md | func3 | 10 | rs1' | major opcode | madd.s.mx 
+| 0100 | 000 | 0 | ms2 | ms1 | md | func3 | 10 | 000 | major opcode | msub.s.mm 
+| 0100 | 001 | 0 | ms2 | ms1 | md | func3 | 10 | rs1' | major opcode | msub.s.mv.x 
+| 0100 | 010 | 0 | ms2 | ms1 | md | func3 | 10 | uimm3 | major opcode | msub.s.mv.i 
+| 0100 | 011 | 0 | ms2 | 000 | md | func3 | 10 | rs1' | major opcode | msub.s.mx 
+| 0101 | 000 | 0 | ms2 | ms1 | md | func3 | 10 | 000 | major opcode | msra.s.mm 
+| 0101 | 001 | 0 | ms2 | ms1 | md | func3 | 10 | rs1' | major opcode | msra.s.mv.x 
+| 0101 | 010 | 0 | ms2 | ms1 | md | func3 | 10 | uimm3 | major opcode | msra.s.mv.i 
+| 0101 | 011 | 0 | ms2 | 000 | md | func3 | 10 | rs1' | major opcode | msra.s.mx 
+| 0110 | 000 | 0 | ms2 | ms1 | md | func3 | 10 | 000 | major opcode | mn4clip.s.mm 
+| 0110 | 001 | 0 | ms2 | ms1 | md | func3 | 10 | rs1' | major opcode | mn4clip.s.mv.x 
+| 0110 | 010 | 0 | ms2 | ms1 | md | func3 | 10 | uimm3 | major opcode | mn4clip.s.mv.i 
+| 0110 | 011 | 0 | ms2 | 000 | md | func3 | 10 | rs1' | major opcode | mn4clip.s.mx 
+| 0111 | 000 | 0 | ms2 | ms1 | md | func3 | 10 | 000 | major opcode | mn4clipu.s.mm 
+| 0111 | 001 | 0 | ms2 | ms1 | md | func3 | 10 | rs1' | major opcode | mn4clipu.s.mv.x 
+| 0111 | 010 | 0 | ms2 | ms1 | md | func3 | 10 | uimm3 | major opcode | mn4clipu.s.mv.i 
+| 0111 | 011 | 0 | ms2 | 000 | md | func3 | 10 | rs1' | major opcode | mn4clipu.s.mx 
+| 1000 | 000 | 0 | ms2 | ms1 | md | func3 | 10 | 000 | major opcode | mmul.s.mm 
+| 1000 | 001 | 0 | ms2 | ms1 | md | func3 | 10 | rs1' | major opcode | mmul.s.mv.x 
+| 1000 | 010 | 0 | ms2 | ms1 | md | func3 | 10 | uimm3 | major opcode | mmul.s.mv.i 
+| 1000 | 011 | 0 | ms2 | 000 | md | func3 | 10 | rs1' | major opcode | mmul.s.mx 
+| 1001 | 000 | 0 | ms2 | ms1 | md | func3 | 10 | 000 | major opcode | mmulh.s.mm 
+| 1001 | 001 | 0 | ms2 | ms1 | md | func3 | 10 | rs1' | major opcode | mmulh.s.mv.x 
+| 1001 | 010 | 0 | ms2 | ms1 | md | func3 | 10 | uimm3 | major opcode | mmulh.s.mv.i 
+| 1001 | 011 | 0 | ms2 | 000 | md | func3 | 10 | rs1' | major opcode | mmulh.s.mx 
+| 0011 | 000 | 0 | ms2 | ms1 | md | func3 | 11 | 000 | major opcode | madd.d.mm 
+| 0011 | 001 | 0 | ms2 | ms1 | md | func3 | 11 | rs1' | major opcode | madd.d.mv.x 
+| 0011 | 010 | 0 | ms2 | ms1 | md | func3 | 11 | uimm3 | major opcode | madd.d.mv.i 
+| 0011 | 011 | 0 | ms2 | 000 | md | func3 | 11 | rs1' | major opcode | madd.d.mx 
+| 0100 | 000 | 0 | ms2 | ms1 | md | func3 | 11 | 000 | major opcode | msub.d.mm 
+| 0100 | 001 | 0 | ms2 | ms1 | md | func3 | 11 | rs1' | major opcode | msub.d.mv.x 
+| 0100 | 010 | 0 | ms2 | ms1 | md | func3 | 11 | uimm3 | major opcode | msub.d.mv.i 
+| 0100 | 011 | 0 | ms2 | 000 | md | func3 | 11 | rs1' | major opcode | msub.d.mx 
+| 0101 | 000 | 0 | ms2 | ms1 | md | func3 | 11 | 000 | major opcode | msra.d.mm 
+| 0101 | 001 | 0 | ms2 | ms1 | md | func3 | 11 | rs1' | major opcode | msra.d.mv.x 
+| 0101 | 010 | 0 | ms2 | ms1 | md | func3 | 11 | uimm3 | major opcode | msra.d.mv.i 
+| 0101 | 011 | 0 | ms2 | 000 | md | func3 | 11 | rs1' | major opcode | msra.d.mx 
+| 0110 | 000 | 0 | ms2 | ms1 | md | func3 | 11 | 000 | major opcode | mn4clip.d.mm 
+| 0110 | 001 | 0 | ms2 | ms1 | md | func3 | 11 | rs1' | major opcode | mn4clip.d.mv.x 
+| 0110 | 010 | 0 | ms2 | ms1 | md | func3 | 11 | uimm3 | major opcode | mn4clip.d.mv.i 
+| 0110 | 011 | 0 | ms2 | 000 | md | func3 | 11 | rs1' | major opcode | mn4clip.d.mx 
+| 0111 | 000 | 0 | ms2 | ms1 | md | func3 | 11 | 000 | major opcode | mn4clipu.d.mm 
+| 0111 | 001 | 0 | ms2 | ms1 | md | func3 | 11 | rs1' | major opcode | mn4clipu.d.mv.x 
+| 0111 | 010 | 0 | ms2 | ms1 | md | func3 | 11 | uimm3 | major opcode | mn4clipu.d.mv.i 
+| 0111 | 011 | 0 | ms2 | 000 | md | func3 | 11 | rs1' | major opcode | mn4clipu.d.mx 
+| 1000 | 000 | 0 | ms2 | ms1 | md | func3 | 11 | 000 | major opcode | mmul.d.mm 
+| 1000 | 001 | 0 | ms2 | ms1 | md | func3 | 11 | rs1' | major opcode | mmul.d.mv.x 
+| 1000 | 010 | 0 | ms2 | ms1 | md | func3 | 11 | uimm3 | major opcode | mmul.d.mv.i 
+| 1000 | 011 | 0 | ms2 | 000 | md | func3 | 11 | rs1' | major opcode | mmul.d.mx 
+| 1001 | 000 | 0 | ms2 | ms1 | md | func3 | 11 | 000 | major opcode | mmulh.d.mm 
+| 1001 | 001 | 0 | ms2 | ms1 | md | func3 | 11 | rs1' | major opcode | mmulh.d.mv.x 
+| 1001 | 010 | 0 | ms2 | ms1 | md | func3 | 11 | uimm3 | major opcode | mmulh.d.mv.i 
+| 1001 | 011 | 0 | ms2 | 000 | md | func3 | 11 | rs1' | major opcode | mmulh.d.mx 
 |===
 
 === Matrix Load/Store Instructions
@@ -904,7 +939,6 @@ The matrix load/store instruction format:
 [width="100%",cols="1,1,1,1,1,1,1,2",options="header",]
 |===
 |31 28 |27 25 |24 20 |19 15 |14 12 |11 10 |9 7 |6 0
-|func |uop |rs2 |rs1 |func3 |size |md/ms3 |major opcode
 |func |uop |rs2 |rs1 |func3 |size |md/ms3 |major opcode
 |===
 
@@ -917,37 +951,79 @@ Uop[2:0] field indicates instruction type:
 |101 |Matrix store
 |===
 
-bit[28] = 1 indicates streaming load/store and bit[29]=1 indicates whole
-register load/store.
+Bit[29]=1 indicates whole register load/store.
 
 [width="99%",cols="1,1,1,1,1,1,1,2,3",options="header",]
 |===
 |31 28 |27 25 |24 20 |19 15 |14 12 |11 10 |9 7 |6 0 |
 |0000 |100 |rs2 |rs1 |func3 |size |md |major opcode |mld
 |0000 |101 |rs2 |rs1 |func3 |size |ms3 |major opcode |mst
-|0001 |100 |rs2 |rs1 |func3 |size |md |major opcode |msld
-|0001 |101 |rs2 |rs1 |func3 |size |ms3 |major opcode |msst
 |0010 |100 |{00,nf} |rs1 |func3 |size |md |major opcode |mld<1/2/4/8>m<b/h/w/d>
 |0010 |101 |{00,nf} |rs1 |func3 |size |md |major opcode |mst<1/2/4/8>m<b/h/w/d>
 |===
 
 === Other Instructions
 
+==== configuration
+
 The uop of configuration instructions is 3'b111.
 
 [width="99%",cols="1,1,1,1,1,1,1,2,2",options="header",]
 |===
 |31 |30 28 |27 25 |24 20 |19 15 |14 12 |11 7 |6 0 |
-|0 |index |111 |uimm7[6:2] |\{uimm7[1:0],000} |func3 |rd |major opcode
-|mcfigi
-
-|1 |index |111 |00000 |rs1 |func3 |rd |major opcode |mcfig
+| 0 | 000 | 111 2+| {uimm7,000} | func3 | rd | major opcode | mcfgki 
+| 0 | 001 | 111 2+| {uimm7,000} | func3 | rd | major opcode | mcfgmi 
+| 0 | 010 | 111 2+| {uimm7,000} | func3 | rd | major opcode | mcfgni 
+| 1 | 000 | 111 | 00000 | rs1 | func3 | rd | major opcode | mcfgk 
+| 1 | 001 | 111 | 00000 | rs1 | func3 | rd | major opcode | mcfgm 
+| 1 | 010 | 111 | 00000 | rs1 | func3 | rd | major opcode | mcfgn 
+| 1 | 111 | 111 | 00000 | rs1 | func3 | rd | major opcode | mcfg 
 |===
 
+==== mzero
+The mzero instruction shares the 3'b000 uop with the arithmetic instructions.
+[width="99%",cols="1,1,1,1,1,1,1,1,1,2,2",options="header",]
+|===
+|31 28 |27 25 |24 |23 21 |20 18 |17 15 |14 12 |11 10 |9 7 |6 0| 
+|1010 |000 |0 |000 |000 |md |func3 |00 |000 |major code |mzero      
+|===
+
+==== mrelease
+
+The mrelease instruction uses the configuration 3'b111 uop.
+
+[width="99%",cols="1,1,1,1,1,1,1,2,2",options="header",]
+|===
+|31 |30 28 |27 25 |24 20 |19 15 |14 12 |11 7 |6 0 |
+| 0 | 111 | 111 | 00000 | 00000 | func3 | 00000 | major opcode | mrelease 
+|===
+
+==== move from matrix
+[width="99%",cols="1,1,1,1,1,1,1,1,2,2",options="header",]
+|===
+|31 28 |27 25 |24 |23 21 |20 |19 15 |14 12 |11 7 |6 0 |
+| 0000 | 110 | 0 | ms2 | 0 | rs1 | func3 | rd | major opcode | mmovb.x.m 
+| 0000 | 110 | 0 | ms2 | 1 | rs1 | func3 | rd | major opcode | mmovh.x.m 
+| 0000 | 110 | 1 | ms2 | 0 | rs1 | func3 | rd | major opcode | mmovw.x.m 
+| 0000 | 110 | 1 | ms2 | 1 | rs1 | func3 | rd | major opcode | mmovd.x.m 
+|===
+
+==== move GPR to matrix
+[width="99%",cols="1,1,1,1,1,1,1,2,2",options="header",]
+|===
+|31 28 |27 25 |24 20 |19 15 |14 12 |11 10 |9 7 |6 0 |
+| 0001 | 110 | rs2 | 0000 | func3 | 00 | md | major opcode | mdupb.m.x 
+| 0001 | 110 | rs2 | 0000 | func3 | 01 | md | major opcode | mduph.m.x 
+| 0001 | 110 | rs2 | 0000 | func3 | 10 | md | major opcode | mdupw.m.x 
+| 0001 | 110 | rs2 | 0000 | func3 | 11 | md | major opcode | mdupd.m.x 
+| 0010 | 110 | rs2 | rs1 | func3 | 00 | md | major opcode | mmovb.m.x 
+| 0010 | 110 | rs2 | rs1 | func3 | 01 | md | major opcode | mmovh.m.x 
+| 0010 | 110 | rs2 | rs1 | func3 | 10 | md | major opcode | mmovw.m.x 
+| 0010 | 110 | rs2 | rs1 | func3 | 11 | md | major opcode | mmovd.m.x 
+|===
 === Matrix Register Overlap
 
-Instructions support matrix source and destination registers overlap
-except matrix multiplication instructions. 
+Instructions support matrix source and destination registers overlap except matrix multiplication instructions. 
 
 == Standard Matrix Extensions 
 
@@ -976,9 +1052,9 @@ multiplication and add , illegal if bit[0] of xmisa register is 0
 
 The maximum matrix shape is:
 
-* matrixA: M <= MLEN/32, K <= MLEN/4
-* matrixB: N <= MLEN/32, K <= MLEN/4
-* matrixC: M <= MLEN/32, N <= MLEN/32
+* matrixA: M <= RLEN/32, K <= RLEN/4
+* matrixB: N <= RLEN/32, K <= RLEN/4
+* matrixC: M <= RLEN/32, N <= RLEN/32
 
 ....
 #4bit data width
@@ -997,7 +1073,7 @@ pmmaqasu.b ms3, ms2, ms1
 [width="100%",cols="1,1,1,2,1,1,2,1,1,2,1,1",options="header",]
 |===
 | 3+^|matrix A 3+^|matrix B 3+^|matrix C 2+|
-|MLEN |M |K |data width |N |K |data width |M |N |data width |Gops/GHz
+|RLEN |M |K |data width |N |K |data width |M |N |data width |Gops/GHz
 |latency
 
 |128 |4 |32 |512 bits |4 |32 |512 bits |4 |4 |512 bits |256 |4
@@ -1010,8 +1086,7 @@ pmmaqasu.b ms3, ms2, ms1
 
 == Instruction List
 
-There are 28 instructions extended for matrix, some are optional for
-hardware implementations.
+There are 25 instructions extended for matrix, some are optional for hardware implementations.
 
 [width="100%",cols="1,2,4",options="header",]
 |===
@@ -1027,23 +1102,28 @@ hardware implementations.
 |pmmaqau. |int4 unsigned integer matrix multiplication
 |pmmaqasu. |int4 signed -unsigned integer matrix multiplication
 |pmmaqaus. |int4 unsigned -signed integer matrix multiplication
-.6+^|matrix load/store(6) 
+.4+^|matrix load/store(4) 
 |mld.<b/h/w/d> |matrix load to matrix registers
 |mst.<b/h/w/d> |matrix store from matrix registers
-|msld.<b/h/w/d> |stream load to matrix registers
-|msst.<b/h/w/d> |stream matrix store from matrix registers
 |mld<1/2/4/8>m.<b/h/w/d> |load to whole matrix register
 |mst<1/2/4/8>m.<b/h/w/d> |store to whole matrix register
 ^|matrix movement(1) 
-|mmov.mm/mmov.mv.x 
+|mmov.mm/mmov.mv.x
 
-mmov.mv.i/mmov.mx 
-|move between matrix registers 
+mmov.mv.i/
+
+mmov.<b/h/w/d>.m.x/
+
+mdup.<b/h/w/d>.m.x/
+
+mmov.<b/h/w/d>.x.m 
+|move from/to matrix registers 
 .2+^|configuration(2) 
 |mcfgi |
 |mcfg |
-^|others(1) 
-|zero |
+.2+^|others(2) 
+|mrelease |clear ms to CLEAN
+|mzero|  
 .6+^|matrix integer pointwise arithmetic (6) 
 |madd/msub.<s/d>.<mm/mv/mx>.<x/i> |
 |mshift.<s/d>.<mm/mv/mx>.<x/i> |

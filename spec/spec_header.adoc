@@ -1,8 +1,8 @@
 [[header]]
 :description: RISC-V Matrix Multiplication Extension Specification
 :company: T-head-Semi
-:revdate: 02/2023
-:revnumber: 0.1
+:revdate: 05/2023
+:revnumber: 0.3
 :revremark: This document is in development. Assume everything can change.
 :url-riscv: http://riscv.org
 :doctype: book
