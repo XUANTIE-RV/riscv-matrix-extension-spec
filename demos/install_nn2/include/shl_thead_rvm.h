@@ -108,6 +108,6 @@ int shl_rvm_wg_b6f3s1_nhwc_fp16(struct csinn_tensor *input, struct csinn_tensor 
                                 struct csinn_tensor *kernel, struct csinn_tensor *bias,
                                 struct csinn_conv2d_params *params);
 
-int csrr_xmlenb();
+int csrr_xrlenb();
 
 #endif  // INCLUDE_SHL_THEAD_RVM_H_

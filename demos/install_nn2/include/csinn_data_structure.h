@@ -46,9 +46,8 @@ enum csinn_mem_type_enum {
     CSINN_MEM_TYPE_CPU_NOT_ALIGNED = 0,
     CSINN_MEM_TYPE_CPU_ALIGNED,
     CSINN_MEM_TYPE_DMABUF,
-    CSINN_MEM_TYPE_ASP42,   /* structed sparsity 4:2 */
-    CSINN_MEM_TYPE_ASP41,   /* structed sparsity 4:1 */
-    CSINN_MEM_TYPE_CPU_ACC, /* accelerator driver memory, cpu can access */
+    CSINN_MEM_TYPE_ASP42, /* structed sparsity 4:2 */
+    CSINN_MEM_TYPE_ASP41, /* structed sparsity 4:1 */
 };
 
 /* quant type */
@@ -66,9 +65,6 @@ enum csinn_quant_enum {
     CSINN_QUANT_SIZE,
 };
 
-/* alias of TH1520, for compatible */
-#define CSINN_LIGHT 7
-
 /* API type */
 enum csinn_api_enum {
     CSINN_REF = 0,
@@ -78,7 +74,7 @@ enum csinn_api_enum {
     CSINN_C910,
     CSINN_ANOLE,
     CSINN_CH8601,
-    CSINN_TH1520,
+    CSINN_LIGHT,
     CSINN_DP1K,
     CSINN_I805,
     CSINN_E804,
