@@ -1,8 +1,8 @@
 [[header]]
 :description: RISC-V Matrix Multiplication Extension Specification
-:company: T-head-Semi
-:revdate: 05/2023
-:revnumber: 0.3
+:company: Alibaba
+:revdate: 12/2023
+:revnumber: 0.4
 :revremark: This document is in development. Assume everything can change.
 :url-riscv: http://riscv.org
 :doctype: book
@@ -36,7 +36,7 @@ endif::[]
 :xrefstyle: short
 
 = RISC-V Matrix Multiplication Extension Specification 
-T-Head Semiconductor  
+Alibaba  
 
 // Preamble
 [WARNING]
@@ -54,12 +54,17 @@ Attribution 4.0 International License (CC-BY 4.0). The full
 license text is available at
 https://creativecommons.org/licenses/by/4.0/.
 
-Copyright 2023 by T-Head Semiconductor Corp.
+Copyright 2023 by Alibaba Corp.
 
 [preface]
 include::contributors.adoc[]
 
 include::matrix_intro.adoc[]
-include::matrix_body.adoc[]
+include::matrix_programmer_model.adoc[]
+include::matrix_instructions.adoc[]
+include::matrix_instruction_format.adoc[]
+include::matrix_standard_matrix_extensions.adoc[]
+include::matrix_instruction_list.adoc[]
+include::matrix_memory_model.adoc[]
 //the index must precede the bibliography
 include::index.adoc[]

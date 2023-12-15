@@ -13,7 +13,6 @@ build_spec:
     --failure-level=ERROR \
     --require=asciidoctor-bibtex \
     --require=asciidoctor-diagram \
-    --require=asciidoctor-mathematical \
     --out-file=$(SPEC_RESULT) \
     $(SPEC_SOURCE)
 

@@ -1,0 +1,702 @@
+[[chapter3]]
+== Instructions
+
+=== Matrix Multiplication Instructions
+
+Matrix multiplication instructions take matrixA(sizeMxsizeK) and
+matrixB(sizeNxsizeK) from matrix registers specified by ms1 and ms2, and
+accumulate the multiplication result of A[M][K] * (B[N][K])T to
+matrixC(sizeM x sizeN) from md register, the output will overwrite the
+accumulation register.
+
+* shape of matrixA: M rows(sizeM), K columns(sizeK/element size in byte)
+* shape of matrixB: N rows(sizeN), K columns(sizeK/element size in byte)
+* shape of matrixC: M rows(sizeM), N columns(sizeN)
+
+The function description:
+
+....
+for(int i=0; i<sizeM; i++) {
+  for(int j=0; j<sizeN; j++) {
+      for(int k=0; k<(sizeK/element size); k++)
+         C[i,j] += A[i,k]*B[j,k];
+}}}
+....
+
+The ISA specification provides different instructions to support float
+and integer matrix multiplication and and operation. Hardware design has
+the flexibility of supported data types.
+
+
+[width="100%",cols="2,2,2,3,3",options="header",]
+|===
+|category | instructions | Operand Type A,B | Accumulator Type C | Optional Feature .5+^.|
+Float | 
+fmmacc.h | fp16/bf16 | fp16 | MATRIX_MULT_F16F16 |  
+fmmacc.s | fp32 | fp32 | MATRIX_MULT_F32F32 |  
+fmmacc.d | fp64 | fp64 | MATRIX_MULT_F64F64 |
+fwmmacc.h | fp16/bf16 | fp32 | MATRIX_MULT_F16F32 |
+fwmmacc.s | fp32 | fp64 | MATRIX_MULT_F32F64 
+
+ .3+^.|Int | 
+ mmaqa.b mmaqu.b mmaqasu.b mmaqaus.b | int8 | int32 | MATRIX_MULT_I8I32 |
+mmaqa.h mmaqu.h mmaqasu.h mmaqaus.h | int16 | int64 |MATRIX_MULT_I16I64 |
+pmmaqa.b pmmaqu.b pmmaqasu.b pmmaqaus.b | int4(mx8) | int32(mxm) | MATRIX_MULT_I4I32 
+|===
+	
+''''
+_The hardware implementation can choose one or more subsets ._
+	
+''''
+The float matrix multiplication reuses the floating-point control and
+status register, fcsr, to select the dynamic rounding mode for
+floating-point arithmetic operations and hold the accrued exception
+flags.
+
+image:FCSR.png[FCSR.png]
+
+The float matrix multiplication uses the dynamic rounding mode in frm. If
+frm is set to an invalid value (101-111), any subsequent attempt to
+execute a floating-point operation with a dynamic rounding mode will cause
+an illegal instruction exception.
+
+[width="100%",cols="3,3,7",options="header",]
+|===
+|rounding mode |Mnemonic |Meaning
+|000 |RNE |Round to Nearest, ties to Even
+|001 |RTZ |Round towards Zero
+|010 |RDN |Round Down (towards -∞)
+|011 |RUP |Round Up (towards +∞)
+|100 |RMM |Round to Nearest, ties to Max Magnitude
+|101 | |Invalid. Reserved for future use
+|110 | |Invalid. Reserved for future use
+|111 | |Invalid in rounding mode register
+|===
+
+If the floating-point unit status field mstatus.FS is off then any
+attempt to execute a matrix floating-point instruction will raise an
+illegal instruction exception. Any matrix floating-point instruction
+that modifies any floating-point extension state (i.e., floating-point
+CSRs or f registers) must set mstatus.FS to Dirty. The basic operation
+of float matrix multiplication is float dot , the float dot operations
+follow the IEEE-754/2008 standard.
+
+''''
+_For float dot, if any operand element
+is NaN or a product of ∞ x 0 or a sum of infinities of different signs,
+the result is NaN. Except when otherwise stated, if the result is NaN,
+it is the canonical NaN. A product of ∞ x 0 or a sum of infinities of
+different signs signals the invalid operation exception. Otherwise, sums
+are computed with no avoidable intermediate exception conditions in the
+calculation and the final result is determined from that intermediate
+result. If the final result overflows, signal overflows. If the final
+result underflows, signal underflows. If the final result is
+inexact, signal is inexact._
+
+''''
+
+The standard matrix floating-point instructions treat elements as
+IEEE-754/2008-compatible values. If the EEW of a matrix floating-point
+operand does not correspond to a supported IEEE floating-point type, the
+instruction encoding is reserved. For bf16-extension, 16-bit
+floating-point element can be seen as bf16 or fp16. 
+
+==== Float Matrix Multiplication(non-widen) 
+
+Non-widen float matrix multiplication
+indicates the source and destination operands data width keep the same
+which are encoded in the instruction.
+
+* fmmacc.h: fp16/bf16 floating-point ,illegal if bit[3] of xmisa
+register is 0
+* fmmacc.s: fp32 floating-point, illegal if bit[4] of xmisa register is
+0
+* fmmacc.d: fp64 floating-point, illegal if bit[5] of xmisa register is
+0
+
+....
+#float matrix multiplication, md = md + ms1*ms2
+fmmacc.h md, ms2, ms1
+fmmacc.s md, ms2, ms1
+fmmacc.d md, ms2, ms1
+....
+
+For fmmacc.s, the max matrix shape is:
+
+* matrixA: M <= RLEN/32, K <= RLEN/32
+* matrixB: N <= RLEN/32, K <= RLEN/32
+* matrixC: M <= RLEN/32, N <= RLEN/32
+
+The operation of fmmacc.s is shown below for RLEN=128.
+
+image:FM_e1.jpeg[matrix-mult-fp32.jpg]
+
+For fmmacc.h, 16-bit float matrix multiplication and add instruction,
+the element can be seen as fp16 or bf16 if bf16 data type is supported.
+The max matrix shape is:
+
+* matrixA: M <= RLEN/32, K <= RLEN/16
+* matrixB: N <= RLEN/16, K <= RLEN/16
+* matrixC: M <= RLEN/32, N <= RLEN/16
+
+As data width for matrix B is twice that of matrix A and C, two matrix
+register(register-pair) are used by Matrix B specified by ms~2~ and ms~2~+1.
+Instructions specifying an odd-numbered ms~2~ is reserved. The operation
+is shown below for RLEN=128.
+
+image:FM_e2.jpeg[matrix-mult-fp16.jpg]
+
+For fmmacc.d, 64-bit float matrix multiplication and add instruction,
+The maximum matrix shape is:
+
+* matrixA: M <= RLEN/32, K <= RLEN/64
+* matrixB: N <= RLEN/32, K <= RLEN/64
+* matrixC: M <= RLEN/32, N <= RLEN/32
+
+As data width for matrix C is twice that of matrix A and B, two matrix
+register(register-pair) are used by MatrixC specified by md and md+1.
+Instructions specifying an odd-numbered md is reserved. the operation is
+shown below for RLEN=128.
+
+image:FM_e3.jpeg[matrix-64bit.jpg]
+
+Summary for max Matrix size of fmmacc instructions for typical RLEN:
+
+[width="100%",cols="3,2,2,2,3,2,2,3,2,2,3",options="header",]
+|===
+2+| 3+^|matrix A 3+^|matrix B 3+^|matrix C  
+| |RLEN |M |K |data width |N |K |data width |M |N |data width 
+
+.3+^.|fmacc.s 
+|128 |4 |4 |512 bits |4 |4 |512 bits |4 |4 |512 bits 
+
+|256 |8 |8 |2048 bits |8 |8 |2048 bits |8 |8 |2048 bits 
+
+|512 |16 |16 |8192 bits |16 |16 |8192 bits |16 |16 |8192 bits 
+
+.3+^.|fmacc.h 
+|128 |4 |8 |512 bits |8 |8 |1024 bits |4 |8 |512 bits 
+
+|256 |8 |16 |2048 bits |16 |16 |4096 bits |8 |16 |2048 bits 
+
+|512 |16 |32 |8192 bits |32 |32 |16384 bits |16 |32 |8192 bits 
+
+.3+^.|fmacc.d 
+|128 |4 |2 |512 bits |4 |2 |512 bits |4 |4 |1024 bits 
+|256 |8 |4 |2048 bits |8 |4 |2048 bits |8 |8 |4096 bits 
+|512 |16 |8 |8192 bits |16 |8 |8192 bits |16 |16 |16384 bits 
+|===
+
+==== Float Matrix Multiplication(widen)
+
+Widen float matrix multiplication indicates destination operand data
+width is twice of the source operand. The data width of source operand
+is in instruction encoding.
+
+* fwmmacc.h: fp16/bf16 floating-point source and fp32 result ,illegal if
+bit[8] of xmisa register is 0
+* fwmmacc.s: fp32 floating-point source and fp64 result , illegal if
+bit[9] of xmisa register is 0
+
+....
+#float matrix multiplication, output widen, md = md + ms1*ms2
+fwmmacc.h md, ms2, ms1
+fwmmacc.s md, ms2, ms1
+....
+
+For fwmmacc.h, 16-bit float widen matrix multiplication and add
+instruction, the element can be seen as fp16 or bf16 if bf16 data type
+is supported. The maximum matrix shape is:
+
+* matrixA: M <= RLEN/32, K <= RLEN/16
+* matrixB: N <= RLEN/32, K <= RLEN/16
+* matrixC: M <= RLEN/32, N <= RLEN/32
+
+For fwmmacc.s, 32-bit float widen matrix multiplication and add
+instruction, The maximum matrix shape is:
+
+* matrixA: M <= RLEN/32, K <= RLEN/32
+* matrixB: N <= RLEN/32, K <= RLEN/32
+* matrixC: M <= RLEN/32, N <= RLEN/32
+
+As data width for matrix C is twice that of matrix A and B, two matrix
+register(register-pair) are used by MatrixC specified by md and md+1.
+Instructions specifying an odd-numbered md is reserved. Summary for max
+Matrix size of fwmmacc instructions for typical RLEN:
+
+[width="100%",cols="2,1,1,1,2,1,1,2,1,1,2",options="header",]
+|===
+2+| 3+^|matrix A 3+^|matrix B 3+^|matrix C | |
+RLEN |M |K |data width |N |K |data width |M |N |data width
+.3+^.|fwmacc.h 
+|128 |4 |8 |512 bits |4 |8 |512 bits |4 |4 |512 bits
+|256 |8 |16 |2048 bits |8 |16 |2048 bits |8 |8 |2048 bits
+|512 |16 |32 |8192 bits |16 |32 |8192 bits |16 |16 |8192 bits
+.3+^.|fwmacc.s 
+|128 |4 |4 |512 bits |4 |4 |512 bits |4 |4 |1024 bits
+|256 |8 |8 |2048 bits |8 |8 |2048 bits |8 |8 |4096 bits
+|512 |16 |16 |8192 bits |16 |16 |8192 bits |16 |16 |16384 bits
+|===
+
+==== Integer Matrix Multiplication (4x widen)
+
+The integer matrix multiplication with destination data width is four-times that  of the source data width. The source operand data width in instruction encoding supported are int8 and int16, other data widths are reserved. Both signed/unsigned versions are provided . Thus, the source operand can be both signed/both unsigned/signed-unsigned/unsigned-signed, the result of multiplication is sign-extended before addition  and accumulation. Overflow is ignored and the result wraps around.
+
+* mmaqa.b/mmaqau.b/mmaqaus.b/mmaqasu.b:  int8 four-times  widen matrix multiplication, illegal if bit[1] of xmisa register is 0
+* mmaqa.h/mmaqau.h/mmaqaus.h/mmaqasu.h:  int16 four-times  widen matrix multiplication, illegal if bit[2] of xmisa register is 0
+
+....
+#8bit data width
+#signed matrix multiply
+mmaqa.b md, ms2, ms1
+#unsigned matrix multiply
+mmaqau.b md, ms2, ms1
+#unsigned-signed matrix multiply
+mmaqaus.b md, ms2, ms1
+#signed-unsigned matrix multiply
+mmaqasu.b md, ms2, ms1
+
+#16bit data width
+#signed matrix multiply
+mmaqa.h md, ms2, ms1
+#unsigned matrix multiply
+mmaqau.h md, ms2, ms1
+#unsigned-signed matrix multiply
+mmaqaus.h md, ms2, ms1
+#signed-unsigned matrix multiply
+mmaqasu.h md, ms2, ms1
+....
+
+For int8 four-times matrix-multiplication, the maximum matrix shape is:
+
+* matrixA: M <= RLEN/32, K <= RLEN/8
+* matrixB: N <= RLEN/32, K <= RLEN/8
+* matrixC: M <= RLEN/32, N <= RLEN/32
+
+For int16 four-times matrix-multiplication, as data width for matrix C is four-times of matrix A and B, two matrix register(register-pair) are used by matrix C
+specified by md and md+1. Instructions specifying an odd-numbered md is
+reserved. the maximum matrix shape is:
+
+* matrixA: M <= RLEN/32, K <= RLEN/16
+* matrixB: N <= RLEN/32, K <= RLEN/16
+* matrixC: M <= RLEN/32, N <= RLEN/32
+
+Summary for max Matrix size of integer matrix multiply and add
+instructions for typical RLEN:
+
+[width="99%",cols="2,1,1,1,2,1,1,2,1,1,2",options="header",]
+|===
+1+|  3+^|matrix A 3+^|matrix B 3+^|C |
+|| RLEN |M |K |data width |N |K |data width |M |N |data width 
+
+.3+^.|int8 4x 
+|128 |4 |16 |512 bits |4 |16 |512 bits |4 |4 |512 bits 
+|256 |8 |32 |2048 bits |8 |32 |2048 bits |8 |8 |2048 bits 
+|512 |16 |64 |8192 bits |16 |64 |8192 bits |16 |16 |8192 bits 
+
+.3+^.|int16 4x 
+|128 |4 |8 |512 bits |4 |8 |512 bits |4 |4 |1024 bits 
+|256 |8 |16 |2048 bits |8 |16 |2048 bits |8 |8 |4096 bits 
+|512 |16 |32 |8192 bits |16 |32 |8192 bits |16 |16 |16384 bits 
+|===
+
+
+
+=== Matrix Load/Store Instructions
+
+Matrix load instructions load a matrix from memory to matrix register.
+and matrix store instructions store a matrix from matrix register to
+memory.
+
+image:MLS.jpeg[matrix_load.jpg]
+
+The element data width is in instruction encoding, including
+byte/halfword/word/doubleword, other data widths are reserved. The base
+address is in rs1 and row stride in byte is in rs2, md/ms3 is the
+register index for destination of matrix load and source for matrix
+store.
+
+....
+#matrix load
+mld.<b/h/w/d> md, (rs1), rs2
+#stream matrix load
+mld.<b/h/w/d>.s  md, (rs1), rs2
+#matrix store
+mst.<b/h/w/d>  ms3, (rs1), rs2
+#stream matrix store
+mst.<b/h/w/d>.s  ms3, (rs1), rs2
+#whole matrix load
+mld<1/2/4/8>m.<b/h/w/d> md, (rs1)
+#whole matrix store
+mst<1/2/4/8>m.<b/h/w/d> ms3, (rs1)
+....
+
+Matrix shape (MxK) is in matrix size configure register, M given by sizeM and K given by sizeK(in byte). M=sizeM <= RLEN/32, K=sizeK/element size in byte, sizeK <= RLEN/8. If sizeM < RLEN/32 or sizeK < RLEN/8,  the matrix register data  with row index > sizeM or column  index > (sizeK/ element size in byte) set zero  for load, and don't write to memory for store.
+
+There are 2 versions provided: (1)normal (2) whole
+register load/store. 
+
+Whole register load/store data with maximum matrix size from/to memory with sizeM = RLEN/32 and sizeK = RLEN/8. The matrix size configurations are ignored.
+
+''''
+
+_These instructions are intended to be used to save and restore matrix registers when the length of the current contents of the matrix register is not known, or where modifying matrix size would be costly. Examples include compiler register spills,  function calls where values are passed in matrix registers, interrupt handlers, and OS context switches. Software can determine the number of bytes transferred by reading the xmlenb register._
+
+''''
+
+rs2 field is reused to specify the register number. rs2[4:3] is set to 0,
+otherwise reserved. rs2[2:0] is nf field, encoding how many matrix
+registers to load and store using the NFIELDS encoding. md/ms2 register
+index should be aligned with the register number.
+[width="80%",cols=",",align="center",options="header",]
+|===
+|nf[2:0] |register number
+|000 |1
+|001 |2
+|011 |4
+|111 |8
+|others |reserved
+|===
+
+All matrix load/store instructions may generate and accept a non-zero
+row-start value. The row-start register is reset to zero at the end of
+the matrix instruction execution. 
+
+With the ZIHINTNTL extension, matrix memory access instruction can behave as stream memory access operations to fit different memory hierarchy.
+Stream memory access instructions have the same
+function as normal matrix load/store instructions, except that the data
+may not be reused in the near future which can be potentially optimized
+by hardware implementation. 
+
+
+=== Configuration Instructions
+
+Matrix configuration instructions configure a field or the whole matrix size configuration register. The field retains the value if not changed by a configuration instruction. The index field of the instruction indicates which field is updated,  sizeM/sizeK/sizeN or the entire configure register as following table shows. The new matrix size are returned to rd.
+
+[width="80%",cols="1,1,3",align="center",options="header",]
+|===
+|index |instruction |effect on matrix size
+|000 |mcfgk(i) |msize.half1 = x[rs1]  
+|001 |mcfgm(i) |msize.byte0 = x[rs1]  
+|010 |mcfgn(i) |msize.byte1 = x[rs1]  
+|111 |mcfg |msize.byte0 = x[rs1] .byte0 
+msize.byte1 = x[rs1] .byte1
+msize.half1 = x[rs1] .half1  | others 2+| reserved  |
+|===
+
+....
+#imm type
+mcfg<m/n/k>i  uimm7   
+#register type
+mcfg<m/n/k>    rs1
+#entire register
+mcfg rs1
+....
+
+=== Pointwise Instructions
+==== Integer Pointwise Arithmetic Instructions
+For integer matrix pointwise instructions, matrix-matrix/matrix-vector instruction format are provided. 32-bit and 64-bit integer instructions are optionally supported.
+
+* 32bit instructions: legal if bit[28] and bit[1] of xmisa register are both set to 1, also legal if bit[28] and bit[0] of xmisa register are both set to 1, illegal In all other cases.
+* 64bit instructions: legal if bit[15] and bit[2] of xmisa register are both set to 1, illegal In all other cases.
+
+The matrix operands shape is M/K, provided by sizeM x (sizeK/element size in byte).
+
+* sizeM <= RLEN/32
+* sizeK <= RLEN/8
+[width="80%",cols=",,,",align="center",options="header",]
+|===
+| operand datawidth | RLEN (bit) | M | K 
+.3+<|32bit 
+| 128 | 4 | 4 
+| 256 | 8 | 8 
+| 512 | 16 | 16
+.3+<|64bit 
+| 128 | 4 | 2 
+| 256 | 8 | 4 
+| 512 | 16 | 8 |
+|===
+
+For matrix-matrix instructions, both sources are matrix. For matrix-vector instructions, src2 is matrix and src1 is one row of matrix.  Use row0 as an example, the vector operand operates on each row of matrix operand as md[i, j] = ms2[i, j] op ms1[0, j].
+
+madd performs the addition of src1 and src2. msub performs the subtraction of src2 from src1. mmul performs the multiplication of src1 and src2. Overflows are ignored and the low XLEN bits of results are written to the destination rd.  The mmul versions write the low bits of the product to the destination
+register, while the mmulh versions write the high bits of the product to the destination register. mmax and mmin perform signed and unsigned compares respectively. 
+
+....
+#matrix-matrix add
+madd.<s/d>.mm md, ms2, ms1
+#matrix-vector add
+madd.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix sub
+msub.<s/d>.mm md, ms2, ms1
+#matrix-vector sub
+msub.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix mul
+mmul.<s/d>.mm md, ms2, ms1
+#matrix-vector mul
+mmul.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix mulh
+mmulh.<s/d>.mm md, ms2, ms1
+#matrix-vector mulh
+mmulh.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix max
+mmax.<s/d>.mm md, ms2, ms1
+#matrix-vector max
+mmax.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix unsigned max
+mumax.<s/d>.mm md, ms2, ms1
+#matrix-vector unsigned max
+mumax.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix min
+mmin.<s/d>.mm md, ms2, ms1
+#matrix-vector min
+mmin.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix unsigned min
+mumin.<s/d>.mm md, ms2, ms1
+#matrix-vector unsigned min
+mumin.<s/d>.mv.i md, ms2, ms1[uimm3]
+....
+
+Matrix shift instructions including mn4clip/msll/msrl/msra.
+
+mn4clip/mn4clipu instructions are used to pack a fixed-point value into a 4x narrower destination. Rounding, scaling and saturation are supported. The scaling shift amount comes from a matrix (specified by ms1), a vector(ms1[uimm3]) . The low 6-bits for 64-bit and 5-bits for 32-bit source data width are used, the higher bits are ignored. Saturation sets xmsat if the destination overflows.
+
+msll msrl and msra perform logical left logic right and arithmetic right shift, the source data is in ms2, and the shift amount is provided by a matrix/vector data specified by ms1/ms1[uimm3].
+
+Matrix shift instructions support rounding with rounding mode specified in the xmxrm CSR. For clip instructions, rounding occurs before saturation.
+
+....
+#matrix-matrix logical left shift
+msll.<s/d>.mm md, ms2, ms1
+#matrix-vector logical left shift
+msll.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix logic right shift
+msrl.<s/d>.mm md, ms2, ms1
+#matrix-vector logic right shift
+msrl.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+
+#matrix-matrix arithmetic right shift
+msra.<s/d>.mm md, ms2, ms1
+#matrix-vector arithmetic right shift
+msra.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix signed clip
+mn4clip.<s/d>.mm md, ms2, ms1
+#matrix-vector clip,uimm3
+mn4clip.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix unsigned clip
+mn4clipu.<s/d>.mm md, ms2, ms1
+#matrix-vector clip,uimm3
+mn4clipu.<s/d>.mv.i md, ms2, ms1[uimm3]
+
+....
+=== Float Pointwise Arithmetic Instructions
+16bit 32-bit and 64-bit floating point pointwise operations are optionally supported.
+
+* for fp16/bf16 pointwise arithmetic instructions, legal if bit[31] and bit[3] of xmisa register are both set to 1, illegal In all other cases.
+* for fp32 pointwise arithmetic instructions,  legal if bit[31] and bit[6] of xmisa register are both set to 1, also legal if bit[31] and bit[4] of xmisa register are both set to 1, illegal In all other cases.
+* for fp64 pointwise arithmetic instructions,  legal if bit[31] and bit[7] of xmisa register are both set to 1, also legal if bit[31] and bit[5] of xmisa register are both set to 1, illegal In all other cases.
+* for conversion between fp64 and fp32 , legal if bit[31] and bit[7] of xmisa register are both set to 1, illegal In all other cases.
+* for conversion between fp32 and fp16/bf16 , legal if bit[31] and bit[6] of xmisa register are both set to 1, illegal In all other cases
+
+The matrix operands shape is M/K, provided by sizeM x (sizeK/element size in byte).
+
+[width="80%",cols=",,,",align="center",options="header",]
+|===
+| operand datawidth | RLEN (bit) | M | K 
+.3+<|16bit 
+| 128 | 4 | 8 
+| 256 | 8 | 16 
+| 512 | 16 | 32
+.3+<|32bit 
+| 128 | 4 | 4 
+| 256 | 8 | 8 
+| 512 | 16 | 16 
+.3+<|64 bit
+| 128 | 4 | 2 
+| 256 | 8 | 4 
+| 512 | 16 | 8 |
+|===
+
+For matrix-matrix instructions, both sources are matrixs. For matrix-vector instructions, src2 is matrix and src1 is one row of matrix.  Use row0 as an example, the vector operand operates on each row of matrix operand as md[i, j] = ms2[i, j] operations with ms1[0, j].
+
+All floating-point pointwise instructions that perform rounding can select the rounding mode using the frm field. 
+
+Non-widen float pointwise instruction indicates the source and destination operands data width keep the same which are encoded in the instruction. Non-widen float pointwise instruction includes mfadd/mfsub/mfmul/mfmax/mfmin.
+....
+#matrix-matrix fadd
+mfadd.<h/s/d>.mm md, ms2, ms1
+#matrix-vector fadd
+mfadd.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix fsub
+mfsub.<h/s/d>.mm md, ms2, ms1
+#matrix-vector sub
+mfsub.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix fmul
+mfmul.<h/s/d>.mm md, ms2, ms1
+#matrix-vector fmul
+mfmul.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix fmax
+mfmax.<h/s/d>.mm md, ms2, ms1
+#matrix-vector fmax
+mfmax.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix fmin
+mfmin.<h/s/d>.mm md, ms2, ms1
+#matrix-vector fmin
+mfmin.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+....
+
+Widen float pointwise instruction indicates destination operand data width is twice that of the source operand. The data width of source operand is in instruction encoding. If the source element is fp16/bf16 floating-point data, the destination element is fp32 floating-point data, the instruction is classified as fp16/bf16 pointwise arithmetic instructions. If the source element is fp32 floating-point data, the destination element is fp64 floating-point data, the instruction is classified as fp32 pointwise arithmetic instructions. As data width for destination matrix is twice that of source matrix, two matrix register(register-pair) are used by destination matrix specified by md and md+1. Instructions specifying an odd-numbered md is reserved. 
+....
+#matrix-matrix widen fadd
+mfwadd.<h/s>.mm md, ms2, ms1
+#matrix-vector widen fadd
+mfwadd.<h/s>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix widen fsub
+mfwsub.<h/s>.mm md, ms2, ms1
+#matrix-vector widen fsub
+mfwsub.<h/s>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix widen fmul
+mfwmul.<h/s>.mm md, ms2, ms1
+#matrix-vector widen fmul
+mfwmul.<h/s>.mv.i md, ms2, ms1[uimm3]
+....
+
+The convert instruction converts each element from ms1 to destination register md1. Narrow conversion is supported by instruction mfncvt, source elements are twice as wide as destination elements, two matrix register(register-pair) are used by source matrix specified by ms and ms+1. Instructions specifying an odd-numbered ms is reserved. 
+
+image:CVT_P1.png[matrix-narrow-conversion.jpg]
+
+Widen conversion is supported by instruction mfwcvt, destination elements are twice as wide as source elements, two matrix register(register-pair) are used by destination matrix specified by md and md+1. Instructions specifying an odd-numbered md is reserved. 
+image:CVT_P2.png[matrix-widen-conversion.jpg]
+....
+#matrix-matrix floating point narrow convert(fp32tofp16   fp64tofp32)
+mfncvt.<s/d>.mm md, ms1   
+
+#matrix-matrix floating point widen convert(fp16tofp32 fp32tofp64)
+mfwcvt.<h/s>.mm md, ms1
+....
+
+==== Float integer Conversion Instructions
+
+Float integer conversion instructions are optionally supported. 
+
+* for conversion between fp32 and int32,  legal if bit[29] and bit[4] of xmisa register are both set to 1, also legal if bit[29] and bit[7] of xmisa register are both set to 1, illegal In all other cases
+* for conversion between fp16 and int8,  legal if bit[29] and bit[3] of xmisa register are all set to 1, also legal if bit[29] and bit[6] of xmisa register are all set to 1, illegal In all other cases
+
+The conversion from integer to floating point supports non-widen conversion/double widen conversion. Integers support signed and unsigned integers. For double widen conversion, two matrix registers are used by destination matrix specified by md and md+1. Instructions specifying an odd-numbered md is reserved. 
+
+image:FI_CVT_P1.png[matrix-FI-conversion.jpg]
+image:FI_CVT_P2.png[matrix-FIwiden-conversion.jpg]
+
+....
+#matrix-matrix unsigned integer floating point convert(uint32 to fp32)
+mufcvt.<w>.mm md, ms2
+#matrix-matrix signed integer floating point widen convert(uint8 to fp16)
+mufwcvt.<b>.mm md, ms2
+
+#matrix-matrix signed integer floating point convert(sint32 to fp32)
+msfcvt.<w>.mm md, ms2
+#matrix-matrix signed integer floating point widen convert(sint8 to fp16)
+msfwcvt.<b>.mm md, ms2
+....
+
+The conversion from floating point to integer supports non-narrow conversion/half narrow conversion. Integers support signed and unsigned integers. For half narrow conversion, two matrix registers are used by source matrix specified by ms and ms+1. Instructions specifying an odd-numbered ms is reserved.  
+
+image:IF_CVT_P1.png[matrix-IF-conversion.jpg]
+image:IF_CVT_P2.png[matrix-IFnarrow-conversion.jpg]
+
+....
+#matrix-matrix floating point unsigned integer convert(fp32 to uint32)
+mfucvt.<s>.mm md, ms2
+#matrix-matrix floating point unsigned integer narrow convert(fp16 to uint8)
+mfuncvt.<h>.mm md, ms2
+
+#matrix-matrix floating point signed integer convert(fp32 to sint32)
+mfscvt.<s>.mm md, ms2
+#matrix-matrix floating point signed integer narrow convert(fp16 to sint8)
+mfsncvt.<h>.mm md, ms2   
+....
+
+=== Other Instructions
+
+==== Mzero Instruction
+
+Mzero instruction sets the destination register to zero.
+
+....
+#matrix-matrix
+mzero md  
+....
+
+==== Mrelease Instruction
+Mrelease Instruction sets MS to Initial state. 
+
+....
+mrelease  
+....
+_mrelease shares the encoding with mcfgi, with index filed is 3'b111._
+
+
+
+====  Matrix Move Instructions 
+
+Matrix move instructions ignore matrix size configuration.
+
+===== move between matrix registers
+
+The mmov.mm instruction moves a whole matrix register to another matrix register.
+
+The mmov.mv.i instruction moves and duplicates a vector to every row of the destination matrix register. The vector data is a row of matrix register, indexed by uimm3.The log2 (RLEN/32) bits are used. 
+
+....
+#matrix-matrix mov
+mmov.mm md, ms1
+#matrix-vector add,rs1'/uimm3
+mmov.mv.i md, ms1[uimm3]
+....
+
+===== move from GPR to matrix registers
+
+The mdup<b/h/w/d>.m.x instruction moves and duplicates a scalar data to every element of the destination matrix register. 
+
+The mmov<b/h/w/d>.m.x instruction moves a scalar data to an element of the destination matrix register. The elements number within a matrix row is selected by rs1, modulo the number of such elements in a row. The row number is selected by rs1 , divided by the number of such elements in a row. The low log~2~(xmlenb/ element size) bits are used.
+
+The scalar data is taken from the scalar x register specified by rs2 with XLEN data width. If data width < XLEN, the least-significant bits are copied and the upper bits are ignored. If data width > XLEN, the value is sign-extended.
+
+....
+#matrix-scalar mov with duplicate
+mdup<b/h/w/d>.m.x md, rs2
+#matrix-scalar mov 
+mmov<b/h/w/d>.m.x md, rs2, rs1
+....
+
+===== move from matrix registers to GPR
+mmov<b/h/w/d>.x.m instruction moves a scalar data from a matrix register to a general purpose register specified by rd. 
+
+The scalar data is indexed by rs1. The elements number within a matrix row is selected by rs1, modulo the number of such elements in a row. The row number is selected by rs1, divided by the number of such elements in a row.  The low log~2~(xmlenb/ element size) bits of rs1 are used.
+
+If data width > XLEN, the least-significant XLEN bits are transferred and the upper bits are ignored. If data width < XLEN, the value is sign-extended to XLEN bits.
+
+....
+mmov<b/h/w/d>.x.m rd, ms2, rs1
+....
+
+=== Matrix Register Overlap
+
+Instructions support matrix source and destination registers overlap except matrix multiplication instructions. 

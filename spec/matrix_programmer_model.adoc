@@ -1,0 +1,207 @@
+[[chapter2]]
+== Programmer's Model
+
+Matrix extension adds eight two-dimensional matrix registers and six CSRs.
+
+[width="90%",cols="2,2,3,5,align="center",options="header"]
+|===
+|Address|Privilege |Name |Description
+|xxxx |URW |xmrstart |matrix start row position
+|xxxx |URW |xmcsr |matrix control and status register
+|xxxx |URW |xmsize |matrix size configure, matrix size
+|xxxx |URO |xmlenb |matrix register size in byte, mrows*xrlenb
+|xxxx |URO |xrlenb |RLEN (in bytes)
+|xxxx |URO |xmisa |matrix instruction subset
+|===
+
+=== Matrix Registers
+
+If matrix extension is implemented,  there are eight two-dimensional matrix registers named M0, M1, M2, M3, M4, M5, M6 and M7 added to architectural state. 
+
+RLEN represents the length of each register row in bits. It is a constant value in any implementation, and the available RLEN options are 128, 256, or 512 or more. The matrix register row number is RLEN divided by 32, resulting in 4, 8, or 16 or more. Consequently, each matrix register comprises [M x K] MSEW elements, where M is calculated as RLEN divided by 32, K is calculated as RLEN divided by MSEW, and MSEW represents the element size.
+
+The example size of the matrix registers varies as following.
+
+[width="99%",cols="8,8,9,9,9,9",options="header",]
+|===
+|size[2:0] |operand datawidth |RLEN(bit) |M |K |Matrix size in bits
+.3+<|100 .3+<|4bit 
+|128 |4 |32 |512 
+|256 |8 |64 |2048
+|512 |16 |128 |8192
+.3+<|000 .3+<|8bit 
+|128 |4 |16 |512
+|256 |8 |32 |2048
+|512 |16 |64 |8192
+.3+<|001 .3+<|16bit 
+|128 |4 |8 |512
+|256 |8 |16 |2048
+|512 |16 |32 |8192
+.3+<|010 .3+<|32bit 
+|128 |4 |4 |512
+|256 |8 |8 |2048
+|512 |16 |16 |8192
+.3+<|011 .3+<|64bit 
+|128 |4 |2 |512
+|256 |8 |4 |2048
+|512 |16 |8 |8192
+|===
+
+If MSEW remains constant, when RLEN doubles, the rows and the columns both double, resulting in four times as many bits.
+
+image:MREG_diff_MLEN.jpeg[matrix_mlen_example.jpg,width="80%"]
+
+If RLEN remains constant, when MSEW doubles, the rows remain the same while the columns halve.
+
+image:MLEN_diff_msew.jpeg[matrix-sew-example.jpg,align=center]
+
+=== Matrix Size Configure
+
+Matrix size configure  is a XLEN-bit WARL read-write register. It also can be updated by matrix configure instructions. The matrix size register has three fields, sizeK, sizeN and sizeM. Bits[XLEN-1:32] are reserved.
+
+[width="80%",cols="4,4,7",align="center",options="header",]
+|===
+|bits |Name |Description
+|XLEN-1:XLEN-32 |0 |reserved if non-zero
+|31:16 |sizeK[15:0] |column of Matrix A or Matrix B, in bytes
+|15:8 |sizeN[7:0] |row of Matrix B
+|7:0 |sizeM[7:0] |row of Matrix A
+|===
+
+The sizeM/sizeN/sizeK field hold an unsigned integer specifying the source elements needed and the destination elements updated by a matrix instructions. The sizeK which is not the multiples of element size in byte will raise an illegal instruction exception.
+
+For matrix-multiplication instructions, which computing  C[M][N] += A[M][K]*B^T^[N][K], there are 3 source operands and 1 destination operand. Only sizeM x sizeN elements will be updated, the other elements are set by zeros. The source operands dimensions are defined as follows:
+
+* Matrix A: sizeM x (sizeK/element size)
+* Matrix B: sizeN x (sizeK/element size)
+* Matrix C: sizeM x sizeN
+
+Thus, there are the limitations of Matrix shape due to the matrix
+register.
+
+* sizeK <= xrlenb
+* sizeM <= RLEN/32
+* sizeN <= RLEN/32, for fmmacc.h sizeN <= 2*(RLEN/32)
+
+Taking 32-bit matrix-multiplication with RLEN=128 as an example,  the configuration of  sizeM=2 / sizeK=12 / sizeN=2 indicates MatrixA(2x3) x MatrixB^T^(2x3)+MatrixC(2x2), only the green block elements are used or updated by the instruction.
+
+image:TAIL_e1.jpeg[matrix-size-1.jpg]
+
+For pointwise  and load/store instructions, the matrix shapes keep during the execution, which are specified by sizeM and sizeK. Only sizeM x sizeN elements will be updated, the other elements are set by zeros. The size limitations are:
+
+* sizeM <= RLEN/32
+* sizeK <= max_colb
+
+Int32 matrix add as example , the configuration of  sizeM=2/sizeK=12 indicates MatrixA(2x3) x+MatrixB(2x3)=MatrixC(2x3), only the green block elements are used or updated by the instruction.
+
+image:TAIL_e2.jpeg[matrix_size_0.jpg]
+
+=== Matrix Control and Status 
+The xmcsr CSR is a WARL read-write register. Bits[XLEN-1:3] are reserved and should be written with zero. The layout of matrix control and status register is:
+
+[width="80%",cols="2,2,4",align="center",options="header",]
+|===
+|bits |name |description
+|XLEN-1:3 |0 |reserved if non-zero
+|2 |xmsat |Fixed-point accrued saturation flag
+|1:0 |xmxrm |Fixed-point rounding mode
+|===
+
+==== Matrix fixed-point rounding mode 
+
+Matrix fixed-point rounding mode(xmxrm) filed is defined in bit[3:2] of matrix control and status register.  The xmxrm uses the same encoding and rounding algorithm with vxrm[1:0] as follows. Suppose the pre-rounding result is v, and d bits of that result are to be rounded off. Then the rounded result is (v >> d) + r, where r depends on the rounding mode as specified in the following table.
+
+[cols="1,1,6,5",align="center",options="header",]
+|===
+2+|vxrm[1:0] |rounding mode |rounding increment r
+|0 |0 |rnu round-to-nearest-up (add +0.5 LSB)|v[d-1]
+|0 |1 |rne round-to-nearest-even |v[d-1] & (v[d-2:0]≠0 \| v[d])
+|1 |0 |rdn round-down (truncate) |0
+|1 |1 |rod round-to-odd (OR bits into LSB, aka "jam") | !v[d] & v[d-1:0]≠0
+|===
+
+The rounding functions are used to represent this operation in the instruction descriptions below:
+....
+roundoff_unsigned(v, d) = (unsigned(v) >> d) + r
+roundoff_signed(v, d) = (signed(v) >> d) + r
+....
+==== Matrix fixed-point saturation flag
+The xmxsat filed indicates if a fixed-point instruction has had to saturate an output value to fit into a destination format.
+
+
+===  Matrix Register Information 
+
+Matrix register information includes two read-only XLEN-bit registers, which are constant in any implementation.
+
+* xrlenb:  RLEN in byte indicating RLEN-bits state of each matrix register row
+* xmlenb: matrix register size in byte, mrows*xrlenb, mrows=RLEN/32
+
+
+=== Matrix Start Row
+
+The xmrstart read-write register indicates the first matrix  row index to be executed by a matrix load/store instruction. Normally xmrstart is only written by hardware on a trap of matrix load/store instructions, the unsigned value of register specifies the row at which the execution should resume after a resumable trap is handled. 
+
+_All matrix instructions, including mcfg/mcfgi, reset the xmrstart CSR to zero._
+
+The xmrstart CSR is defined to have only enough writable bits to hold the largest row index(one less than the max row) or log2(RLEN/32). The upper bits of the xmrstart CSR are hardwired to zero(reads zero, writes ignored)
+
+_For example, xmrstart would have 2 bits to represent row indices from 0 through 3_
+
+=== Matrix ISA
+
+Xmisa is an XLEN-bit read-only CSR register, specifying the supported
+matrix instruction subset of the current hardware implementation.
+
+[width="85%",cols="2,3,2",align="center",options="header",]
+|===
+|bits |FEATURE |
+|31 | MATRIX_PW_FLOAT|optional
+|29 | MATRIX_PW_FLOAT|optional
+|28 | MATRIX_PW_INT|optional
+|8 |MATRIX_MULT_F16F32  |optional
+|7 |MATRIX_MULT_F32F64 |optional
+|6 |MATRIX_MULT_F16F32 |optional
+|5 |MATRIX_MULT_F64F64 |optional
+|4 |MATRIX_MULT_F32F32 |optional
+|3 |MATRIX_MULT_F16F16 |optional
+|2 |MATRIX_MULT_I16I64 |optional
+|1 |MATRIX_MULT_I8I32 |compulsory
+|0 |MATRIX_MULT_I4I32 |optional
+|===
+
+bit[i] =1 indicates the optional feature is supported.
+
+* MATRIX_MULT_I4I32: for matrix-multiplication instruction, element in source  registers is int4 and in destination registers is int 32;
+* MATRIX_MULT_I8I32: for matrix-multiplication instruction, element in source  registers is int8 and in destination registers is int 32;
+* MATRIX_MULT_I16I64: for matrix-multiplication instruction, element in source  registers is int16 and in destination registers is int 64;
+* MATRIX_MULT_F16F16: for matrix-multiplication instruction, element in source and destination registers are fp16/bf16;
+* MATRIX_MULT_F32F32: for matrix-multiplication instruction, element in source and destination registers are fp32;
+* MATRIX_MULT_F64F64: for matrix-multiplication instruction, element in source and destination registers are fp64;
+* MATRIX_MULT_F16F32: for widen matrix-multiplication instruction, element in source registers is fp16/bf16, element in destination registers is fp16/bf16;
+* MATRIX_MULT_F32F64: for widen matrix-multiplication instruction, element in source registers is fp32 element in destination registers is fp64;
+* MATRIX_PW_INT: for integer pointwise instruction, cannot be set alone, only works if it is enabled with the corresponding integer multiply instruction (refer to section 2.4 for details);
+* MATRIX_PW_FP: for float pointwise instruction, cannot be set alone, only works if it is enabled with the corresponding multiply instruction (refer to section 2.4 for details). 
+* MATRIX_FLOAT_INT_CVT: for float integer conversion instruction, cannot be set alone, only works if it is enabled with the corresponding multiply instruction (refer to section 2.4 for details). 
+
+=== State of Matrix Extension at Reset
+
+The matrix extension must have a consistent state at reset. It is recommended that at reset, CSRs are set to zero.
+
+=== Matrix Context Status
+A matrix context status field, MS, is defined to mstatus and shadowed in sstatus, which can be used to reduce the cost of context save and restore. The MS fields uses the same status encoding as FS/VS/XS, shown in the table.
+
+[width="90%",cols="2,2,2",align="center",options="header",]
+|===
+|status |ms[1:0] |MS Meaning
+|0 |2'b00 |All off
+
+|1 |2'b01 |Initial
+
+|2 |2'b10 |Clean
+
+|3 |2'b11 |Dirty
+|===
+
+Attempts to execute any matrix instructions, or to access the matrix CSRs raise an illegal instruction exception when MS is set to off. If MS is set to initial or clean, executing any instructions that change the matrix state will change the ms to dirty. 
+
+An implementation can use the activity of the Initial state to influence the choice of power-saving states.
