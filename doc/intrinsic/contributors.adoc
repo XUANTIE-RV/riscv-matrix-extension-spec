@@ -2,5 +2,12 @@
 
 This RISC-V specification has been contributed to directly or indirectly by:
 
-QuXianmiao, MaJin
+Jin Ma <jinma@linux.alibaba.com>
+
+Zixuan Wu <zixuan.wu@linux.alibaba.com>
+
+Xianmiao Qu <cooper.qu@linux.alibaba.com>
+
+CunJian Huang <huangcunjian.huang@alibaba-inc.com>
+
 [%hardbreaks]

@@ -1,8 +1,8 @@
 [[header]]
 :description: Matrix Multiplication Extension Intrinsic API Reference Manual
 :company: T-head-Semi
-:revdate: 10/2022
-:revnumber: 0.1
+:revdate: 4/2024
+:revnumber: 0.2
 :revremark: This document is in development. Assume everything can change.
 :url-riscv: http://riscv.org
 :doctype: book
@@ -24,7 +24,7 @@
 :listing-caption: Listing
 :sectnums:
 :toc: left
-:toclevels: 4
+:toclevels: 5
 :source-highlighter: pygments
 ifdef::backend-pdf[]
 :source-highlighter: coderay
