@@ -1,6 +1,6 @@
 [[header]]
 :description: Matrix Multiplication Extension ABI Manual
-:company: T-head-Semi
+:company: C-SKY MicroSystems 
 :revdate: 10/2022
 :revnumber: 0.1
 :revremark: This document is in development. Assume everything can change.
@@ -36,7 +36,7 @@ endif::[]
 :xrefstyle: short
 
 = Matrix Multiplication Extension ABI Manual
-T-Head Semiconductor  
+C-SKY MicroSystems 
 
 // Preamble
 [WARNING]
@@ -54,7 +54,7 @@ Attribution 4.0 International License (CC-BY 4.0). The full
 license text is available at
 https://creativecommons.org/licenses/by/4.0/.
 
-Copyright 2022 by T-Head Semiconductor Corp.
+Copyright © 2023 Hangzhou C-SKY MicroSystems Co., Ltd. All rights reserved. 
 
 [preface]
 include::contributors.adoc[]

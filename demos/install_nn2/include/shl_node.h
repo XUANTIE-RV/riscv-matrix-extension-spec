@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2022 T-Head Semiconductor Co., Ltd. All rights reserved.
+ * Copyright © 2023 Hangzhou C-SKY MicroSystems Co., Ltd. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *

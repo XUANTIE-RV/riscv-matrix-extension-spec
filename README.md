@@ -37,7 +37,7 @@ Some key directories are shown below.
 ## Quick Start
 ### Prepare and clone repos.
 ```
-git clone https://github.com/T-head-Semi/riscv-matrix-extension-spec.git
+git clone https://github.com/XUANTIE-RV/riscv-matrix-extension-spec.git
 cd riscv-matrix-extension-spec
 git submodule update --init
 ```
@@ -49,7 +49,7 @@ cd demos/
 make 
 ./run.sh
 ```
-Please refer to the [demos/README](https://github.com/T-head-Semi/riscv-matrix-extension-spec/blob/master/demos/README.md) for details.
+Please refer to the [demos/README](https://github.com/XUANTIE-RV/riscv-matrix-extension-spec/blob/master/demos/README.md) for details.
 
 ## Matrix Extension Documents
 This project is built using AsciiDoctor (Ruby). The repository has been setup to build the PDF on checkin using GitHub actions. Workflow dependencies are located in the dependencies directory.
@@ -85,7 +85,7 @@ make
 ```
 
 Get your own case and compile into matrix.elf. Both intrinsic and nn libraries can be used to perform this step.
-Please refer to [T-HEAD GNU Compiler Toolchain](https://github.com/T-head-Semi/xuantie-gnu-toolchain) or [HHB](https://www.yuque.com/za4k4z/kvkcoh/sxltga) and [SHL](https://github.com/T-head-Semi/csi-nn2) for details.
+Please refer to [T-HEAD GNU Compiler Toolchain](https://github.com/XUANTIE-RV/xuantie-gnu-toolchain) or [HHB](https://www.yuque.com/za4k4z/kvkcoh/sxltga) and [SHL](https://github.com/XUANTIE-RV/csi-nn2) for details.
 
 Evaluation matrix performance on qemu with RISC-V Matrix Extension(with vector length set to VLEN and matrix length set to RLEN)
 ```

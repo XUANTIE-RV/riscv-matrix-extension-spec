@@ -28,7 +28,7 @@ SHL source code has been published on github
 
 [source,bash]
 ----
-git clone https://github.com/T-head-Semi/csi-nn2.git
+git clone https://github.com/XUANTIE-RV/csi-nn2.git
 cd csi-nn2
 ----
 
@@ -41,7 +41,7 @@ make nn2_ref_x86
 
 #### compile C906 optimization
 
-Download gcc https://occ.t-head.cn/community/download?id=3996672928124047360[2.2.4] from OCC，after decompress and set the path.
+Download gcc from OCC，after decompress and set the path.
 
 [source,c]
 ----

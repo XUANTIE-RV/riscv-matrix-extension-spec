@@ -4,7 +4,7 @@
 
 compiler_file="./toolchain/Xuantie-gcc-linux-glibc-x86_64-matrix.tar.gz"
 compiler_md5="15e6fe82825664494310a1a671b73d6a"
-compiler_address="https://github.com/T-head-Semi/riscv-matrix-extension-spec/releases/download/v0.3.0/Xuantie-gcc-linux-glibc-x86_64-matrix.tar.gz"
+compiler_address="https://github.com/XUANTIE-RV/riscv-matrix-extension-spec/releases/download/v0.3.0/Xuantie-gcc-linux-glibc-x86_64-matrix.tar.gz"
 
 ######make qemu
 echo "--- Make qemu ---"
