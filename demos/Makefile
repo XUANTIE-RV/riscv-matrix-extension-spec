@@ -4,8 +4,8 @@ NN2_DIR=install_nn2
 CC = gcc/bin/riscv64-unknown-linux-gnu-gcc
 CFLAGS += -march=rv64gcv_zfh_xtheadc_xtheadmatrix -mabi=lp64d -O2
 INCLUDE += -I ${NN2_DIR}/include
-LDFLAGS_RVM = -L ${NN2_DIR}/lib -lshl_rvm -lm -static
-LDFLAGS_RVV = -L ${NN2_DIR}/lib -lshl_rvv -lm -static
+LDFLAGS_RVM = -L ${NN2_DIR}/lib -lshl_rvm -lm -static -Wl,--no-warn-mismatch
+LDFLAGS_RVV = -L ${NN2_DIR}/lib -lshl_rvv -lm -static -Wl,--no-warn-mismatch
 
 all: gemm_int8 gemm_fp16 resnet50_int8 resnet50_fp16 intrinsic gemm_int8_rvv gemm_fp16_rvv resnet50_int8_rvv resnet50_fp16_rvv
 
