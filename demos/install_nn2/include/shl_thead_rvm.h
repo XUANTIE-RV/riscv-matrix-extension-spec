@@ -24,7 +24,7 @@
 #include "shl_thead_rvv.h"
 
 #ifdef __riscv_xtheadmatrix
-#include <riscv_matrix.h>
+#include <thead_matrix.h>
 #define MATRIX_PW_I32  // requantize inst: enable
 #endif                 // __riscv_xtheadmatrix
 
