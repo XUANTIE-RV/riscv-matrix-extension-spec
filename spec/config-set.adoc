@@ -1,0 +1,141 @@
+Due to hardware resource constraints, one of the common ways to handle large-sized matrix multiplication is "tiling", where each iteration of the loop processes a subset of elements, and then continues to iterate until all elements are processed. The Matrix extension provides direct, portable support for this approach.
+
+The block processing of matrix multiplication requires three levels of loops to iterate in the direction of m/k/n of the input application tiles.
+
+For each iteration, most of the matrix multiplication can fully use the input tile registers. But when dealing with the tail of each input application tile's dimension, the length of each multiplication dimension like mtilem/mtiln/mtilek need to be updated to proper tail size.  
+
+//A set of instructions is provided to allow rapid configuration of the values in `mtile*` and `mtype` to match application needs. 
+
+A set of instructions is provided to allow rapid configuration of the values in `mtile*` to match application needs. 
+
+For a simple matrix multiplication example, check out the Section Intrinsic Example, which describes how the code keeps track of the matrices shapes each iteration.
+
+//The `msettype[i]` instructions set the `mtype` CSR based on their arguments, and write the new value of mtype into rd.
+
+//```
+//msettypei  rd, imm      # rd = new mtype, imm = new mtype[31:0] setting.
+//msettype   rd, rs1      # rd = new mtype, rs1 = new mtype value.
+//```
+
+//The `mset*` instructions set the specified field of `mtype` without affecting other fields.
+//```
+//# Set integer type fields.
+//msetint rd, int4     # rd = new mtype, set mint4 = 1 to enable INT4 type.
+//msetint rd, int8     # rd = new mtype, set mint8 = 1 to enable INT8 type.
+//msetint rd, int16    # rd = new mtype, set mint16 = 1 to enable INT16 type.
+//msetint rd, int32    # rd = new mtype, set mint32 = 1 to enable INT32 type.
+//msetint rd, int64    # rd = new mtype, set mint64 = 1 to enable INT64 type.
+
+//# Set float point type fields.
+//msetfp  rd, fp8    # rd = new mtype, set mfp8 = 1 to enable 3 8-bit float types.
+//msetfp  rd, fp16   # rd = new mtype, set mfp16 = 1 to enable 2 16-bit float types.
+//msetfp  rd, fp32   # rd = new mtype, set mfp32 = 1 to enable 2 32-bit float types.
+//msetfp  rd, fp64   # rd = new mtype, set mfp64 = 1 to enable FP64 type.
+//```
+
+//The `munset*` instructions unset the specified field of `mtype` without affecting other fields.
+//```
+//munsetint rd, int4      # rd = new mtype, set mint4 = 0 to disable INT4 type.
+//munsetint rd, int8      # rd = new mtype, set mint8 = 0 to disable INT8 type.
+//munsetint rd, int16     # rd = new mtype, set mint16 = 0 to disable INT16 type.
+//munsetint rd, int32     # rd = new mtype, set mint32 = 0 to disable INT32 type.
+//munsetint rd, int64     # rd = new mtype, set mint64 = 0 to disable INT64 type.
+//
+//munsetfp rd, fp8   # rd = new mtype, set mfp8 = 0 to disable 3 8-bit float types.
+//munsetfp rd, fp16  # rd = new mtype, set mfp16 = 0 to disable 2 16-bit float types.
+//munsetfp rd, fp32  # rd = new mtype, set mfp32 = 0 to disable 2 32-bit float types.
+//munsetfp rd, fp64  # rd = new mtype, set mfp64 = 0 to disable FP64 type.
+//```
+
+//The field to be set or unset is specified by `mtf` (inst[42:39]) and the value is specified by imm[10:0] (inst[25:15]).
+//
+//.Field to be set or unset
+//[cols="^2,^2"]
+//|===
+//|       *mtf*   | *field*
+//|        0000   | mint4
+//|        0001   | mint8
+//|        0010   | mint16
+//|        0011   | mint32
+//|        0100   | mint64
+//|        0101   | mfp8
+//|        0110   | mfp16
+//|        0111   | mfp32
+//|        1000   | mfp64
+//|===
+
+
+The `msettile{m|k|n}[i]` instructions set the mtilem/mtilek/mtilen CSRs based on their arguments.
+
+```
+msettilemi  imm          # imm = new mtilem
+msettilem   rs1          # rs1 = new mtilem
+msettileki  imm          # imm = new mtilek
+msettilek   rs1          # rs1 = new mtilek
+msettileni  imm          # imm = new mtilen
+msettilen   rs1          # rs1 = new mtilen
+```
+
+//==== mtype Encoding
+//
+//include::mtype.adoc[]
+//
+//The new `mtype` value is encoded in the immediate fields of `msettypei`, and in the `rs1` register for `msettype`. Each field can be set or unset with `msetfp`, `msetint`, `munsetfp` and `munsetint` instructions independently.
+//
+//The fields encoded by instruction directly have higher priority than the same fileds in `mtype` CSR.
+
+==== Matrix Size Configuration Instructions Constraints
+
+There are three values, `TMMAX`, `TKMAX` and `TNMAX`, represent the maximum shapes of the matrix tiles that could be stored in matrix registers, and can be operated on with a single matrix instruction given the current SEW settings.
+
+The values of `TMMAX`, `TKMAX` and `TNMAX` are related to MLEN, RLEN and the configuration of `mmode`. 
+
+For `A x B` mode (`mmode=00`),
+
+* TMMAX = MLEN / RLEN
+* TKMAX = min(MLEN / RLEN, RLEN / SEW)
+* TNMAX = RLEN / SEW
+
+For `AT x B` mode (`mmode=10`),
+
+* TMMAX = min(MLEN / RLEN, RLEN / SEW)
+* TKMAX = MLEN / RLEN
+* TNMAX = RLEN / SEW
+
+For `A x BT` mode (`mmode=01`).
+
+* TMMAX = MLEN / RLEN
+* TKMAX = RLEN / SEW
+* TNMAX = MLEN / RLEN 
+
+For examples, with `MLEN=256`, `RLEN=64` and `mmode=00`, `TMMAX`, `TKMAX` and `TNMAX` values are shown below.
+
+```
+SEW=8,  TMMAX=4, TKMAX=4, TNMAX=8       
+SEW=16, TMMAX=4, TKMAX=4, TNMAX=4       
+SEW=32, TMMAX=4, TKMAX=2, TNMAX=2       
+```
+
+For examples, with `MLEN=2048`, `RLEN=256` and `mmode=01`, `TMMAX`, `TKMAX` and `TNMAX` values are shown below.
+
+```
+SEW=8,  TMMAX=8, TKMAX=32, TNMAX=8
+SEW=16, TMMAX=8, TKMAX=16, TNMAX=8
+SEW=32, TMMAX=8, TKMAX=8,  TNMAX=8
+```
+
+The new tile shape settings should take `TMMAX` / `TKMAX` / `TNMAX` into consideration, generally the new `tilem` /`tilen` / `tilek` should be no bigger than `TMMAX` / `TKMAX` / `TNMAX`. Executing most instructions like matrix load/store and multiplication under the unsupported `tilem` / `tilek` / `tilen` will raise the illegal instruction exceptions.
+
+For the `msettile{m|k|n}i` instructions, the new `tilem` / `tilek` / `tilen` is encoded as a 10-bit unsigned immediate in the rs1.
+
+Continue to use `MLEN=256`, `RLEN=64` and `mmode=00` as a example. When SEW=16, TMMAX=4, TKMAX=4, TNMAX=8.
+
+If A is a 7 x 8 matrix and B is a 8 x 14 matrix, we could get `mtilem/mtilek/mtilen` values as show below, in the last loop of tiling.
+
+image::tiled-matmul-example.svg[Tiled Matrix Multiplication Example]
+
+Continue to use `MLEN=2048`, `RLEN=256` and `mmode=01` as a example. When SEW=32, TMMAX=8, TKMAX=8, TNMAX=8.
+
+image::tiled-matmul-example2.svg[Tiled Matrix Multiplication Example2]
+
+If A is a 10 x 12 matrix and BT is a 11 x 12 matrix, we could get `mtilem/mtilek/mtilen` values as show above, in the last loop of tiling.

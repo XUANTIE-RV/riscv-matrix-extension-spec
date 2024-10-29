@@ -1,0 +1,13 @@
+[[intro]]
+
+include::intro.adoc[]
+
+include::param.adoc[]
+
+include::program-model.adoc[]
+
+include::instructions.adoc[]
+
+include::intrinsic.adoc[]
+
+//include::inst-list.adoc[]

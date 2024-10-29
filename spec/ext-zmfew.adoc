@@ -1,0 +1,43 @@
+=== Zmfew: Matrix Float Point Element-wise Extension 
+
+Matrix float point element-wise add/sub/multiply instructions. The input and output matrices are both accumulation registers and always with size `mtilem x mtilen`. The element-wise calculation of tile registers can be implemented by combining data move instructions (such as `mmve*.a.t` and `mmve*.t.a`).
+
+Hardware implementation support this extension must set misa[XLEN-5] bit to 1. 
+
+```
+
+# Float matrix element-wise add.
+# md[i,j] = ms1[i,j] + ms2[i,j]
+mfadd.[cf|hf|f|d].mm     md, ms1, ms2
+mfwadd.[cf|hf|f].mm      md, ms1, ms2  # output double widen
+
+# Float matrix element-wise subtract.
+# md[i,j] = ms1[i,j] - ms2[i,j]
+mfsub.[cf|hf|f|d].mm     md, ms1, ms2
+mfwsub.[cf|hf|f].mm      md, ms1, ms2  # output double widen
+
+# Float matrix element-wise minimum.
+# md[i,j] = min{ms1[i,j], ms2[i,j]}
+mfmin.[cf|hf|f|d].mm     md, ms1, ms2
+
+# Float matrix element-wise maximum.
+# md[i,j] = max{ms1[i,j], ms2[i,j]}
+mfmax.[cf|hf|f|d].mm     md, ms1, ms2
+
+# Float matrix element-wise multiply.
+# md[i,j] = ms1[i,j] * ms2[i,j]
+mfmul.[cf|hf|f|d].mm     md, ms1, ms2
+mfwmul.[cf|hf|f].mm      md, ms1, ms2  # output double widen
+
+# Float matrix element-wise divide.
+# md[i,j] = ms1[i,j] / ms2[i,j]
+mfdiv.[cf|hf|f|d].mm     md, ms1, ms2
+
+# Float matrix element-wise square root.
+# md[i,j] = ms1[i,j] ^ (1/2)
+mfsqrt.[cf|hf|f|d].m     md, ms1
+```
+
+NOTE: There is no matrix-scalar and matrix-vector version for element-wise instructions. Such operations can be replaced by a broadcast instruction and a matrix-matrix element-wise instruction.
+
+//Float point Element-wise add/sub/multiply instructions support mask register. The mask register is a general accumulation register whose element is in bit. Bit 1 means the corresponding element in source register is active. Bit 0 means the corresponding element will not be calculated and its value is set to 0 (agnostic).

@@ -1,0 +1,22 @@
+== Implementation-defined Constant Parameters
+
+Each hart supporting a matrix extension defines four parameters:
+
+. The maximum size in bits of a matrix element that any operation can produce or consume, stem:[\rm{ELEN} \ge 8], which must be a power of 2.
+. The number of bits in a single matrix tile register, MLEN, which must be a power of 2, and must be no greater than 2^32^.
+. The number of bits in a row of a single matrix tile register, RLEN, which must be a power of 2, and must be no greater than 2^16^.
+. The multiple of length for matrix accumulation registers, AMUL, where the number of bits in a row of a single matrix accumulation register is stem:[\rm{RLEN} \times \rm{AMUL}], and the number of bits in a single matrix accumulation register is stem:[\rm{MLEN} \times \rm{AMUL}]. AMUL can be integer value or fractional value, meaning the number of bits in a row of a single matrix accumulation register can be greater or lesser than the number of bits in a row of a single matrix tile register.
+. The number of rows of tile register and accumulation register, ROWNUM, equals to MLEN/RLEN, which must be a power of 2. 
+
+Some constraints on these parameters are defined as following.
+
+. stem:[\rm{ELEN} \le \rm{RLEN} \le \rm{MLEN}], the maximum matrix tile size supported is stem:[2^{16} \times 2^{16}].
+. The length of matrix accumulation registers should be no less than ELEN, which means AMUL >= ELEN / RLEN.
+. For implmentations with one-eighth-narrowing accumulation space, stem:[\rm{AMUL} = 1/8].
+. For implmentations with quarter-narrowing accumulation space, stem:[\rm{AMUL} = 1/4].
+. For implmentations with half-narrowing accumulation space, stem:[\rm{AMUL} = 1/2].
+. For implmentations without widening accumulation space, stem:[\rm{AMUL} = 1].
+. For implmentations with double-widening accumulation space, stem:[\rm{AMUL} = 2].
+. For implmentations with quadruple-widening accumulation space, stem:[\rm{AMUL} = 4].
+. For implmentations with octuple-widening accumulation space, stem:[\rm{AMUL} = 8].
+

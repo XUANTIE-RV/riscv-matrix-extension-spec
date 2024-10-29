@@ -1,0 +1,117 @@
+=== Zmsp*: Matrix Sparsity Extension
+
+The Zmspa extension allows to perform 2:4 sparsing for left matrix.
+
+The Zmspb extension allows to perform 2:4 sparsing for right matrix.
+
+Hardware implementation support this extension must set misa[XLEN-4] bit to 1. 
+
+The Zmsp* extension adds an unprivileged CSR, two configuration instructions, and two groups of matrix multiplication instructions, both for left matrix and right matrix.
+
+.Sparsity CSRs
+[cols="^2,^2,^2,10",options="header"]
+|===
+| Address | Privilege | Name   | Description
+|  0xC4F  |    URO    | mdsp   | The direction of sparsity (0 for row and 1 for column).
+|===
+
+==== Configuration Instructions
+
+The Zmsp* extension adds two configuration instruction to configure the source index register and sparsity direction.
+
+```
+# Set sparsity direction.
+msetdspi  rd, imm   # rd = new mdsp, imm = direction
+msetdsp   rd, rs1   # rd = new mdsp, rs1 = direction
+```
+
+An implementation may support one of sparsity directions or both two directions. The `msetdsp[i]` always returns the supported direction.
+
+==== Matrix Multiplication Instructions
+
+The Zmspa extension adds a group of matrix multiplication instructions for left matrix sparsity.
+
+```
+# Unigned integer sparsing matrix multiplication and add, md = md + ms1 * ms2.
+mmau.spa.[dw].mm   md, ms1, ms2, sps
+mmau.spa.[w].mm    md, ms1, ms2, sps
+mmau.spa.[h].mm    md, ms1, ms2, sps
+mqmau.spa.[b].mm   md, ms1, ms2, sps
+momau.spa.[hb].mm  md, ms1, ms2, sps
+
+msmau.spa.[dw].mm  md, ms1, ms2, sps
+msmau.spa.[w].mm   md, ms1, ms2, sps
+msmau.spa.[h].mm   md, ms1, ms2, sps
+msqmau.spa.[b].mm  md, ms1, ms2, sps
+msomau.spa.[hb].mm md, ms1, ms2, sps
+
+# Signed integer sparsing matrix multiplication and add, md = md + ms1 * ms2.
+mma.spa.[dw].mm    md, ms1, ms2, sps
+mma.spa.[w].mm     md, ms1, ms2, sps
+mma.spa.[h].mm     md, ms1, ms2, sps
+mqma.spa.[b].mm    md, ms1, ms2, sps
+moma.spa.[hb].mm   md, ms1, ms2, sps
+
+msma.spa.[dw].mm   md, ms1, ms2, sps
+msma.spa.[w].mm    md, ms1, ms2, sps
+msma.spa.[h].mm    md, ms1, ms2, sps
+msqma.spa.[b].mm   md, ms1, ms2, sps
+msoma.spa.[hb].mm  md, ms1, ms2, sps
+
+# Float point sparsing matrix multiplication and add, md = md + ms1 * ms2.
+mfma.spa.[d].mm    md, ms1, ms2, sps
+mfma.spa.[f].mm    md, ms1, ms2, sps
+mfma.spa.[hf].mm   md, ms1, ms2, sps
+
+mfwma.spa.[f].mm   md, ms1, ms2, sps
+mfwma.spa.[hf].mm  md, ms1, ms2, sps
+mfwma.spa.[cf].mm  md, ms1, ms2, sps
+mfqma.spa.[cf].mm  md, ms1, ms2, sps
+```
+
+The Zmspb extension adds a group of matrix multiplication instructions for right matrix sparsity.
+
+```
+# Unigned integer sparsing matrix multiplication and add, md = md + ms1 * ms2.
+mmau.spb.[dw].mm   md, ms1, ms2, sps
+mmau.spb.[w].mm    md, ms1, ms2, sps
+mmau.spb.[h].mm    md, ms1, ms2, sps
+mqmau.spb.[b].mm   md, ms1, ms2, sps
+momau.spb.[hb].mm  md, ms1, ms2, sps
+
+msmau.spb.[dw].mm  md, ms1, ms2, sps
+msmau.spb.[w].mm   md, ms1, ms2, sps
+msmau.spb.[h].mm   md, ms1, ms2, sps
+msqmau.spb.[b].mm  md, ms1, ms2, sps
+msomau.spb.[hb].mm md, ms1, ms2, sps
+
+# Signed integer sparsing matrix multiplication and add, md = md + ms1 * ms2.
+mma.spb.[dw].mm    md, ms1, ms2, sps
+mma.spb.[w].mm     md, ms1, ms2, sps
+mma.spb.[h].mm     md, ms1, ms2, sps
+mqma.spb.[b].mm    md, ms1, ms2, sps
+moma.spb.[hb].mm   md, ms1, ms2, sps
+
+msma.spb.[dw].mm   md, ms1, ms2, sps
+msma.spb.[w].mm    md, ms1, ms2, sps
+msma.spb.[h].mm    md, ms1, ms2, sps
+msqma.spb.[b].mm   md, ms1, ms2, sps
+msoma.spb.[hb].mm  md, ms1, ms2, sps
+
+# Float point sparsing matrix multiplication and add, md = md + ms1 * ms2.
+mfma.spb.[d].mm    md, ms1, ms2, sps
+mfma.spb.[f].mm    md, ms1, ms2, sps
+mfma.spb.[hf].mm   md, ms1, ms2, sps
+
+mfwma.spb.[f].mm   md, ms1, ms2, sps
+mfwma.spb.[hf].mm  md, ms1, ms2, sps
+mfwma.spb.[cf].mm  md, ms1, ms2, sps
+mfqma.spb.[cf].mm  md, ms1, ms2, sps
+```
+
+`mba` and `frm` are used as optional suffixes after `sps`.
+
+```
+m*ma*.spa.*.m      md, ms1, ms2, sps, [mba], [frm]
+m*ma*.spb.*.m      md, ms1, ms2, sps, [mba], [frm]
+```

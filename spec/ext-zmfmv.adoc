@@ -1,0 +1,33 @@
+=== Zmfmv*: Matrix and Float-point Data move Extension
+
+This extension provides float point and matrix data move instructions. Hardware implementation support this extension must set misa[XLEN-8] bit to 1. 
+
+```
+# f[rd] = ms1[i, j], i = rs2[15:0], j = rs2[XLEN-1:16]
+# rd is a float-point register and ms1 is a tile register.
+mfmve8.f.t  rd, ms1, rs2
+mfmve16.f.t rd, ms1, rs2
+mfmve32.f.t rd, ms1, rs2
+mfmve64.f.t rd, ms1, rs2
+
+# md[i, j] = f[rs1], i = rs2[15:0], j = rs2[XLEN-1:16]
+# md is a tile register and rs1 is a float-point register.
+mfmve8.t.f  md, rs1, rs2
+mfmve16.t.f md, rs1, rs2
+mfmve32.t.f md, rs1, rs2
+mfmve64.t.f md, rs1, rs2
+
+# f[rd] = ms1[i, j], i = rs2[15:0], j = rs2[XLEN-1:16]
+# rd is a float-point register and ms1 is an accumulation register.
+mfmve8.f.a  rd, ms1, rs2
+mfmve16.f.a rd, ms1, rs2
+mfmve32.f.a rd, ms1, rs2
+mfmve64.f.a rd, ms1, rs2
+
+# md[i, j] = f[rs1], i = rs2[15:0], j = rs2[XLEN-1:16]
+# md is an accumulation register and rs1 is a float-point register.
+mfmve8.a.f  md, rs1, rs2
+mfmve16.a.f md, rs1, rs2
+mfmve32.a.f md, rs1, rs2
+mfmve64.a.f md, rs1, rs2
+```

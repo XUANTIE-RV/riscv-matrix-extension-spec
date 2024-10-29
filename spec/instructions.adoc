@@ -1,0 +1,39 @@
+== Instructions
+
+=== Instruction Formats
+
+include::inst-format.adoc[]
+
+=== Configuration-Setting Instructions
+
+include::config-set.adoc[]
+
+=== Load and Store Instructions
+
+include::load-store.adoc[]
+
+=== Data Move Instructions
+
+include::data-move.adoc[]
+
+=== Matrix Multiplication Instructions
+
+==== Matrix Multiplication Instructions
+
+include::matmul.adoc[]
+
+//==== Element-Wise Instructions
+
+//include::element-wise.adoc[]
+
+//=== Mzero Instructions
+
+//include::mzero.adoc[]
+
+=== Mrelease Instructions
+
+include::mrelease.adoc[]
+
+=== Type-Convert Instructions
+
+include::type-convert.adoc[]

@@ -1,0 +1,27 @@
+The instructions in the matrix extension use 64-bit encoding with prefix 0111111 at the lowest 7 bits and a major opcode xxyyy11 at [38:32], where stem:[\rm{yyy} \ne 111].
+
+Instruction formats are listed below.
+
+Configuration instructions, where `funct3` field, inst[14:12], is fixed to 000. The `imm` field supports 32-bit immediate operand.
+
+image::inst64-config.svg[alt="Configuration Instruction Format", align="center"]
+
+Load & store instructions, where `funct3` field is fixed to 001, and `ls` field indicates the direction of memory access (load or store). For higher 32 bits, `eew` field indicates the effective element width, `bma` field indicates if the out-of-bound elements are agnostic, and `mt` field indicates the type of matrix (00 for output/accumulation matrix, 01 for left matrix and 10 for right matrix).
+
+image::inst64-ls.svg[alt="Load-Store Instruction Format", align="center"]
+
+Data move instructions, where `funct3` field is fixed to 010, `di` field indicates the moving direction, and `rc` field indicates the moving dimension (in row, in column or in element). 
+
+image::inst64-mv.svg[alt="Data Move Instruction Format", align="center"]
+
+Matrix multiplication instructions, where `funct3` field is fixed to 100, and `fp` field indicates if the operation is float-point type. `typ*` field indicates the data type of source or destination elements (000-011 for 8b-64b, 111 for 4b, and 100 to use `msew` field of `mtype` CSR). `frm` field indicates the rounding mode of float-point result, where the encoding is the same as RVF. `sps` field specifies the source sparsity index register and `sp` field indicates if the sparsing mode is enabled.
+
+image::inst64-mm.svg[alt="Matrix Multiplication Instruction Format", align="center"]
+
+Element-wise instructions, where `funct3` field is fixed to 101, and `fp` field indicates if the operation is float-point type. The `typ*` and `frm` fields are the same as matrix multiplication instructions. The `mks` and `mk` fields are the same as data move instructions.
+
+image::inst64-ew.svg[alt="Element-wise Instruction Format", align="center"]
+
+Type-convert instructions, where `funct3` field is fixed to 111, `fd` field indicates if the destination is float point, and `fs` field indicates if the source is float point. Other fields are the same as element-wise instructions.
+
+image::inst64-cvt.svg[alt="Type-convert Instruction Format", align="center"]

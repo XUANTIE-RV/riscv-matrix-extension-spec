@@ -1,0 +1,88 @@
+Matrix Multiplication operations take two matrix tiles from matrix **tile registers** specified by `ms1` and `ms2` respectively, and the output matrix tile is a matrix **accumulation register** specified by `md`.
+
+```
+# Unigned integer matrix multiplication and add, md = md + ms1 * ms2.
+mmau.[dw].mm    md, ms1, ms2        # uint64, output no-widen
+mmau.[w].mm     md, ms1, ms2        # uint32, output no-widen
+mmau.[h].mm     md, ms1, ms2        # uint16, output no-widen
+mwmau.[w].mm    md, ms1, ms2        # uint32, output double-widen
+mwmau.[h].mm    md, ms1, ms2        # uint16, output double-widen
+mqmau.[b].mm    md, ms1, ms2        # uint8, output quad-widen
+momau.[hb].mm   md, ms1, ms2        # uint4, output oct-widen
+
+msmau.[dw].mm   md, ms1, ms2        # uint64, output no-widen and saturated
+msmau.[w].mm    md, ms1, ms2        # uint32, output no-widen and saturated
+msmau.[h].mm    md, ms1, ms2        # uint16, output no-widen and saturated
+mswmau.[w].mm   md, ms1, ms2        # uint32, output double-widen and saturated
+mswmau.[h].mm   md, ms1, ms2        # uint16, output double-widen and saturated
+msqmau.[b].mm   md, ms1, ms2        # uint8, output quad-widen and saturated
+msomau.[hb].mm  md, ms1, ms2        # uint4, output oct-widen and saturated
+
+# Signed integer matrix multiplication and add, md = md + ms1 * ms2.
+mma.[dw].mm     md, ms1, ms2        # int64, output no-widen
+mma.[w].mm      md, ms1, ms2        # int32, output no-widen
+mma.[h].mm      md, ms1, ms2        # int16, output no-widen
+mwma.[w].mm     md, ms1, ms2        # int32, output double-widen
+mwma.[h].mm     md, ms1, ms2        # int16, output double-widen
+mqma.[b].mm     md, ms1, ms2        # int8, output quad-widen
+moma.[hb].mm    md, ms1, ms2        # int4, output oct-widen
+
+msma.[dw].mm    md, ms1, ms2        # int64, output no-widen and saturated
+msma.[w].mm     md, ms1, ms2        # int32, output no-widen and saturated
+msma.[h].mm     md, ms1, ms2        # int16, output no-widen and saturated
+mswma.[w].mm    md, ms1, ms2        # int32, output double-widen and saturated
+mswma.[h].mm    md, ms1, ms2        # int16, output double-widen and saturated
+msqma.[b].mm    md, ms1, ms2        # int8, output quad-widen and saturated
+msoma.[hb].mm   md, ms1, ms2        # int4, output oct-widen and saturated
+```
+Hardware can support a subset of these instructions above. Executing of unsupported instructions will raise illegal instruction exception. The supported instructions are shown in `misa` registers.
+
+For `moma.[hb].mm` / `msoma.[hb].mm` / `momau.[hb].mm` / `msomau.[hb].mm` instructions, illegal instruction exception will raise if bit[0] of `misa` register is 0. These instructions are optional for hardware implementation.
+
+For `msqma.[b].mm` / `mqma.[b].mm` / `msqmau.[b].mm` / `mqmau.[b].mm` instructions, illegal instruction exception will raise if bit[1] of `misa` register is 0. These instructions are compulsory for hardware implementation.
+
+For `msma.[h].mm` / `mma.[h].mm` / `msmau.[h].mm` / `mmau.[h].mm` instructions, illegal instruction exception will raise if bit[2] of `misa` register is 0. These instructions are optional for hardware implementation.
+
+For `mswma.[h].mm` / `mwma.[h].mm` / `mswmau.[h].mm` / `mwmau.[h].mm` instructions, illegal instruction exception will raise if bit[3] of `misa` register is 0. These instructions are optional for hardware implementation.
+
+For `msma.[w].mm` / `mma.[w].mm` / `msmau.[w].mm` / `mmau.[w].mm` instructions, illegal instruction exception will raise if bit[4] of `misa` register is 0. These instructions are optional for hardware implementation.
+
+For `mswma.[w].mm` / `mwma.[w].mm` / `mswmau.[w].mm` / `mwmau.[w].mm` instructions, illegal instruction exception will raise if bit[5] of `misa` register is 0. These instructions are optional for hardware implementation.
+
+For `msma.[dw].mm` / `mma.[dw].mm` / `msmau.[dw].mm` / `mmau.[dw].mm` instructions, illegal instruction exception will raise if bit[6] of `misa` register is 0. These instructions are optional for hardware implementation.
+
+```
+# Float point matrix multiplication and add, md = md + ms1 * ms2.
+mfma.[d].mm     md, ms1, ms2        # 64-bit float point
+mfma.[f].mm     md, ms1, ms2        # 32-bit float point
+mfma.[hf].mm    md, ms1, ms2        # 16-bit float point
+
+mfwma.[f].mm    md, ms1, ms2        # 32-bit float point, output double-widen
+mfwma.[hf].mm   md, ms1, ms2        # 16-bit float point, output double-widen
+mfwma.[cf].mm   md, ms1, ms2        # 8-bit float point, output double-widen
+mfqma.[cf].mm   md, ms1, ms2        # 8-bit float point, output quad-widen
+```
+
+Hardware can support a subset of these instructions above. Executing of unsupported instructions will raise illegal instruction exception. The supported instructions are shown in `misa` registers.
+
+For `mfma.[d].mm` instructions, illegal instruction exception will raise if bit[7] of `misa` register is 0. These instructions are optional for hardware implementation.
+
+For `mfma.[f].mm` instructions, illegal instruction exception will raise if bit[8] and bit[9] of `misa` register are 0. Bit[8] indicates that the source operand is tf32 type while bit[9] indicates the source operand is fp32 type. These instructions are optional for hardware implementation.
+
+For `mfwma.[f].mm` instructions, illegal instruction exception will raise if bit[10] of `misa` register is 0. These instructions are optional for hardware implementation.
+
+For `mfwma.[hf].mm` instructions, illegal instruction exception will raise if bit[11] of `misa` register is 0. These instructions are optional for hardware implementation. The source operand type can be fp16 or bf16.
+
+For `mfma.[hf].mm` instructions, illegal instruction exception will raise if bit[12] of `misa` register is 0. These instructions are optional for hardware implementation.
+
+For `mfqma.[cf].mm` instructions, illegal instruction exception will raise if bit[13] of `misa` register is 0. These instructions are optional for hardware implementation. The source operand type can be fp8 or bf8.
+
+For `mfwma.[cf].mm` instructions, illegal instruction exception will raise if bit[14] of `misa` register is 0. These instructions are optional for hardware implementation. The source operand type can be fp8 or bf8. The dest operand type can be fp16 or bf16.
+
+//A subset of these instructions is supported according to the implemented standard extensions (Zmi4, Zmi8, etc.).
+
+The field `mfrm` in `mcsr` register indicates the rounding mode of float-point matrix instructions. The encoding is shown in chapter 3.5.
+
+For both integer and float point instructions, the output matrix register may not be filled. The elements out of bound of `mtilem x mtilen` are set to 0 (agnostic).
+
+For executing matrix multiplication instructions, illegal instruction exception will occur under unsupported corresponding mtilem/mtilen/mtilek setting. The illegal condition for upper instructions is mtilem/mtilk/mtilen is bigger than TMMAX/TKMAX/TNMAX/.

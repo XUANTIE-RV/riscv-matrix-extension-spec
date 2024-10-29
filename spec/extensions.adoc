@@ -1,0 +1,23 @@
+== Standard Matrix Extensions
+
+include::ext-mode.adoc[]
+
+include::ext-zmfmv.adoc[]
+
+include::ext-zmt.adoc[]
+
+include::ext-zmbtpm.adoc[]
+
+include::ext-zmiew.adoc[]
+
+include::ext-zmfew.adoc[]
+
+//include::ext-type.adoc[]
+
+include::ext-zmv.adoc[]
+
+include::ext-zmi2c.adoc[]
+
+include::ext-zmc2i.adoc[]
+
+include::ext-zmsp.adoc[]

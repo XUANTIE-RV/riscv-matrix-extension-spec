@@ -1,0 +1,33 @@
+.`maisa` register layout
+[cols="^2,^2,^2"]
+|===
+|     Bits   | Feature    |  Support Type 
+|    XLEN-1  | mab        |  optional
+|    XLEN-2  | matb       |  optional
+|    XLEN-3  | mabt       |  optional
+|    XLEN-4  | msp        |  optional
+|    XLEN-5  | mfew       |  optional
+|    XLEN-6  | miew       |  optional
+|    XLEN-7  | mabtpm     |  optional
+|    XLEN-8  | mfmv       |  optional
+|    XLEN-9  | mt         |  optional
+|    XLEN-10 | mmv        |  optional
+|    XLEN-11 | mi2c       |  optional
+|    XLEN-12 | mc2i       |  optional 
+| XLEN-13:15 | 0          |  reserved
+|        14  | mmf8f16    |  optional 
+|        13  | mmf8fp32   |  optional 
+|        12  | mmfp16fp16 |  optional 
+|        11  | mmf16fp32  |  optional 
+|        10  | mmfp32fp64 |  optional 
+|         9  | mmfp32fp32 |  optional 
+|         8  | mmtf32fp32 |  optional 
+|         7  | mmfp64fp64 |  optional 
+|         6  | mmi64i64   |  optional 
+|         5  | mmi32i64   |  optional 
+|         4  | mmi32i32   |  optional 
+|         3  | mmi16i32   |  optional 
+|         2  | mmi16i16   |  optional 
+|         1  | mmi8i32    |  compulsory 
+|         0  | mmi4i32    |  optional 
+|===

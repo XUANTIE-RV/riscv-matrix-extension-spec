@@ -1,20 +1,21 @@
-SPEC_SOURCE := spec_header.adoc
-SPEC_RESULT := RISC-V-Matrix-Extension-spec.pdf
+HEADER_SOURCE := header.adoc
+PDF_RESULT := riscv-matrix-spec.pdf
 
-all: build_spec
+all: build
 
-build_spec:
+build:
 
-	@echo "Building specification"
-	asciidoctor-pdf \
+	@echo "Building asciidoc"
+	asciidoctor-pdf --trace \
     --attribute=mathematical-format=svg \
-    --attribute=pdf-fontsdir=docs-resources/fonts \
-    --attribute=pdf-style=docs-resources/themes/riscv-pdf.yml \
+    -a pdf-theme=riscv-matrix.yml \
+    -a pdf-fontsdir=GEM_FONTS_DIR \
     --failure-level=ERROR \
     --require=asciidoctor-bibtex \
     --require=asciidoctor-diagram \
-    --out-file=$(SPEC_RESULT) \
-    $(SPEC_SOURCE)
+    --require=asciidoctor-mathematical \
+    --out-file=$(PDF_RESULT) \
+    $(HEADER_SOURCE)
 
 clean:
-	rm $(SPEC_RESULT) 
+	rm $(PDF_RESULT)

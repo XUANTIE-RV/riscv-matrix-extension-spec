@@ -1,0 +1,20 @@
+The matrix extension adds 8 architectural **Tile Registers** (tr0-tr7) for input tile matrices and 8 architectural *Accumulation Registers* (acc0-acc7) for output accumulation matrices.
+
+A **Tile Register** has a fixed MLEN bits of state, where each row has RLEN bits. As a result, there are MLEN / RLEN rows for each tile register in logic.
+
+An **Accumulation Register** has a fixed stem:[\rm{MLEN} \times \rm{AMUL}] bits of state, where each row has stem:[\rm{RLEN} \times \rm{AMUL}] bits. As a result, there are MLEN / RLEN rows for each accumulation register in logic.
+
+If the hardware only support `zmab` matrix multiplication extension, the value of AMUL should be no less than the maximum widening ratio of widening instructions that hardware are supported, to make sure there is enough space for accumulation register.
+
+If the hardware only support `Zmatb` matrix multiplication extension, the value of AMUL should be no less than the maximum widening ratio of widening instructions that hardware are supported, to make sure there is enough space for accumulation register.
+
+If the hardware only support `zmabt` matrix multiplication extension, the accumulation registers' width should be no less than `MLEN / RLEN x ELEN` bit. This constraint guarantees that each accumulation registers' row is able to hold MLEN/RLEN elements. So the value of AMUL should be no less than `MLEN / (RLEN ^2) x ELEN`.
+
+If the hardware support multiple matrix multiplication extension, the choice of AMUL should be no less than the maximum AMUL value of each extensions required.
+
+image::tileregstruct.svg[alt="Matrix Tile Structure", align="center"]
+image::accregstruct.svg[alt="Matrix Accumulation Structure", align="center"]
+image::tilereg.svg[alt="Tile Register File", align="center"]
+image::accreg.svg[alt="Accumulation Register File", align="center"]
+
+Introducing of AMUL is to address the mismatched widths issue between input and output matrix of matrix multiplication instructions. The choice of AMUL is based on both the supported matrix multiplication mode and the maximum widening ratio of the supported widening instruction. For certain specific hardware configurations, accumulation registers' width can be narrower or wider than the tile registers' width, which leads to AMUL having a corresponding fractional or integer value. Further details about AMUL will be discussed in next chapter.

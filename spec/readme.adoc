@@ -1,0 +1,26 @@
+= RISC-V Matrix Specification
+
+This repository is a matrix extension proposal for RISC-V.
+
+= License
+
+This work is licensed under a Creative Commons Attribution 4.0 International License (CC-BY-4.0).
+See the link:LICENSE[LICENSE] file for details.
+
+= Contributors
+
+Contributors to this specification are contained in the link:contributors.adoc[contributors] file.
+
+For instructions on how to contribute please see the link:CONTRIBUTING.md[CONTRIBUTING] file.
+
+= Dependencies
+
+This project is built using AsciiDoctor (Ruby). The repository has been setup to build the PDF on
+checkin using GitHub actions.  Workflow dependencies are located in the `dependencies` directory.
+
+For more information on AsciiDoctor, specification guidelines, or building locally, see the
+https://github.com/riscv/docs-dev-guide[RISC-V Documentation Developer Guide].
+
+= Building the document
+
+The final specification form of PDF can be generated using the `make` command.

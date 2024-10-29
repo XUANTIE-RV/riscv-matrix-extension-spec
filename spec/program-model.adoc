@@ -1,0 +1,205 @@
+== Programmer's Model
+
+The matrix extension adds 8 unprivileged CSRs and 16 matrix registers to the base scalar RISC-V ISA.
+
+include::csr.adoc[]
+
+=== Matrix Registers
+
+include::tilereg.adoc[]
+
+=== Accumulation Matrix Length Multiplier Register, mamul
+
+The read-only XLEN-wide _matrix_ _type_ CSR, `mamul`, is used to hold the value of AMUL. AMUL indicates the multiple of length for matrix accumulation registers of tile registers, which is a hardware implementation defined parameter. The relationship between `mamul` register and AMUL is shown in the table below. 
+
+include::mamulreg.adoc[]
+
+The table above defines the legal value of the `mamul` register with the corresponding value of AMUL, any other value is not allowed.
+
+AMUL is a hardware implementation defined parameter. The choice of AMUL is based on both the supported matrix multiplication mode and the maximum widening ratio of the supported widening instruction.
+
+For example, if the hardware implementation only support `Zmab` extension, which means the matrix multiplication only support `C = A x B` mode, for widening matrix multiplication instructions, each output element is wider than input one. To match the width of input and output, an output matrix should be written back to a wider accumulation register whose length are specified by MLEN x AMUL. In this case AMUL is a integer num relevent to the maximum widening instructions that hardware supported.
+
+In addition, AMUL can be a fractional number as well. For example, if the hardware implementation only support `Zmabt` extension for matrix multiplication instructions, which means the matrix multiplication only support `C = A x BT` mode. Assume matrix A and BT only use a full tile register and matrix C use a full accumulation register. Input matrix A's dimension is `m x k` and input matrix BT's dimension is `n x k` and output matrix C's dimension is `m x n`. After the calculation, the input dimension `k` is eliminated. So it is possible that k dimension is significantly larger than the n dimension, which leads to a narrower accumulation register width and a fractional AMUL value.
+
+In this specification, multiple matrix multiplication modes like `C = A x B` or `C = A x BT` or `C = AT x B` are supported. Hardware implementation can support one or multiple modes. If the hardware only support `C = A x BT` mode, the proper AMUL should be no less than `MLEN/ (RLEN ^2) x ELEN`. This constraint guarantees that each accumulation registers' row is able to hold MLEN/RLEN elements. If the hardware only support `C = A x B` or `C = AT x B` mode, the value of AMUL should be no less than the maximum widening ratio of the widening matrix multiplication instructions. 
+
+If hardware support multiple modes, the choice of AMUL should be no less than the largest AMUL value among all modes. For example, if hardware support both `C = A x BT`  and `C = A x B` mode, the proper value of AMUL should be no less than the largest value between `MLEN/ (RLEN ^2) x ELEN` and the maximum widening ratio of the matrix multiplication instructions supported. 
+
+=== Matrix ISA Register, misa
+
+The read-only XLEN-wide _matrix_ _type_ CSR, `misa`, specifying the supported matrix arithmetic feature of the current hardware implementation. 
+
+include::misa.adoc[]
+
+//The `msew` field is used to specify the element width of source operands. It is used to calculate the maximum values of matrix size.
+
+For each field, a value 0 means the corresponding feature is not supported, a value 1 means the corresponding feature is supported. 
+
+For `mmi4i32` field, a value 1 means the corresponding int4/uint4 oct-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmi8i32` field, a value 1 means the corresponding int8/uint8 quad-widen matrix multiplication instructions are supported. This field is compulsory for hardware implementation.
+
+For `mmi16i16` field, a value 1 means the corresponding int16/uint16 no-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmi16i32` field, a value 1 means the corresponding int16/uint16 double-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmi32i32` field, a value 1 means the corresponding int16/uint16 no-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmi32i64` field, a value 1 means the corresponding int32/uint32 double-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmi64i64` field, a value 1 means the corresponding int64/uint64 no-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmfp64fp64` field, a value 1 means the corresponding fp64 no-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmtf32fp32` field, a value 1 means the corresponding tf32 matrix multiplication instructions are supported. The source operands type of this field are tf32 and the destination operand is fp32. This field is optional for hardware implementation.
+
+For `mmfp32fp32` field, a value 1 means the corresponding fp32 no-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmfp32fp64` field, a value 1 means the corresponding fp32 double-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmf16fp32` field, a value 1 means the corresponding fp16/bf16 double-widen matrix multiplication instructions are supported. The source operands type of this field are fp16/bf16 and the destination operand is fp32. This field is optional for hardware implementation.
+
+For `mmfp16fp16` field, a value 1 means the corresponding fp16 no-widen matrix multiplication instructions are supported. This field is optional for hardware implementation.
+
+For `mmf8f32` field, a value 1 means the corresponding fp8/bf8 double-widen matrix multiplication instructions are supported. The source operands type of this field are fp8/bf8 and the destination operand is fp32. This field is optional for hardware implementation.
+
+For `mmf8f16` field, a value 1 means the corresponding fp8/bf8 double-widen matrix multiplication instructions are supported. The source operands type of this field are fp8/bf8 and the destination operand is fp16/bf16. This field is optional for hardware implementation.
+
+For `mab` field, a value 1 means the matrix multiplication mode `C = A x B` is supported. For `matb` field, a value 1 means the matrix multiplication mode `C = AT x B` is supported. For `mabt` field, a value 1 means the matrix multiplication mode `C = A x BT` is supported. These three fields are all optional for hardware implementation while a least one mode are required to be supported. 
+
+For `mabtpm` field, a value 1 means the pair matrix multiplication extension under `C = A x BT` multiplication mode is supported. Setting this field to 1 requires the hardware support of the `mabt` field. This field is optional for hardware implementation.
+
+For `mfsp` field, a value 1 means float point sparse matrix multiplication extension is supported. This field is optional for hardware implementation.
+
+For `mfew` field, a value 1 means float point element wise extension is supported. This field is optional for hardware implementation.
+
+For `misp` field, a value 1 means integer sparse matrix multiplication extension is supported. This field is optional for hardware implementation.
+
+For `miew` field, a value 1 means integer element wise extension is supported. This field is optional for hardware implementation.
+
+For `mfmv` field, a value 1 means the matrix and float point move extension is supported. This field is optional for hardware implementation.
+
+For `mt` field, a value 1 means the matrix transpose extension is supported. This field is optional for hardware implementation.
+
+For `mmv` field, a value 1 means the matrix for vector extension is supported. This field is optional for hardware implementation.
+
+For `mi2c` field, a value 1 means the matrix Im2col extension is supported. This field is optional for hardware implementation.
+
+For `mc2i` field, a value 1 means the matrix Col2im extension is supported. This field is optional for hardware implementation.
+
+//For each type field, a value 0 means the corresponding type is disabled. Write non-zero value to enable matrix multiplication operation of the specified type. 0 will be returned and `mill` will be set if the type is not supported.
+
+//For `mint4` field, write 1 to enable 4-bit integer where a 8-bit integer will be treated as a pair of 4-bit integers. 1'b0 will be returned if 4-bit integer is not supported.
+
+//For `mint8` field, write 1 to enable 8-bit integer.
+
+//For `mint16` field, write 1 to enable 16-bit integer.
+
+//For `mint64` field, write 1 to enable 64-bit integer.
+
+//For `mfp8` field, write 1 to enable 8-bit float point. Different 8-bit float point type like E4M3/E3M4/E5M2 instructions are all controlled by this field.
+
+//For `mfp16` field, write 1 to enable 16-bit float point. Different 16-bit float point type like IEEE-754 half-precision float point (E5M10) and BFloat16 (E8M7) instructions are both controlled by this field.
+
+//For `mfp32` field, write 1 to enable 32-bit float point. Different 16-bit float point type like IEEE-754 single-precison float point (E8M23) and TensorFloat32 (E8M10) instructions are both controlled by this field.
+
+//For `mfp64` field, write 1 to enable 64-bit double-precision float point. To support FP64 format, the implementation should support "D" extension at the same time. 0 will be returned if FP64 is not supported.
+
+=== Matrix Tile Size Registers, mtilem/mtilek/mtilen
+
+The XLEN-bit-wide read-only `mtilem/mtilek/mtilen` CSRs can only be updated by the `msettile{m|k|n}{i}` instructions. The registers holds 3 unsigned integers specifying the tile shapes for tiled matrix.
+
+=== Matrix Control and Status Register, mcsr
+
+The `mcsr` register has 5 fields, and other bits with non-zero value are reserved.
+
+.`mcsr` register layout
+[cols="^2,^2,8"]
+|===
+|     Bits | Name       | Description
+
+| XLEN-1:8 | 0          | Reserved if non-zero.
+|      8:6 | mfrm       | Integer arithmetic instruction rounding mode.
+|        5 | mfp8sat    | fp8 saturation mode.
+|      4:3 | mrm        | Integer arithmetic instruction rounding mode.
+|        2 | msat       | Integer arithmetic instruction accrued saturation flag.
+|      1:0 | mmode[1:0] | The mode of matrix multiplication.
+|===
+
+`mmode` field indicates the current mode of matrix multiplication. `mmode = 00` means `C = A x B`, where the source matrices, `A` and `B`, are both organized as the original order. `mmode = 01` means `C = A x BT`, where `B` is transposed. `mmode = 10` means `C = AT x B`, where `A` is transposed.
+
+An implementation can support any combination of these modes, with extensions Zmab, Zmabt and Zmatb. The mode supported by hardware is indicated in `misa` register.
+
+If an unsupported `mmode` is set, then any attempt to execute a matrix multiplication instruction will raise an illegal instruction exception.
+
+`msat` field indicates if a integer instruction has had to saturate an output value to fit into a destination format.
+
+`mrm` field indicates the rounding mode of fixed-point instructions. Suppose the pre-rounding result is v, and d bits of that result are to be rounded off. Then the rounded result is (v >> d) + r, where r depends on the rounding mode as specified in the following table.
+
+[cols="^2,^4,^9,7"]
+|===
+|  mrm  |  Mnemonic  |  meaning                                      |  Rounding Increment r
+
+|  00   |  RNU       |  round-to-nearest-up (add +0.5 LSB)           |  v[d-1]
+|  01   |  RNE       |  round-to-nearest-even                        |  v[d-1] & (v[d-2:0] != 0 \| v[d])
+|  10   |  RDN       |  round-down (truncate)                        |  0
+|  11   |  ROD       |  round-to-odd (OR bits into LSB)              |  !v[d] & v[d-1:0] != 0
+|===
+
+The rounding functions are used to represent this operation in the instruction descriptions below:
+
+        roundoff_unsigned(v, d) = (unsigned(v) >> d) + r
+        roundoff_signed(v, d)   = (signed(v) >> d) + r
+
+`mfp8sat` field defines the saturation mode when converting a wider floating point types to FP8 formats.
+
+[cols="^2,^5"]
+|===
+|  mfp8sat  |  Meaning      
+
+|  0        |  non-saturation mode
+|  1        |  saturation mode
+|===
+
+Conversion from all other values first applies rounding to reduce the mantissa bit count to that of the destination FP8 format. After that, if the rounded magnitude is above the maximum destination magnitude: 
+
+        if `mfp8sat` = 1: 
+            generate the max normal FP8 magnitude 
+        if `mfp8sat` = 0:  
+            E4M3 destination: generate a NaN 
+            E5M2 destination: generate an infinity
+
+The field `mfrm` of instruction indicates the rounding mode of float-point matrix instructions. The encoding is shown below.
+
+[cols="^1,^1,<4"]
+|===
+| *mfrm* | *Mnemonic* | *Meaning*
+|  000  |  RNE       | Round to Nearest, ties to Even
+|  001  |  RTZ       | Round towards Zero
+|  010  |  RDN       | Round Down (towards stem:[-\infty])
+|  011  |  RUP       | Round Up (towards stem:[+\infty])
+|  100  |  RMM       | Round to Nearest, ties to Max Magnitude
+|  101  |            | Invalid
+|  110  |            | Invalid
+|  111  |            | Invalid
+|===
+
+If `mfrm` is set to an invalid value (101-111), any subsequent attempt to execute a floating-point operation with a dynamic rounding mode will cause an illegal instruction exception. 
+
+=== Matrix Context Status in mstatus and sstatus
+
+A 2-bit matrix context status field, MS, should be added to mstatus and shadowed in sstatus. It is defined analogously to the vector context status field, VS.
+
+[cols="^1,1"]
+|===
+| *ms[1:0]* | *Meaning*
+|  00       | All Off
+|  01       | Initial
+|  10       | Clean
+|  11       | Dirty
+|=== 
+
+Attempts to execute any matrix instructions, or to access the matrix CSRs raise an illegal instruction excetion when MS is set to off. If MS is set to initial or clean, executing any instructions that change the matrix state will change the ms to dirty. 
+
+An implementation can use the activity of the Initial state to influence the choice of power-saving states.

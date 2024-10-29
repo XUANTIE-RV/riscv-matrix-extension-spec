@@ -1,0 +1,94 @@
+=== Zmiew: Matrix Integer Element-wise Extension 
+
+NOTE: There is no matrix-scalar and matrix-vector version for element-wise instructions. Such operations can be replaced by a broadcast instruction and a matrix-matrix element-wise instruction. Hardware implementation support this extension must set misa[XLEN-6] bit to 1. 
+
+For matrix Integer element-wise add/sub/multiply instructions, the input and output matrices are both accumulation registers and always with size `mtilem x mtilen`. The element-wise calculation of tile registers can be implemented by combining data move instructions (such as `mmve*.a.t` and `mmve*.t.a`).
+
+```
+# Unsigned integer matrix element-wise add. 
+# md[i,j] = ms1[i,j] + ms2[i,j]
+maddu.[hb|b|h|w|dw].mm   md, ms1, ms2
+msaddu.[hb|b|h|w|dw].mm  md, ms1, ms2  # output saturated
+mwaddu.[hb|b|h|w].mm     md, ms1, ms2  # output double widen
+
+# Signed integer matrix element-wise add.
+# md[i,j] = ms1[i,j] + ms2[i,j]
+madd.[hb|b|h|w|dw].mm    md, ms1, ms2
+msadd.[hb|b|h|w|dw].mm   md, ms1, ms2  # output saturated
+mwadd.[hb|b|h|w].mm      md, ms1, ms2  # output double widen
+
+# Unsigned integer matrix element-wise subtract.
+# md[i,j] = ms1[i,j] - ms2[i,j]
+msubu.[hb|b|h|w|dw].mm   md, ms1, ms2
+mssubu.[hb|b|h|w|dw].mm  md, ms1, ms2  # output saturated
+mwsubu.[hb|b|h|w].mm     md, ms1, ms2  # output double widen
+
+# Signed integer matrix element-wise subtract.
+# md[i,j] = ms1[i,j] - ms2[i,j]
+msub.[hb|b|h|w|dw].mm    md, ms1, ms2
+mssub.[hb|b|h|w|dw].mm   md, ms1, ms2  # output saturated
+mwsub.[hb|b|h|w].mm      md, ms1, ms2  # output double widen
+
+# Integer matrix element-wise minimum.
+# md[i,j] = min{ms1[i,j], ms2[i,j]}
+mminu.[hb|b|h|w|dw].mm   md, ms1, ms2
+mmin.[hb|b|h|w|dw].mm    md, ms1, ms2
+
+# Integer matrix element-wise maximum.
+# md[i,j] = max{ms1[i,j], ms2[i,j]}
+mmaxu.[hb|b|h|w|dw].mm   md, ms1, ms2
+mmax.[hb|b|h|w|dw].mm    md, ms1, ms2
+
+# Integer matrix bit-wise logic.
+mand.[hb|b|h|w|dw].mm    md, ms1, ms2
+mor.[hb|b|h|w|dw].mm     md, ms1, ms2
+mxor.[hb|b|h|w|dw].mm    md, ms1, ms2
+
+# Integer matrix element-wise shift.
+msll.[hb|b|h|w|dw].mm    md, ms1, ms2
+msrl.[hb|b|h|w|dw].mm    md, ms1, ms2
+msra.[hb|b|h|w|dw].mm    md, ms1, ms2
+
+# Integer matrix element-wise multiply.
+# md[i,j] = ms1[i,j] * ms2[i,j]
+mmul.[hb|b|h|w|dw].mm    md, ms1, ms2  # signed, returning low bits of product
+mmulh.[hb|b|h|w|dw].mm   md, ms1, ms2  # signed, returning high bits of product
+mmulhu.[hb|b|h|w|dw].mm  md, ms1, ms2  # unsigned, returning high bits of product
+mmulhsu.[hb|b|h|w|dw].mm md, ms1, ms2  # signed-unsigned, returning high bits of product
+
+# Saturated integer matrix element-wise multiply.
+msmul.[hb|b|h|w|dw].mm   md, ms1, ms2  # signed
+msmulu.[hb|b|h|w|dw].mm  md, ms1, ms2  # unsigned
+msmulsu.[hb|b|h|w|dw].mm md, ms1, ms2  # signed-unsigned
+
+# Widening integer matrix element-wise multiply.
+mwmul.[hb|b|h|w].mm      md, ms1, ms2  # signed
+mwmulu.[hb|b|h|w].mm     md, ms1, ms2  # unsigned
+mwmulsu.[hb|b|h|w].mm    md, ms1, ms2  # signed-unsigned
+```
+
+//Integer Element-wise add/sub/multiply instructions support mask register. The mask register is a general accumulation register whose element is in bit. Bit 1 means the corresponding element in source register is active. Bit 0 means the corresponding element will not be calculated and its value is set to 0 (agnostic).
+
+Matrix integer clip instruction are used to pack a fixed-point value into a 4x narrower destination. Rounding, scaling and saturation are supported. The scaling shift amount comes from a matrix (specified by ms1). The low 6-bits for 64-bit and 5-bits for 32-bit source data width are used, the higher bits are ignored.
+
+image::mn4clip.svg[alt="mn4clip instruction example", align="center"]
+
+The input and output matrices are both accumulation registers.The matrix size configurations are ignored for mn4clip instructions. 
+
+```
+# mn4clipl/mn4clipul write back to the first quater of md, the other parts of md are kept undisturbed. 
+# md[i,j] = clip(round_off_unsigned(ms2[i][j] >> ms1[i][j]))
+mn4cliplu.[w|d].mm md, ms2, ms1
+
+# md[i,j] = clip(round_off_signed(ms2[i][j] >> ms1[i][j]))
+mn4clipl.[w|d].mm md, ms2, ms1
+```
+
+```
+# mn4cliph/mn4clipuh write back to the second quater of md, the other parts of md are kept undisturbed.
+# md[i,j+(AMUL*RLEN)/(4*SEW)] = clip(round_off_unsigned(ms2[i][j] >> ms1[i][j]))
+mn4cliphu.[w|d].mm md, ms2, ms1
+
+# md[i,j+(AMUL*RLEN)/(4*SEW)] = clip(round_off_signed(ms2[i][j] >> ms1[i][j]))
+mn4cliph.[w|d].mm md, ms2, ms1
+```

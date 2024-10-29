@@ -1,0 +1,5 @@
+Mrelease instruction sets `MS` field in `mstatus` register to 01 (initial). This instruction is often used after the executing of a set of matrix instructions, indicating that the data in matrix registers can be discarded. Mrelease instruction can reduce context switch costs.
+
+```
+mrelease 
+```

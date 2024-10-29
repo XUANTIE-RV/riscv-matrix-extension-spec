@@ -1,0 +1,40 @@
+=== Zmc2i: Col2im Extension
+
+The Zmc2i extension allows to perform Column to Image operation on-the-fly, by a set of new store instructions.
+
+Hardware implementation support this extension must set misa[XLEN-12] bit to 1. 
+
+==== CSRs
+
+The Zmc2i extension reuses 7 unprivileged CSRs (moutsh, minsh, mpad, mstdi, minsk, moutsk, mpadval) of Zmi2c.
+
+==== Configuration Instructions
+
+The Zmc2i extension reuses all configuration instructions of Zmi2c.
+
+==== Store Fold Instructions
+
+The **Store Fold** instructions allows to store and combine an array of sliding local blocks from the matrix tile regstiers into memory.
+Similar to PyTorch, for the case of two output spatial dimensions this operation is sometimes called `col2im`.
+
+```
+# ms3 destination, rs1 base address, rs2 row byte stride
+
+# for left matrix, a
+msfdae8.m    ms3, (rs1), rs2
+msfdae16.m   ms3, (rs1), rs2
+msfdae32.m   ms3, (rs1), rs2
+msfdae64.m   ms3, (rs1), rs2
+
+# for left matrix, b
+msfdbe8.m    ms3, (rs1), rs2
+msfdbe16.m   ms3, (rs1), rs2
+msfdbe32.m   ms3, (rs1), rs2
+msfdbe64.m   ms3, (rs1), rs2
+
+# for left matrix, c
+msfdce8.m    ms3, (rs1), rs2
+msfdce16.m   ms3, (rs1), rs2
+msfdce32.m   ms3, (rs1), rs2
+msfdce64.m   ms3, (rs1), rs2
+```

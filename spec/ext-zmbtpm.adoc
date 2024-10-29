@@ -1,0 +1,19 @@
+=== Zmabtpm: Matrix A and B Transpose Pair multiplication Extension
+
+This extension requires the Zmabt extension and it only suitable for `C = A x BT` mode instead of all three modes. Hardware implementation support this extension must set both misa[XLEN-3] and misa[XLEN-7] bits to 1.  
+
+The principle behind designing this extension is to fully use the `C` accumulation register, which helps achieve better computational performance than standard multiplication instruction under the `A x BT` mode.
+
+This instruction takes one **tile register** specified by ms1 and two **tile registers** (register-pair) specified by ms2 and ms2+1. Register-pair are viewd as one bigger tile register with max tilen equals to 2*TNMAX. The output matrix tile is a matrix **accumulation register** specified by `md`.
+
+The execution of this instruction must under `C = A x BT` mode.
+
+```
+# Matrix A and Transpose B pair multiplication and add, matrix BT is hold by a pair of tile matrix, md = md + ms1 * {ms2,ms2+1}.
+
+mfmabtp.[hf].mm    md, ms1, ms2     # 16-bit float point
+
+```
+This instruction only support even-numbered ms2 while odd-numbered ms2 is reserved. For example, tile register 2 and 3 are legal pair registers but tile register 3 and 4 are illegal for mfmabtp.[hf].mm. 
+
+In the mfmabtp.[hf].mm instruction format, ms2+1 index is not explicitly encoded in the instruction, here ms2 index represent ms2 and ms2+1 register pair's index.  

@@ -1,0 +1,22 @@
+=== Zmt*: Matrix Transpose Instructions
+
+Transpose instruction can only be used for square matrix. For matrix A, the sizes of two dimensions are both min(`mtilem`, `mtilek`). Matrix B and C are similar. Hardware implementation support this extension must set misa[XLEN-9] bit to 1. 
+
+```
+# Transpose square matrix of tile register.
+mtae8.m  md, ms1
+mtae16.m md, ms1
+mtae32.m md, ms1
+mtae64.m md, ms1
+
+mtbe8.m  md, ms1
+mtbe16.m md, ms1
+mtbe32.m md, ms1
+mtbe64.m md, ms1
+
+# Transpose square matrix of accumulation register.
+mtce8.m  md, ms1
+mtce16.m md, ms1
+mtce32.m md, ms1
+mtce64.m md, ms1
+```

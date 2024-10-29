@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 由 Microsoft Visio, SVG Export 生成 inst32-mv.svg inst32-mv -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
+		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="6.30616in" height="0.699393in"
+		viewBox="0 0 454.043 50.3563" xml:space="preserve" color-interpolation-filters="sRGB" class="st8">
+	<v:documentProperties v:langID="2052" v:metric="true" v:viewMarkup="false">
+		<v:userDefs>
+			<v:ud v:nameU="msvSubprocessMaster" v:prompt="" v:val="VT4(Rectangle)"/>
+			<v:ud v:nameU="msvNoAutoConnect" v:val="VT0(1):26"/>
+		</v:userDefs>
+	</v:documentProperties>
+
+	<style type="text/css">
+	<![CDATA[
+		.st1 {fill:#ffffff;stroke:#000000;stroke-width:0.25}
+		.st2 {fill:#000000;font-family:Arial;font-size:0.833336em}
+		.st3 {fill:#deebf6;stroke:#000000;stroke-width:0.25}
+		.st4 {fill:#e2efd9;stroke:#000000;stroke-width:0.25}
+		.st5 {fill:#fff2cc;stroke:#000000;stroke-width:0.25}
+		.st6 {fill:none;stroke:none;stroke-width:0.25}
+		.st7 {fill:#000000;font-family:Arial;font-size:0.75em}
+		.st8 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}
+	]]>
+	</style>
+
+	<g v:mID="40" v:index="7" v:groupContext="foregroundPage">
+		<v:userDefs>
+			<v:ud v:nameU="msvThemeOrder" v:val="VT0(0):26"/>
+		</v:userDefs>
+		<title>inst32-mv</title>
+		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50394"
+				v:shadowOffsetY="-8.50394"/>
+		<g id="shape169-1" v:mID="169" v:groupContext="shape" transform="translate(0.25,-21.7598)">
+			<title>矩形.169</title>
+			<desc>funct6</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="42.5197" cy="43.2697" width="85.04" height="14.1732"/>
+			<rect x="0" y="36.1831" width="85.0394" height="14.1732" class="st1"/>
+			<text x="28.9" y="46.27" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>funct6</text>		</g>
+		<g id="shape170-4" v:mID="170" v:groupContext="shape" transform="translate(85.2894,-21.7598)">
+			<title>矩形.170</title>
+			<desc>di</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st1"/>
+			<text x="3.19" y="46.27" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>di</text>		</g>
+		<g id="shape171-7" v:mID="171" v:groupContext="shape" transform="translate(99.4626,-21.7598)">
+			<title>矩形.171</title>
+			<desc>rs2/funct5</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="35.4331" cy="43.2697" width="70.87" height="14.1732"/>
+			<rect x="0" y="36.1831" width="70.8661" height="14.1732" class="st3"/>
+			<text x="13.48" y="46.27" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>rs2/funct5</text>		</g>
+		<g id="shape172-10" v:mID="172" v:groupContext="shape" transform="translate(170.329,-21.7598)">
+			<title>矩形.172</title>
+			<desc>rs1/ms1</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="35.4331" cy="43.2697" width="70.87" height="14.1732"/>
+			<rect x="0" y="36.1831" width="70.8661" height="14.1732" class="st4"/>
+			<text x="17.65" y="46.27" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>rs1/ms1</text>		</g>
+		<g id="shape173-13" v:mID="173" v:groupContext="shape" transform="translate(241.195,-21.7598)">
+			<title>矩形.173</title>
+			<desc>eew</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="21.2598" cy="43.2697" width="42.52" height="14.1732"/>
+			<rect x="0" y="36.1831" width="42.5197" height="14.1732" class="st1"/>
+			<text x="12.09" y="46.27" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>eew</text>		</g>
+		<g id="shape174-16" v:mID="174" v:groupContext="shape" transform="translate(354.581,-21.7598)">
+			<title>矩形.174</title>
+			<desc>OP-M32</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="49.6063" cy="43.2697" width="99.22" height="14.1732"/>
+			<rect x="0" y="36.1831" width="99.2126" height="14.1732" class="st1"/>
+			<text x="30.99" y="46.27" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>OP-M32</text>		</g>
+		<g id="shape177-19" v:mID="177" v:groupContext="shape" transform="translate(283.715,-21.7598)">
+			<title>矩形.177</title>
+			<desc>rd/md</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="35.4331" cy="43.2697" width="70.87" height="14.1732"/>
+			<rect x="0" y="36.1831" width="70.8661" height="14.1732" class="st5"/>
+			<text x="22.65" y="46.27" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>rd/md</text>		</g>
+		<g id="shape192-22" v:mID="192" v:groupContext="shape" transform="translate(85.2894,-35.933)">
+			<title>工作表.192</title>
+			<desc>25</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>25</text>		</g>
+		<g id="shape193-25" v:mID="193" v:groupContext="shape" transform="translate(71.1161,-35.933)">
+			<title>工作表.193</title>
+			<desc>26</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>26</text>		</g>
+		<g id="shape194-28" v:mID="194" v:groupContext="shape" transform="translate(0.25,-35.933)">
+			<title>工作表.194</title>
+			<desc>31</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>31</text>		</g>
+		<g id="shape204-31" v:mID="204" v:groupContext="shape" transform="translate(99.4626,-35.933)">
+			<title>工作表.204</title>
+			<desc>24</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>24</text>		</g>
+		<g id="shape205-34" v:mID="205" v:groupContext="shape" transform="translate(156.156,-35.9331)">
+			<title>工作表.205</title>
+			<desc>20</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>20</text>		</g>
+		<g id="shape206-37" v:mID="206" v:groupContext="shape" transform="translate(170.329,-35.9331)">
+			<title>工作表.206</title>
+			<desc>19</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>19</text>		</g>
+		<g id="shape207-40" v:mID="207" v:groupContext="shape" transform="translate(227.022,-35.933)">
+			<title>工作表.207</title>
+			<desc>15</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>15</text>		</g>
+		<g id="shape208-43" v:mID="208" v:groupContext="shape" transform="translate(241.195,-35.9331)">
+			<title>工作表.208</title>
+			<desc>14</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>14</text>		</g>
+		<g id="shape209-46" v:mID="209" v:groupContext="shape" transform="translate(269.541,-35.9331)">
+			<title>工作表.209</title>
+			<desc>12</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>12</text>		</g>
+		<g id="shape210-49" v:mID="210" v:groupContext="shape" transform="translate(283.715,-35.9331)">
+			<title>工作表.210</title>
+			<desc>11</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="2.08" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>11</text>		</g>
+		<g id="shape211-52" v:mID="211" v:groupContext="shape" transform="translate(340.407,-35.9331)">
+			<title>工作表.211</title>
+			<desc>7</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="4.58" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>7</text>		</g>
+		<g id="shape212-55" v:mID="212" v:groupContext="shape" transform="translate(354.581,-35.9331)">
+			<title>工作表.212</title>
+			<desc>6</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="4.58" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>6</text>		</g>
+		<g id="shape213-58" v:mID="213" v:groupContext="shape" transform="translate(439.62,-35.9331)">
+			<title>工作表.213</title>
+			<desc>0</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="7.08661" cy="43.2697" width="14.18" height="14.1732"/>
+			<rect x="0" y="36.1831" width="14.1732" height="14.1732" class="st6"/>
+			<text x="4.58" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>0</text>		</g>
+		<g id="shape214-61" v:mID="214" v:groupContext="shape" transform="translate(0.250007,-0.25)">
+			<title>工作表.214</title>
+			<desc>Data Move Instructions.</desc>
+			<v:textBlock v:margins="rect(0,0,0,0)" v:tabSpace="42.5197"/>
+			<v:textRect cx="226.772" cy="43.2697" width="453.55" height="14.1732"/>
+			<rect x="0" y="36.1831" width="453.543" height="14.1732" class="st6"/>
+			<text x="179.5" y="45.97" class="st7" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>Data Move Instructions.</text>		</g>
+	</g>
+</svg>

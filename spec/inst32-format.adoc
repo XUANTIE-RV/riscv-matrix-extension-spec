@@ -1,0 +1,23 @@
+The instructions in the matrix extension use 32-bit encoding and a new major opcode OP-M32 (1110111).
+
+Instruction formats are listed below.
+
+Configuration instructions, where the `imm` field supports 10-bit immediate operand.
+
+image::inst32-config.svg[alt="Configuration Instruction Format", align="center"]
+
+Load & store instructions, where `ls` field indicates the type (load or store), and `tr` field indicates if the operand in register is transposed. `eew` field (000-011) indicates the effective element width.
+
+image::inst32-ls.svg[alt="Load-Store Instruction Format", align="center"]
+
+Data move instructions, where `di` field indicates the moving direction.
+
+image::inst32-mv.svg[alt="Data Move Instruction Format", align="center"]
+
+Arithmetic and logic instructions, where `fp` field indicates if the operation is float point, `sa` field indicates if the result is saturated, and `sn` field indicates if the source operands are signed (for integer). `eew` field indicates the effective element width (000-011 for int8-int64, 111 for int4, and 100 to use `mtype.msew`).
+
+image::inst32-cal.svg[alt="Arithmetic Instruction Format", align="center"]
+
+Type-convert instructions, where `fd` field indicates if the destination elements are float point, and `sn` field indicates if the integer operand is signed. `eew` field indicates the effective element width (000-011 for int8-int64, 111 for int4, and 100 to use `mtype.msew`). `nw` field indicates if the destination elements are narrowed or widen.
+
+image::inst32-cvt.svg[alt="Type-convert Instruction Format", align="center"]

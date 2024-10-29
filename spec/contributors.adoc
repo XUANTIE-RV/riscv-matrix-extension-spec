@@ -1,8 +1,29 @@
 == Contributors
 
-This RISC-V specification proposal has been contributed to directly or indirectly by:
+This RISC-V specification has been contributed to directly or indirectly by:
 
-ZhaoJiang, WenmengZhang, WenganShao, ZhiweiLiu, XianmiaoQu, JingQiu, MingxinZhao, YunhaiShang, XiaoyanXiang, ChenChen
-
-Others are welcome to help improve the specification.
 [%hardbreaks]
+* Chaoqun Wang
+* Chen Chen
+* Fujie Fan
+* Hui Yao
+* Jing Qiu
+* Kening Zhang
+* Kun Hu
+* Mingxin Zhao
+* Wengan Shao
+* Wenmeng Zhang
+* Xianmiao Qu
+* Xiaoyan Xiang
+* Xin Ouyang
+* Xin Yang
+* Yunhai Shang
+* Zhao Jiang
+* Zhiqiang Liu
+* Zhiwei liu
+* Zhiyong Zhang
+* Ziyang Deng
+
+* *Your name here*
+
+We will be very grateful to the huge number of other people who will have helped to improve this specification through their comments, reviews, feedback and questions.

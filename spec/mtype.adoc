@@ -1,0 +1,17 @@
+.`mtype` register layout
+[cols="^2,^2,8"]
+|===
+|     Bits  | Name       | Description
+
+|    XLEN-1 | mill       | Illegal value if set.
+| XLEN-2:10 | 0          | Reserved if non-zero.
+|         9 | mfp8       | 8-bit float point enabling.
+|         8 | mfp16      | 16-bit float point enabling.
+|         7 | mfp32      | 32-bit float point enabling.
+|         6 | mfp64      | 64-bit float point enabling.
+|         5 | mint4      | 4-bit integer enabling.
+|         4 | mint8      | 8-bit integer enabling.
+|         3 | mint16     | 16-bit integer enabling.
+|         2 | mint32     | 32-bit integer enabling.
+|         1 | mint64     | 64-bit integer enabling.
+|===

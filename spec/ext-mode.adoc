@@ -1,0 +1,8 @@
+=== Zma*b*: Matrix Mode Extension
+
+The Zmab extension allows to use `C = A x B` mode for matrix multiplication, where the setting of `mcsr.mmode = 00` is legal. Hardware implementation support this extension must set misa[XLEN-1] bit to 1. 
+
+The Zmabt extension allows to use `C = A x BT` mode for matrix multiplication, where the setting of `mcsr.mmode = 01` is legal. Hardware implementation support this extension must set misa[XLEN-2] bit to 1. 
+
+The Zmatb extension allows to use `C = AT x B` mode for matrix multiplication, where the setting of `mcsr.mmode = 10` is legal. Hardware implementation support this extension must set misa[XLEN-3] bit to 1. 
+

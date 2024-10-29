@@ -1,0 +1,137 @@
+==== Load Instructions
+
+Load a matrix tile from memory, where the matrix on memory is not transposed. The shape of the tile that load to matrix register is related to current `mmode`. For example, if current `mmode` is `C = A x B`, the shape of right matrix B that load to matrix register is `mtilek x mtilen`. However, if current `mmode` is `C = A x BT`, the shape of right matrix B that load to matrix register is `mtilen x mtilek`.
+
+
+```
+# md destination, rs1 base address, rs2 row byte stride
+
+# For left matrix, A
+mlae8.m  md, (rs1), rs2         #  8-bit left tile load
+mlae16.m md, (rs1), rs2         # 16-bit left tile load
+mlae32.m md, (rs1), rs2         # 32-bit left tile load
+mlae64.m md, (rs1), rs2         # 64-bit left tile load
+
+# For right matrix, B
+mlbe8.m  md, (rs1), rs2         #  8-bit right tile load
+mlbe16.m md, (rs1), rs2         # 16-bit right tile load
+mlbe32.m md, (rs1), rs2         # 32-bit right tile load
+mlbe64.m md, (rs1), rs2         # 64-bit right tile load
+
+# For output matrix, C
+mlce8.m  md, (rs1), rs2         #  8-bit output tile load
+mlce16.m md, (rs1), rs2         # 16-bit output tile load
+mlce32.m md, (rs1), rs2         # 32-bit output tile load
+mlce64.m md, (rs1), rs2         # 64-bit output tile load
+
+```
+
+Load a matrix tile from memory, where the matrix on memory is transposed. The shape of the tile that load to matrix register is related to current `mmode`. For example, if current `mmode` is `C = A x B`, the shape of right matrix B that load to matrix register is `mtilek x mtilen`. However, if current `mmode` is `C = A x BT`, the shape of right matrix B that load to matrix register is `mtilen x mtilek`.
+
+
+```
+# md destination, rs1 base address, rs2 row byte stride
+
+# For left matrix, A
+mlate8.m  md, (rs1), rs2        #  8-bit left tile load
+mlate16.m md, (rs1), rs2        # 16-bit left tile load
+mlate32.m md, (rs1), rs2        # 32-bit left tile load
+mlate64.m md, (rs1), rs2        # 64-bit left tile load
+
+# For right matrix, B
+mlbte8.m  md, (rs1), rs2        #  8-bit right tile load
+mlbte16.m md, (rs1), rs2        # 16-bit right tile load
+mlbte32.m md, (rs1), rs2        # 32-bit right tile load
+mlbte64.m md, (rs1), rs2        # 64-bit right tile load
+
+# For output matrix, C
+mlcte8.m  md, (rs1), rs2        #  8-bit output tile load
+mlcte16.m md, (rs1), rs2        # 16-bit output tile load
+mlcte32.m md, (rs1), rs2        # 32-bit output tile load
+mlcte64.m md, (rs1), rs2        # 64-bit output tile load
+
+```
+
+Executing matrix load instructions will result in illegal instruction exception under unsupported corresponding mtilem/mtilek/mtilen settings.
+
+==== Store Instructions
+
+Store a matrix tile to memory, where the matrix on memory is not transposed. The shape of the tile that store from matrix register is related to current `mmode`. For example, if current `mmode` is `C = A x B`, the shape of right matrix B that store from matrix register is `mtilek x mtilen`. However, if current `mmode` is `C = A x BT`, the shape of right matrix B that store from matrix register is `mtilen x mtilek`.
+```
+# ms3 store data, rs1 base address, rs2 row byte stride
+
+# For left matrix, A
+msae8.m  ms3, (rs1), rs2        #  8-bit left tile store
+msae16.m ms3, (rs1), rs2        # 16-bit left tile store
+msae32.m ms3, (rs1), rs2        # 32-bit left tile store
+msae64.m ms3, (rs1), rs2        # 64-bit left tile store
+
+# For right matrix, B
+msbe8.m  ms3, (rs1), rs2        #  8-bit right tile store
+msbe16.m ms3, (rs1), rs2        # 16-bit right tile store
+msbe32.m ms3, (rs1), rs2        # 32-bit right tile store
+msbe64.m ms3, (rs1), rs2        # 64-bit right tile store
+
+# For output matrix, C
+msce8.m  ms3, (rs1), rs2        #  8-bit output tile store
+msce16.m ms3, (rs1), rs2        # 16-bit output tile store
+msce32.m ms3, (rs1), rs2        # 32-bit output tile store
+msce64.m ms3, (rs1), rs2        # 64-bit output tile store
+
+```
+
+Store a matrix tile to memory, where the matrix on memory is transposed. The shape of the tile that store from matrix register is related to current `mmode`. For example, if current `mmode` is `C = A x B`, the shape of right matrix B that store from matrix register is `mtilek x mtilen`. However, if current `mmode` is `C = A x BT`, the shape of right matrix B that store from matrix register is `mtilen x mtilek`.
+```
+# ms3 store data, rs1 base address, rs2 row byte stride
+
+# For left matrix, A
+# tile size = mtilek * mtilem
+msate8.m  ms3, (rs1), rs2       #  8-bit left tile store
+msate16.m ms3, (rs1), rs2       # 16-bit left tile store
+msate32.m ms3, (rs1), rs2       # 32-bit left tile store
+msate64.m ms3, (rs1), rs2       # 64-bit left tile store
+
+# For right matrix, B
+# tile size = mtilen * mtilek
+msbte8.m  ms3, (rs1), rs2       #  8-bit right tile store
+msbte16.m ms3, (rs1), rs2       # 16-bit right tile store
+msbte32.m ms3, (rs1), rs2       # 32-bit right tile store
+msbte64.m ms3, (rs1), rs2       # 64-bit right tile store
+
+# For output matrix, C
+# tile size = mtilen * mtilem
+mscte8.m  ms3, (rs1), rs2       #  8-bit output tile store
+mscte16.m ms3, (rs1), rs2       # 16-bit output tile store
+mscte32.m ms3, (rs1), rs2       # 32-bit output tile store
+mscte64.m ms3, (rs1), rs2       # 64-bit output tile store
+```
+
+Executing matrix store instructions will result in illegal instruction exception under unsupported corresponding mtilem/mtilek/mtilen settings.
+
+==== Whole Matrix Load & Store Instructions
+
+Load a whole Tile matrix from memory without considering the tile size.
+
+```
+mltre8.m   md, (rs1), rs2        #  8-bit whole tile matrix load
+```
+
+Load a whole Accumulation matrix from memory without considering the tile size.
+
+```
+mlare8.m   md, (rs1), rs2        #  8-bit whole accumulation matrix load
+```
+
+Store a whole Tile matrix register to  memory without considering the tile size.
+
+```
+mstre8.m   ms3, (rs1), rs2       #  8-bit whole tile matrix store
+```
+
+Store a whole Accumulation matrix register to  memory without considering the tile size.
+
+```
+msare8.m   ms3, (rs1), rs2       #  8-bit whole accumulation matrix store
+```
+
+NOTE: Whole matrix load and store instructions are usually used for context saving and restoring.

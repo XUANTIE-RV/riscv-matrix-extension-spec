@@ -1,0 +1,13 @@
+== Introduction
+
+This document describes the matrix extension for RISC-V. 
+
+Matrix extension implement matrix multiplication and accumulation by partitioning the input and output matrix into tiles, which are then stored to matrix registers.
+
+Tile size usually refers to the dimensions of these tiles. For the operation C = A x B + C in figure below, the tile size of C is mtilem × mtilen, the tile size of A is mtilem × mtilek and the tile size of B is mtilek × mtilen. 
+
+image::tiled-matmul.svg[Tiled Matrix Multiplication]
+
+Each matrix multiplication instruction computes its output tile by stepping through the K dimension in tiles, loading the required values from the A and B matrices, and multiplying and accumulating them into the output.
+
+Matrix extension is strongly inspired by the RISC-V Vector "V" extension.

@@ -1,0 +1,13 @@
+.Matrix CSRs
+[cols="^2,^2,^2,10",options="header"]
+|===
+| Address | Privilege | Name    | Description
+|  0xC40  |    URO    | mtype   | Matrix tile data type register.
+|  0xC41  |    URO    | mtilem  | Tile length in m direction.
+|  0xC42  |    URO    | mtilen  | Tile length in n direction.
+|  0xC43  |    URO    | mtilek  | Tile length in k direction.
+|  0xC44  |    URO    | mlenb   | MLEN/8 (matrix tile register length in bytes).
+|  0xC45  |    URO    | mrlenb  | RLEN/8 (matrix tile register row length in bytes).
+|  0xC46  |    URO    | mamul   | AMUL.
+|  0x041  |    URW    | mcsr    | Matrix control and status register.
+|===

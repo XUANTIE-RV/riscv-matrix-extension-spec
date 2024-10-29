@@ -1,0 +1,136 @@
+== Intrinsic Examples
+
+=== Matrix multiplication
+
+Examples below show matrix multiplication examples of different mode. For simplicity, we assume that application length m/n is multiple of TMMAX/TNMAX and k may not be multiple of TKMAX. 
+```
+void matmul_float16(c, a, b, m, k, n) {
+    iter_m = m / TMMAX;
+    tail_m = m % TMMAX;
+    iter_n = n / TNMAX;
+    tail_n = n % TNMAX;
+    iter_k = k / TKMAX;
+    tail_k = k % TKMAX;
+    if ((tail_m == 0) &&(tail_k == 0))
+    {
+        msettilem(TMMAX); 
+        for (i = 0; i < m; i += TMMAX) {           
+        // loop at dim m with tiling
+            msettilen(TNMAX); 
+            for (j = 0; j < n; j += TNMAX) {       
+            // loop at dim n with tiling
+                out = mwsub_mm(out, out)            // clear output reg
+                msettilek(TKMAX);
+                for (s = 0; s < iter_k * TKMAX; s += TKMAX) {   
+                // loop at dim k with tiling                
+                    tr1 = mlae16_m(&a[i][s], k*2);  // load left matrix a
+                    tr2 = mlbe16_m(&b[s][j], n*2);  // load right matrix b
+                    out = mfwma_mm(tr1, tr2);       // tiled matrix multiply,
+                                                // double widen output
+                }
+                if (tail_k != 0)
+                {
+                    msettilek(tail_k);
+                    tr1 = mlae16_m(&a[i][s], k*2);  // load left matrix a
+                    tr2 = mlbe16_m(&b[s][j], n*2);  // load right matrix b
+                    out = mfwma_mm(tr1, tr2);       // tiled matrix multiply,
+                                                    // double widen output
+                }   
+                out = mfncvt_f_fw_m(out);           // convert widen result
+                msce16_m(out, &c[i][j], n*2);       // store to matrix c
+            }
+        }
+    }
+}
+
+```
+
+
+=== Matrix multiplication with left matrix transposed
+
+```
+void matmul_a_tr_float16(c, a, b, m, k, n) {
+    iter_m = m / TMMAX;
+    tail_m = m % TMMAX;
+    iter_n = n / TNMAX;
+    tail_n = n % TNMAX;
+    iter_k = k / TKMAX;
+    tail_k = k % TKMAX;
+    if ((tail_m == 0) &&(tail_k == 0))
+    {    
+        msettilem(TMMAX); 
+        for (i = 0; i < m; i += TMMAX) {           // loop at dim m with tiling
+            msettilen(TNMAX); 
+            for (j = 0; j < n; j += TNMAX) {       // loop at dim n with tiling                
+                msettilek(TKMAX); 
+                out = mwsub_mm(out, out)            // clear output reg
+                for (s = 0; s < iter_k * TKMAX; s += TKMAX) {   
+                // loop at dim k with tiling                
+                tr1 = mlate16_m(&a[s][i], m*2); // load transposed left matrix a
+                tr2 = mlbe16_m(&a[s][j], n*2);  // load right matrix b
+                out = mfwma_mm(tr1, tr2);       // tiled matrix multiply,
+                                                // double widen output
+            }
+                if (tail_k != 0)
+                {
+                    msettilek(tail_k);
+                    tr1 = mlate16_m(&a[s][i], m*2); 
+                    // load transposed left matrix a
+                    tr2 = mlbe16_m(&a[s][j], n*2);  // load right matrix b
+                    out = mfwma_mm(tr1, tr2);       // tiled matrix multiply,
+                                                // double widen output
+                }   
+
+            out = mfncvt_f_fw_m(out);           // convert widen result
+            msce16_m(out, &c[i][j], n*2);       // store to matrix c
+            }
+        }
+    }
+}
+
+```
+
+=== Matrix multiplication with right matrix transposed 
+
+```
+void matmul_a_tr_float16(c, a, b, m, k, n) {
+    iter_m = m / TMMAX;
+    tail_m = m % TMMAX;
+    iter_n = n / TNMAX;
+    tail_n = n % TNMAX;
+    iter_k = k / TKMAX;
+    tail_k = k % TKMAX;
+    if ((tail_m == 0) &&(tail_k == 0))
+    {    
+        msettilem(TMMAX); 
+        for (i = 0; i < m; i += TMMAX) {           
+        // loop at dim m with tiling
+            msettilen(TNMAX); 
+            for (j = 0; j < n; j += TNMAX) {       // loop at dim n with tiling            
+            out = mwsub_mm(out, out)            // clear output reg
+                for (s = 0; s < k; s += mtilek) {   
+                // loop at dim k with tiling
+                    tr1 = mlae16_m(&a[i][s], k*2); 
+                    // load left matrix a
+                    tr2 = mlbte16_m(&a[j][s], k*2); 
+                    // load transposed right matrix b
+                    out = mfwma_mm(tr1, tr2);       // tiled matrix multiply,
+                                                   // double widen output
+                }
+
+                if (tailk != 0)
+                {
+                    msettilek(tail_k);
+                    tr1 = mlae16_m(&a[i][s], k*2); // load left matrix a
+                    tr2 = mlbte16_m(&a[j][s], k*2);// load transposed right matrix b
+                    out = mfwma_mm(tr1, tr2);       // tiled matrix multiply,
+                                                // double widen output
+                }
+                out = mfncvt_f_fw_m(out);           // convert widen result
+                msce16_m(out, &c[i][j], n*2);       // store to matrix c
+            }
+        }
+    }
+}
+
+```

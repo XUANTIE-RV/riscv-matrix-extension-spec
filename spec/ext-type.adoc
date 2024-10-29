@@ -1,0 +1,778 @@
+=== Zmi4: Matrix 4-bit Integer Extension
+
+The Zmi4 extension allows to use 4-bit integer as the data type of input matrix elements.
+
+The Zmi4 extension adds a bit `mtype[3]` in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mint4` field, write 1 to enable 4-bit integer where a 8-bit integer will be treated as a pair of 4-bit integers (the size of a row must be even). 0 will be returned and `mtype.mill` will be set if 4-bit integer is not supported.
+
+The `mint4` field can be set with other fields by `msettype[i]` or set independently by `msetint` or `munsetint`.
+
+```
+msettypei rd, imm       # rd = new mtype, imm = new mtype setting.
+msettype  rd, rs1       # rd = new mtype, rs1 = new mtype value.
+
+msetint   rd, int4      # rd = new mtype, set mint4 = 1 to enable INT4 type.
+munsetint rd, int4      # rd = new mtype, set mint4 = 0 to disable INT4 type.
+```
+
+As int4 must be in pair, the e8 load/store and data move instructions are reused for int4 data.
+
+The element-wise and type-convert instructions with suffix .hb are added for int4 format.
+
+Four octuple-widen instructions are added to support int4 matrix multiplication. So the output type is always 32-bit integer. As a result, int32 element-wise instructions and type-convert instructions between int4 and int32 must be supported for accumulation registers.
+
+```
+# Matrix multiplication instructions.
+momau.[hb].mm       md, ms1, ms2
+msomau.[hb].mm      md, ms1, ms2
+
+moma.[hb].mm        md, ms1, ms2
+msoma.[hb].mm       md, ms1, ms2
+
+# Element-wise instructions.
+maddu.[hb|w].mm     md, ms1, ms2
+msaddu.[hb|w].mm    md, ms1, ms2
+mwaddu.[hb].mm      md, ms1, ms2
+
+madd.[hb|w].mm      md, ms1, ms2
+msadd.[hb|w].mm     md, ms1, ms2
+mwadd.[hb].mm       md, ms1, ms2
+
+...
+
+mwmul.[hb].mm       md, ms1, ms2
+mwmulu.[hb].mm      md, ms1, ms2
+mwmulsu.[hb].mm     md, ms1, ms2
+
+# Type-convert instructions.
+mcvt.x.xu.m         md, ms1
+mcvt.hb.uhb.m       md, ms1
+mcvt.xu.x.m         md, ms1
+mcvt.uhb.hb.m       md, ms1
+
+mwcvtu.xw.x.m       md, ms1
+mwcvtu.xq.x.m       md, ms1
+mwcvtu.xo.x.m       md, ms1
+mwcvtu.b.hb.m       md, ms1
+mwcvtu.h.hb.m       md, ms1
+mwcvtu.w.hb.m       md, ms1
+
+mwcvt.xw.x.m        md, ms1
+mwcvt.xq.x.m        md, ms1
+mwcvt.xo.x.m        md, ms1
+mwcvt.b.hb.m        md, ms1
+mwcvt.h.hb.m        md, ms1
+mwcvt.w.hb.m        md, ms1
+
+mncvtu.x.xw.m       md, ms1
+mncvtu.x.xq.m       md, ms1
+mncvtu.x.xo.m       md, ms1
+mncvtu.hb.b.m       md, ms1
+mncvtu.hb.h.m       md, ms1
+mncvtu.hb.w.m       md, ms1
+
+mncvt.x.xw.m        md, ms1
+mncvt.x.xq.m        md, ms1
+mncvt.x.xo.m        md, ms1
+mncvt.hb.b.m        md, ms1
+mncvt.hb.h.m        md, ms1
+mncvt.hb.w.m        md, ms1
+```
+
+=== Zmi8: Matrix 8-bit Integer Extension
+
+The Zmi8 extension allows to use 8-bit integer as the data type of input matrix elements.
+
+The Zmi8 extension adds a bit `mtype[4]` in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mint8` field, write 1 to enable 8-bit integer. 0 will be returned and `mtype.mill` will be set if 8-bit integer is not supported.
+
+The `mint8` field can be set with other fields by `msettype[i]` or set independently by `msetint` or `munsetint`.
+
+```
+msettypei rd, imm       # rd = new mtype, imm = new mtype setting.
+msettype  rd, rs1       # rd = new mtype, rs1 = new mtype value.
+
+msetint   rd, int8      # rd = new mtype, set mint8 = 1 to enable INT8 type.
+munsetint rd, int8      # rd = new mtype, set mint8 = 0 to disable INT8 type.
+```
+
+The e8 load/store and data move instructions are used for int8 data.
+
+The element-wise and type-convert instructions with .b suffix are added for int8 format.
+
+Four quadruple-widen instructions are added to support int8 matrix multiplication. So the output type is always 32-bit integer. As a result, int32 element-wise instructions and type-convert instructions between int8 and int32 must be supported for accumulation registers.
+
+```
+# Matrix multiplication instructions.
+mqmau.[b].mm        md, ms1, ms2
+msqmau.[b].mm       md, ms1, ms2
+
+mqma.[b].mm         md, ms1, ms2
+msqma.[b].mm        md, ms1, ms2
+
+# Element-wise instructions.
+maddu.[b|w].mm      md, ms1, ms2
+msaddu.[b|w].mm     md, ms1, ms2
+mwaddu.[b].mm       md, ms1, ms2
+
+madd.[b|w].mm       md, ms1, ms2
+msadd.[b|w].mm      md, ms1, ms2
+mwadd.[b].mm        md, ms1, ms2
+
+...
+
+mwmul.[b].mm        md, ms1, ms2
+mwmulu.[b].mm       md, ms1, ms2
+mwmulsu.[b].mm      md, ms1, ms2
+
+# Type-convert instructions.
+mcvt.x.xu.m         md, ms1
+mcvt.b.ub.m         md, ms1
+mcvt.xu.x.m         md, ms1
+mcvt.ub.b.m         md, ms1
+
+mwcvtu.xw.x.m       md, ms1
+mwcvtu.xq.x.m       md, ms1
+mwcvtu.h.b.m        md, ms1
+mwcvtu.w.b.m        md, ms1
+
+mwcvt.xw.x.m        md, ms1
+mwcvt.xq.x.m        md, ms1
+mwcvt.h.b.m         md, ms1
+mwcvt.w.b.m         md, ms1
+mncvtu.x.xw.m       md, ms1
+mncvtu.x.xq.m       md, ms1
+mncvtu.b.h.m        md, ms1
+mncvtu.b.w.m        md, ms1
+
+mncvt.x.xw.m        md, ms1
+mncvt.x.xq.m        md, ms1
+mncvt.b.h.m         md, ms1
+mncvt.b.w.m         md, ms1
+```
+
+=== Zmi16: Matrix 16-bit Integer Extension
+
+The Zmi16 extension allows to use 16-bit integer as the data type of input matrix elements.
+
+The Zmi16 extension adds a bit `mtype[5]` in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mint16` field, write 1 to enable 16-bit integer. 0 will be returned and `mtype.mill` will be set if 16-bit integer is not supported.
+
+The `mint16` field can be set with other fields by `msettype[i]` or set independently by `msetint` or `munsetint`.
+
+```
+msettypei rd, imm       # rd = new mtype, imm = new mtype setting.
+msettype  rd, rs1       # rd = new mtype, rs1 = new mtype value.
+
+msetint   rd, int16     # rd = new mtype, set mint16 = 1 to enable INT16 type.
+munsetint rd, int16     # rd = new mtype, set mint16 = 0 to disable INT16 type.
+```
+
+The e16 load/store and data move instructions are used for int16 data.
+
+The element-wise and type-convert instructions with .h suffix are added for int16 format.
+
+Six no-widen and double-widen instructions are added to support int16 matrix multiplication. So the output type is 16-bit or 32-bit integer.
+
+```
+# Matrix multiplication instructions.
+mmau.[h].mm         md, ms1, ms2
+msmau.[h].mm        md, ms1, ms2
+mwmau.[h].mm        md, ms1, ms2
+
+mma.[h].mm          md, ms1, ms2
+msma.[h].mm         md, ms1, ms2
+mwma.[h].mm         md, ms1, ms2
+
+# Element-wise instructions.
+maddu.[h|w].mm      md, ms1, ms2
+msaddu.[h|w].mm     md, ms1, ms2
+mwaddu.[h].mm       md, ms1, ms2
+
+madd.[h|w].mm       md, ms1, ms2
+msadd.[h|w].mm      md, ms1, ms2
+mwadd.[h].mm        md, ms1, ms2
+
+...
+
+mwmul.[h].mm        md, ms1, ms2
+mwmulu.[h].mm       md, ms1, ms2
+mwmulsu.[h].mm      md, ms1, ms2
+
+# Type-convert instructions.
+mcvt.x.xu.m         md, ms1
+mcvt.h.uh.m         md, ms1
+mcvt.xu.x.m         md, ms1
+mcvt.uh.h.m         md, ms1
+
+mwcvtu.xw.x.m       md, ms1
+mwcvtu.w.h.m        md, ms1
+mwcvt.xw.x.m        md, ms1
+mwcvt.w.h.m         md, ms1
+
+mncvtu.x.xw.m       md, ms1
+mncvtu.h.w.m        md, ms1
+mncvt.x.xw.m        md, ms1
+mncvt.h.w.m         md, ms1
+```
+
+=== Zmi32: Matrix 32-bit Integer Extension
+
+The Zmi32 extension allows to use 32-bit integer as the data type of input matrix elements.
+
+The Zmi32 extension adds a bit `mtype[6]` in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mint32` field, write 1 to enable 32-bit integer. 0 will be returned and `mtype.mill` will be set if 32-bit integer is not supported.
+
+The `mint32` field can be set with other fields by `msettype[i]` or set independently by `msetint` or `munsetint`.
+
+```
+msettypei rd, imm       # rd = new mtype, imm = new mtype setting.
+msettype  rd, rs1       # rd = new mtype, rs1 = new mtype value.
+
+msetint   rd, int32     # rd = new mtype, set mint32 = 1 to enable INT32 type.
+munsetint rd, int32     # rd = new mtype, set mint32 = 0 to disable INT32 type.
+```
+
+The e32 load/store and data move instructions are used for int32 data.
+
+The element-wise and type-convert instructions with .w suffix are added for int32 format.
+
+Four no-widen instructions are added to support int32 matrix multiplication. So the output type is always 32-bit integer.
+
+```
+# Matrix multiplication instructions.
+mmau.[w].mm         md, ms1, ms2
+msmau.[w].mm        md, ms1, ms2
+
+mma.[w].mm          md, ms1, ms2
+msma.[w].mm         md, ms1, ms2
+
+# Element-wise instructions.
+maddu.[w].mm        md, ms1, ms2
+msaddu.[w].mm       md, ms1, ms2
+
+madd.[w].mm         md, ms1, ms2
+msadd.[w].mm        md, ms1, ms2
+
+...
+
+msmul.[w].mm        md, ms1, ms2
+msmulu.[w].mm       md, ms1, ms2
+msmulsu.[w].mm      md, ms1, ms2
+
+# Type-convert instructions.
+mcvt.x.xu.m         md, ms1
+mcvt.w.uw.m         md, ms1
+mcvt.xu.x.m         md, ms1
+mcvt.uw.w.m         md, ms1
+```
+
+=== Zmi64: Matrix 64-bit Integer Extension
+
+The Zmi64 extension allows to use 64-bit integer as the data type of input matrix elements.
+
+The Zmi64 extension adds a bit `mtype[7]` in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mint64` field, write 1 to enable 64-bit integer. 0 will be returned and `mtype.mill` will be set if 64-bit integer is not supported.
+
+The `mint64` field can be set with other fields by `msettype[i]` or set independently by `msetint` or `munsetint`.
+
+```
+msettypei rd, imm       # rd = new mtype, imm = new mtype setting.
+msettype  rd, rs1       # rd = new mtype, rs1 = new mtype value.
+
+msetint   rd, int64     # rd = new mtype, set mint64 = 1 to enable INT64 type.
+munsetint rd, int64     # rd = new mtype, set mint64 = 0 to disable INT64 type.
+```
+
+The e64 load/store and data move instructions are used for int64 data.
+
+The element-wise and type-convert instructions with .dw suffix are added for int64 format.
+
+Four no-widen instructions are added to support int64 matrix multiplication. So the output type is always 64-bit integer.
+
+```
+# Matrix multiplication instructions.
+mmau.[dw].mm        md, ms1, ms2
+msmau.[dw].mm       md, ms1, ms2
+
+mma.[dw].mm         md, ms1, ms2
+msma.[dw].mm        md, ms1, ms2
+
+# Element-wise instructions.
+maddu.[dw].mm       md, ms1, ms2
+msaddu.[dw].mm      md, ms1, ms2
+
+madd.[dw].mm        md, ms1, ms2
+msadd.[dw].mm       md, ms1, ms2
+
+...
+
+msmul.[dw].mm       md, ms1, ms2
+msmulu.[dw].mm      md, ms1, ms2
+msmulsu.[dw].mm     md, ms1, ms2
+
+# Type-convert instructions.
+mcvt.x.xu.m         md, ms1
+mcvt.dw.udw.m       md, ms1
+mcvt.xu.x.m         md, ms1
+mcvt.udw.dw.m       md, ms1
+```
+
+If Zmi32 is also supported, the 32-bit widening arithmetic instructions and type convert between int32 and int64 are also provided.
+
+```
+# Matrix multiplication instructions.
+mwmau.[w].mm        md, ms1, ms2
+mwma.[w].mm         md, ms1, ms2
+
+# Element-wise instructions.
+maddu.[w].mm        md, ms1, ms2
+msaddu.[w].mm       md, ms1, ms2
+mwaddu.[w].mm       md, ms1, ms2
+
+madd.[w].mm         md, ms1, ms2
+msadd.[w].mm        md, ms1, ms2
+mwadd.[w].mm        md, ms1, ms2
+
+...
+
+mwmul.[w].mm        md, ms1, ms2
+mwmulu.[w].mm       md, ms1, ms2
+mwmulsu.[w].mm      md, ms1, ms2
+
+# Type-convert instructions.
+mwcvtu.xw.x.m       md, ms1
+mwcvtu.dw.w.m       md, ms1
+mwcvt.xw.x.m        md, ms1
+mwcvt.dw.w.m        md, ms1
+
+mncvtu.x.xw.m       md, ms1
+mncvtu.w.dw.m       md, ms1
+mncvt.x.xw.m        md, ms1
+mncvt.w.dw.m        md, ms1
+```
+
+=== Zmf8e4m3: Matrix 8-bit E4M3 Float Point Extension
+
+The Zmf8e4m3 extension allows to use 8-bit float point format with 4-bit exponent and 3-bit mantissa as the data type of input matrix elements.
+
+The Zmf8e4m3 extension uses a 2-bit `mfp8` field, `mtype[9:8]`, in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mfp8` field, write 01 to enable 8-bit E4M3 float point. 0 will be returned and `mtype.mill` will be set if E4M3 is not supported.
+
+The `mfp8` field can be set with other fields by `msettype[i]` or set independently by `msetfp` or `munsetfp`.
+
+```
+msettypei rd, imm       # rd = new mtype, imm = new mtype setting.
+msettype  rd, rs1       # rd = new mtype, rs1 = new mtype value.
+
+msetfp    rd, fp8       # rd = new mtype, set mfp8 = 01 to enable E4M3 type.
+msetfp    rd, e4m3      # rd = new mtype, set mfp8 = 01 to enable E4M3 type.
+munsetfp  rd, fp8       # rd = new mtype, set mfp8 = 00 to disable FP8 type.
+```
+
+The e8 load/store and data move instructions are used for E4M3 data.
+
+The element-wise and type-convert instructions with .cf suffix are added for E4M3 format.
+
+A double-widen instruction and a quadruple-widen instruction are added to support E4M3 matrix multiplication. So the output type is 16-bit or 32-bit float point. As a result, fp16/fp32 element-wise instructions and type-convert instructions between E4M3 and fp16/fp32 must be supported for accumulation registers.
+
+```
+# Matrix multiplication instructions.
+mfwma.[cf].mm       md, ms1, ms2
+mfqma.[cf].mm       md, ms1, ms2
+
+# Element-wise instructions.
+mfadd.[cf|hf|f].mm  md, ms1, ms2
+mfwadd.[cf|hf].mm   md, ms1, ms2
+
+mfsub.[cf|hf|f].mm  md, ms1, ms2
+mfwsub.[cf|hf].mm   md, ms1, ms2
+
+...
+
+mfsqrt.[cf|hf|f].mm md, ms1
+
+# Type-convert instructions.
+mfwcvt.fw.f.m       md, ms1
+mfwcvt.hf.cf.m      md, ms1
+mfwcvt.f.hf.m       md, ms1
+
+mfncvt.f.fw.m       md, ms1
+mfncvt.cf.hf.m      md, ms1
+mfncvt.hf.f.m       md, ms1
+```
+
+=== Zmf8e5m2: Matrix 8-bit E5M2 Float Point Extension
+
+The Zmf8e5m2 extension allows to use 8-bit float point format with 5-bit exponent and 2-bit mantissa as the data type of input matrix elements.
+
+The Zmf8e5m2 extension uses a 2-bit `mfp8` field, `mtype[9:8]`, in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mfp8` field, write 10 to enable 8-bit E5M2 float point. 0 will be returned and `mtype.mill` will be set if E5M2 is not supported.
+
+The `mfp8` field can be set with other fields by `msettype[i]` or set independently by `msetfp` or `munsetfp`.
+
+```
+msettypei rd, imm       # rd = new mtype, imm = new mtype setting.
+msettype  rd, rs1       # rd = new mtype, rs1 = new mtype value.
+
+msetfp    rd, e5m2      # rd = new mtype, set mfp8 = 10 to enable E5M2 type.
+munsetfp  rd, fp8       # rd = new mtype, set mfp8 = 00 to disable FP8 type.
+```
+
+The e8 load/store and data move instructions are used for E5M2 data.
+
+The element-wise and type-convert instructions with .cf suffix are added for E5M2 format.
+
+A double-widen instruction and a quadruple-widen instruction are added to support E5M2 matrix multiplication. So the output type is 16-bit or 32-bit float point. As a result, fp16/fp32 element-wise instructions and type-convert instructions between E5M2 and fp16/fp32 must be supported for accumulation registers.
+
+```
+# Matrix multiplication instructions.
+mfwma.[cf].mm       md, ms1, ms2
+mfqma.[cf].mm       md, ms1, ms2
+
+# Element-wise instructions.
+mfadd.[cf|hf|f].mm  md, ms1, ms2
+mfwadd.[cf|hf].mm   md, ms1, ms2
+
+mfsub.[cf|hf|f].mm  md, ms1, ms2
+mfwsub.[cf|hf].mm   md, ms1, ms2
+
+...
+
+mfsqrt.[cf|hf|f].mm md, ms1
+
+# Type-convert instructions.
+mfwcvt.fw.f.m       md, ms1
+mfwcvt.hf.cf.m      md, ms1
+mfwcvt.f.hf.m       md, ms1
+
+mfncvt.f.fw.m       md, ms1
+mfncvt.cf.hf.m      md, ms1
+mfncvt.hf.f.m       md, ms1
+```
+
+=== Zmf8e3m4: Matrix 8-bit E3M4 Float Point Extension
+
+The Zmf8e3m4 extension allows to use 8-bit float point format with 3-bit exponent and 4-bit mantissa as the data type of input matrix elements.
+
+The Zmf8e3m4 extension uses a 2-bit `mfp8` field, `mtype[9:8]`, in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mfp8` field, write 11 to enable 8-bit E3M4 float point. 0 will be returned and `mtype.mill` will be set if E3M4 is not supported.
+
+The `mfp8` field can be set with other fields by `msettype[i]` or set independently by `msetfp` or `munsetfp`.
+
+```
+msettypei rd, imm       # rd = new mtype, imm = new mtype setting.
+msettype  rd, rs1       # rd = new mtype, rs1 = new mtype value.
+
+msetfp    rd, e3m4      # rd = new mtype, set mfp8 = 11 to enable E3M4 type.
+munsetfp  rd, fp8       # rd = new mtype, set mfp8 = 00 to disable FP8 type.
+```
+
+The e8 load/store and data move instructions are used for E3M4 data.
+
+The element-wise and type-convert instructions with .cf suffix are added for E3M4 format.
+
+A double-widen instruction and a quadruple-widen instruction are added to support E3M4 matrix multiplication. So the output type is 16-bit or 32-bit float point. As a result, fp16/fp32 element-wise instructions and type-convert instructions between E3M4 and fp16/fp32 must be supported for accumulation registers.
+
+```
+# Matrix multiplication instructions.
+mfwma.[cf].mm       md, ms1, ms2
+mfqma.[cf].mm       md, ms1, ms2
+
+# Element-wise instructions.
+mfadd.[cf|hf|f].mm  md, ms1, ms2
+mfwadd.[cf|hf].mm   md, ms1, ms2
+
+mfsub.[cf|hf|f].mm  md, ms1, ms2
+mfwsub.[cf|hf].mm   md, ms1, ms2
+
+...
+
+mfsqrt.[cf|hf|f].mm md, ms1
+
+# Type-convert instructions.
+mfwcvt.fw.f.m       md, ms1
+mfwcvt.hf.cf.m      md, ms1
+mfwcvt.f.hf.m       md, ms1
+
+mfncvt.f.fw.m       md, ms1
+mfncvt.cf.hf.m      md, ms1
+mfncvt.hf.f.m       md, ms1
+```
+
+=== Zmf16e5m10: Matrix 16-bit Half-precision Float-point (FP16) Extension
+
+The Zmf16e5m10 extension allows to use FP16 format with 5-bit exponent and 10-bit mantissa as the data type of input matrix elements.
+
+The Zmf16e5m10 extension uses a 2-bit `mfp16` field, `mtype[11:10]`, in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mfp16` field, write 01 to enable 16-bit E5M10 float point (FP16). 0 will be returned and `mtype.mill` will be set if FP16 is not supported.
+
+The `mfp16` field can be set with other fields by `msettype[i]` or set independently by `msetfp` or `munsetfp`.
+
+```
+msettypei  rd, imm      # rd = new mtype, imm = new mtype setting.
+msettype   rd, rs1      # rd = new mtype, rs1 = new mtype value.
+
+msetfp     rd, fp16     # rd = new mtype, set mfp16 = 01 to enable FP16 type.
+munsetfp   rd, fp16     # rd = new mtype, set mfp16 = 00 to disable FP16 type.
+```
+
+The e16 load/store and data move instructions are used for FP16 data.
+
+The element-wise and type-convert instructions with .hf suffix are added for FP16 format.
+
+A no-widen instruction and a double-widen instruction are added to support FP16 matrix multiplication. So the output type is 16-bit or 32-bit float point. As a result, fp32 element-wise instructions and type-convert instructions between fp16 and fp32 must be supported for accumulation registers. If integer types are enabled, type-convert instructions between fp16 and integer should also be supported.
+
+```
+# Matrix multiplication instructions.
+mfma.[hf].mm        md, ms1, ms2
+mfwma.[hf].mm       md, ms1, ms2
+
+# Pair Matrix multiplication instructions. (only support in `C = A X BT`)
+btpmfma.[hf].mm        md, ms1, ms2
+
+# Element-wise instructions.
+mfadd.[hf|f].mm     md, ms1, ms2
+mfwadd.[hf].mm      md, ms1, ms2
+
+mfsub.[hf|f].mm     md, ms1, ms2
+mfwsub.[hf].mm      md, ms1, ms2
+
+...
+
+mfsqrt.[hf|f].mm    md, ms1
+
+# Type-convert instructions.
+mfwcvt.fw.f.m       md, ms1
+mfwcvt.f.hf.m       md, ms1
+
+mfncvt.f.fw.m       md, ms1
+mfncvt.hf.f.m       md, ms1
+```
+
+If Zmi* is also supported, the type-convert instructions between integer and fp16/fp32 are also provided.
+
+=== Zmf16e8m7: Matrix 16-bit BFloat (BF16) Extension
+
+The Zmf16e8m7 extension allows to use BF16 format with 8-bit exponent and 7-bit mantissa as the data type of input matrix elements.
+
+The Zmf16e8m7 extension uses a 2-bit `mfp16` field, `mtype[11:10]`, in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mfp16` field, write 10 to enable 16-bit E8M7 float point (BF16). 0 will be returned and `mtype.mill` will be set if BF16 is not supported.
+
+The `mfp16` field can be set with other fields by `msettype[i]` or set independently by `msetfp` or `munsetfp`.
+
+```
+msettypei  rd, imm      # rd = new mtype, imm = new mtype setting.
+msettype   rd, rs1      # rd = new mtype, rs1 = new mtype value.
+
+msetfp     rd, bf16     # rd = new mtype, set mfp16 = 10 to enable BF16 type.
+munsetfp   rd, fp16     # rd = new mtype, set mfp16 = 00 to disable BF16 type.
+```
+
+The e16 load/store and data move instructions are used for BF16 data.
+
+The element-wise and type-convert instructions with .hf suffix are reused for BF16 format.
+
+A no-widen instruction and a double-widen instruction are added to support BF16 matrix multiplication. So the output type is 16-bit or 32-bit float point. As a result, fp32 element-wise instructions and type-convert instructions between bf16 and fp32 must be supported for accumulation registers. If integer types are enabled, type-convert instructions between bf16 and integer should also be supported.
+
+```
+# Regular Matrix multiplication instructions.
+mfma.[hf].mm        md, ms1, ms2
+mfwma.[hf].mm       md, ms1, ms2
+# BTpair Matrix multiplication instructions. (only support in `C = A X BT`)
+btpmfma.[hf].mm        md, ms1, ms2
+
+# Element-wise instructions.
+mfadd.[hf|f].mm     md, ms1, ms2
+mfwadd.[hf].mm      md, ms1, ms2
+
+mfsub.[hf|f].mm     md, ms1, ms2
+mfwsub.[hf].mm      md, ms1, ms2
+
+...
+
+mfsqrt.[hf|f].mm    md, ms1
+
+# Type-convert instructions.
+mfwcvt.fw.f.m       md, ms1
+mfwcvt.f.hf.m       md, ms1
+
+mfncvt.f.fw.m       md, ms1
+mfncvt.hf.f.m       md, ms1
+```
+
+If Zmi* is also supported, the type-convert instructions between integer and fp16/fp32 are also provided.
+
+If Zmf16e5m10 is also supported, the type-convert instructions between fp16 and bf16 are also provided.
+
+```
+# Type-convert instructions.
+mfcvt.bf.hf.m       md, ms1
+mfcvt.hf.bf.m       md, ms1
+```
+
+=== Zmf32e8m23: Matrix 32-bit Float-point Extension
+
+The Zmf32e8m23 extension allows to use standard FP32 format with 8-bit exponent and 23-bit mantissa as the data type of input matrix elements.
+
+The Zmf32e8m23 extension uses a 2-bit `mfp32` field, `mtype[13:12]`, in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mfp32` field, write 01 to enable 32-bit E8M23 float point (FP32). 0 will be returned and `mtype.mill` will be set if FP32 is not supported.
+
+The `mfp32` field can be set with other fields by `msettype[i]` or set independently by `msetfp` or `munsetfp`.
+
+```
+msettypei  rd, imm      # rd = new mtype, imm = new mtype setting.
+msettype   rd, rs1      # rd = new mtype, rs1 = new mtype value.
+
+msetfp     rd, fp32     # rd = new mtype, set mfp32 = 01 to enable FP32 type.
+munsetfp   rd, fp32     # rd = new mtype, set mfp32 = 00 to disable FP32 type.
+```
+
+The e32 load/store and data move instructions are used for FP32 data.
+
+The element-wise and type-convert instructions with .f suffix are added for FP32 format.
+
+A no-widen instruction is added to support FP32 matrix multiplication. So the output type is 32-bit float point. If integer types are enabled, type-convert instructions between fp32 and integer should also be supported.
+
+```
+# Matrix multiplication instructions.
+mfma.[f].mm         md, ms1, ms2
+
+# Element-wise instructions.
+mfadd.[f].mm        md, ms1, ms2
+mfsub.[f].mm        md, ms1, ms2
+...
+mfsqrt.[f].mm       md, ms1
+```
+
+If Zmi* is also supported, the type-convert instructions between integer and fp32 are also provided.
+
+=== Zmf19e8m10: Matrix 19-bit TensorFloat32 (TF32) Extension
+
+The Zmf19e8m10 extension allows to use TF32 format with 8-bit exponent and 10-bit mantissa as the data type of input matrix elements.
+
+The Zmf19e8m10 extension uses a 2-bit `mfp32` field, `mtype[13:12]`, in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mfp32` field, write 10 to enable 19-bit E8M10 float point (TF32). 0 will be returned and `mtype.mill` will be set if TF32 is not supported.
+
+The `mfp32` field can be set with other fields by `msettype[i]` or set independently by `msetfp` or `munsetfp`.
+
+```
+msettypei  rd, imm      # rd = new mtype, imm = new mtype setting.
+msettype   rd, rs1      # rd = new mtype, rs1 = new mtype value.
+
+msetfp     rd, tf32     # rd = new mtype, set mfp32 = 10 to enable TF32 type.
+munsetfp   rd, fp32     # rd = new mtype, set mfp32 = 00 to disable FP32 type.
+```
+
+TF32 implementions are designed to achieve better performance on matrix multiplications and convolutions
+by rounding input Float32 data to have 10 bits of mantissa, and accumulating results with FP32 precision,
+maintaining FP32 dynamic range.
+
+So when Zmtf32 is used, Float32 is still used as the input and output data type for matrix multiplication.
+
+The e32 load/store and data move instructions are used for TF32 data.
+
+The element-wise and type-convert instructions are not supported for TF32 format.
+
+A no-widen instruction is added to support TF32 matrix multiplication. So the output type is always 32-bit float point (FP32). As a result, fp32 element-wise instructions must be supported for accumulation registers. If integer types are enabled, type-convert instructions between fp32 and integer should also be supported.
+
+```
+# Matrix multiplication instructions.
+mfma.[f].mm         md, ms1, ms2
+
+# Element-wise instructions.
+mfadd.[f].mm        md, ms1, ms2
+mfsub.[f].mm        md, ms1, ms2
+...
+mfsqrt.[f].mm       md, ms1
+```
+
+NOTE: There is no double-widen version for TF32 matrix multiplication (a double-widen version for standard FP32 is supported by Zmf64e11m52 extension).
+
+
+=== Zmf64e11m52: Matrix 64-bit Float-point Extension
+
+The Zmf64e11m52 extension allows to use standard FP64 format with 11-bit exponent and 52-bit mantissa as the data type of input matrix elements.
+
+The Zmf64e11m52 extension uses a 1-bit `mfp64` field, `mtype[14]`, in `mtype` register.
+
+include::mtype.adoc[]
+
+For `mfp64` field, write 1 to enable 64-bit E11M52 float point (FP64). 0 will be returned and `mtype.mill` will be set if FP64 is not supported.
+
+The `mfp64` field can be set with other fields by `msettype[i]` or set independently by `msetfp` or `munsetfp`.
+
+```
+msettypei  rd, imm      # rd = new mtype, imm = new mtype setting.
+msettype   rd, rs1      # rd = new mtype, rs1 = new mtype value.
+
+msetfp     rd, fp64     # rd = new mtype, set mfp64 = 1 to enable FP64 type.
+munsetfp   rd, fp64     # rd = new mtype, set mfp64 = 0 to disable FP64 type.
+```
+
+The e64 load/store and data move instructions are used for FP64 data.
+
+The element-wise and type-convert instructions with .d suffix are added for FP64 format.
+
+A no-widen instruction is added to support FP64 matrix multiplication. The output type is always 64-bit float point (FP64). If integer types are enabled, type-convert instructions between fp64 and integer should also be supported.
+
+```
+mfma.[d].mm         md, ms1, ms2
+```
+
+If Zmi* is also supported, the type-convert instructions between integer and fp64 are also provided.
+
+If Zmf32e8m23 is also supported, the 32-bit widening arithmetic instructions and type convert between fp32 and fp64 are also provided.
+
+```
+# Matrix multiplication instructions.
+mfwma.[f].mm        md, ms1, ms2
+
+# Element-wise instructions.
+mfwadd.[f].mm       md, ms1, ms2
+mfwsub.[f].mm       md, ms1, ms2
+...
+mfwmul.[f].mm       md, ms1, ms2
+
+# Type-convert instructions.
+mfwcvt.fw.f.m       md, ms1
+mfwcvt.d.f.m        md, ms1
+mfncvt.f.fw.m       md, ms1
+mfncvt.f.d.m        md, ms1
+```
