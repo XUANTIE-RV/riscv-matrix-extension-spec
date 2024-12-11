@@ -1,4 +1,4 @@
-# RISC-V Matrix Extension Specification
+# RISC-V Matrix Extension Specification Proposal V0.6.0
 
 ## Introduction
 This is a matrix extension proposal for AI applications under RISC-V architecture. The extension is currently at version 0.6.0. Compared to the last version, there are following updates:
