@@ -2,7 +2,11 @@
 
 This RISC-V specification proposal has been contributed to directly or indirectly by:
 
+[%hardbreaks]
+
 ZhaoJiang, WenmengZhang, WenganShao, ZhiweiLiu, XianmiaoQu, JingQiu, MingxinZhao, YunhaiShang, XiaoyanXiang, ChenChen
 
 Others are welcome to help improve the specification.
-[%hardbreaks]
+
+
+We will be very grateful to the huge number of other people who will have helped to improve this specification through their comments, reviews, feedback and questions.

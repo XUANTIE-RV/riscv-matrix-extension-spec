@@ -1,7 +1,0 @@
-[[intro]]
-== Introduction
-This document is a matrix extension proposal for RISC-V. 
-
-The extension chooses a decoupled architecture from the vector extension for the flexibility and implementation considerations. Each harts supporting the matrix extension defines a RLEN constant parameters. RLEN is the number of bits in a row of a matrix register as described in Section Matrix Registers. The programmer's model is designed to achieve binary portability on harts with different RLEN values.
-
-The extension is strongly inspired by the RISC-V Vector extension. 

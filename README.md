@@ -1,19 +1,16 @@
 # RISC-V Matrix Extension Specification
 
 ## Introduction
-This is a matrix extension proposal for AI applications under RISC-V architecture. The extension has the following features.
+This is a matrix extension proposal for AI applications under RISC-V architecture. The extension is currently at version 0.6.0. Compared to the last version, there are following updates:
 
-* Scalability
-    - Register size can be scaled from 64 bytes to 2048 bytes 
-    - Peak performance of the extension varies from 0.125 Tops/Ghz to 32 Tops/Ghz
-    - Binary portability
-* Multiple data types
-    - Support int4/int8/int16/fp16/bf16/fp32
-* Independence
-    - Strongly inspired by the RISC-V Vector extension
-    - Decoupled architecture from Vector extension
-* Extensibility for future
-    - Support extensions for fp8/fp4 and other future extensions
+* Separated source and accumulation registers
+  - The source and accumulation registers are separated to tile register and accumulation register, supporting source and destination registers of different sizes; 
+* More flexible register shape
+  - The number of rows and columns in the matrix registers is adjustable, no longer limited to rows = RLEN/32. By adjusting the number of rows and columns, different sizes of matrix multiplication can be formed, achieving full coverage from pure outer products to pure inner products; 
+* More Element-wise instruction
+  - New element-wise instructions have been added to facilitate operator fusion;
+
+
 
 The extension is still under construction, and this is a preview demo project.
 Some key directories are shown below.
