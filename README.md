@@ -61,7 +61,7 @@ The final documents form of PDF can be generated using the `make` command under 
 
 | Folder | Command     |     Documents |
 | ----   | ----        | ----      |
-| spec | make        | RISC-V Matrix Extension specification |
+| spec | make all      | RISC-V Matrix Extension specification |
 | doc  | make shl    | SHL 2.0 USER GUIDE |
 | doc  | make its    | Matrix Extension intrinsic API Reference Manual |
 | doc  | make abi    | Matrix Extension ABI Manual |
