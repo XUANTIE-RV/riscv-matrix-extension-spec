@@ -1,0 +1,26 @@
+An element of a matrix register can be broadcasted to fill a whole matrix register. The element comes from the first row and the first column of the source matrix. The source register and destination register must be both tile registers or accumulation registers. 
+
+```
+#matrix element broadcast, md[i,j] = ms1[0,0]
+mbce8  md, ms1[imm3]
+mbce16 md, ms1[imm3]
+mbce32 md, ms1[imm3]
+mbce64 md, ms1[imm3]
+```
+
+A row of a matrix register can be broadcasted to fill a whole matrix register. The mrbc.mv.i instruction moves and duplicates a vector to every row of the destination tile/accumulation register. The vector data is a row of tile/accumulation register, indexed by imm3. Only log2(ROWNUM) bits of imm3 are used. The source register and destination register must be both tile registers or accumulation registers.
+
+```
+#matrix row broadcast, md[i,:] = ms1[uimm3,:]
+mrbc.mv.i md, ms1[uimm3]
+```
+
+A column of a matrix register can be broadcasted to fill a whole matrix register. The columns are divided by EEW so that an TRLEN or ARLEN row contains TRLEN/EEW or ARLEN/EEW columns. Only log2(TRLEN/EEW) or log2(ARLEN/EEW) bits of uimm3 are used. The source register and destination register must be both tile registers or accumulation registers.
+
+```
+#matrix column broadcast, md[:,j] = ms1[:,imm3]
+mcbce8.mv.i  md, ms1[imm3]
+mcbce16.mv.i md, ms1[imm3]
+mcbce32.mv.i md, ms1[imm3]
+mcbce64.mv.i md, ms1[imm3]
+```

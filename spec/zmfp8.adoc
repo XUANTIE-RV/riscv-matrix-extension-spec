@@ -1,0 +1,10 @@
+For fp8 extension,  fp8 matrix multiplication instructions are provided with E3M4/E5M2 input data type and fp16/bf16//fp32 output data type.
+
+==== FP8 Half-Precison Extension
+
+include::zmfp8_half.adoc[]
+
+
+==== FP8 Single-Precison Extension
+
+include::zmfp8_single.adoc[]

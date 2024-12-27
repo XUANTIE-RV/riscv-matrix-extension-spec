@@ -1,0 +1,62 @@
+The convert instruction converts each element from ms1 to destination register md. Narrow conversion is supported by sepcifing the source operand width and result operand width, source elements are twice as wide as destination elements. Low or high half columns of  matrix register is used by destination matrix specified by md with another half columns kept undisturbed.
+Widen conversion is also supported by sepcifing the source operand width and result operand width, and destination elements are twice as wide as source elements. Low or high half columns of  matrix register are used by source matrix specified by ms1. 
+
+*  mfcvt<h/l>.h.<e4/e5>: legal if 'mfew' and 'mmf8f16' of xmisa register are both set to 1
+*  mfcvt<h/l>.<e4/e5>.h: legal if 'mfew' and 'mmf8f16' of xmisa register are both set to 1
+*  mfcvt<h/l>.h.s: legal if 'mfew' and 'mmf16f32' of xmisa register are both set to 1
+*  mfcvt<h/l>.s.h: legal if 'mfew' and 'mmf16f32' of xmisa register are both set to 1
+*  mfcvt<h/l>.bf16.s: legal if 'mfew' and 'mmbf16f32' of xmisa register are both set to 1
+*  mfcvt<h/l>.s.bf16: legal if 'mfew' and 'mmbf16f32' of xmisa register are both set to 1
+*  mfcvt<h/l>.s.d: legal if 'mfew' and 'mmf32f64' of xmisa register are both set to 1
+*  mfcvt<h/l>.d.s: legal if 'mfew' and 'mmf32f64' of xmisa register are both set to 1
+
+image::float_convert.svg[alt="float_convert", align="center"]
+
+
+```
+#matrix-matrix floating point narrow convert(fp16tofp8, fp32tofp16, fp64tofp32)
+#write back to the 2nd half of md 
+mfcvth.e4.h md, ms1 
+mfcvth.e5.h md, ms1 
+mfcvth.h.s md, ms1
+mfcvth.bf16.s md, ms1
+mfcvth.s.d md, ms1
+#write back to the 1st half of md 
+mfcvtl.e4.h md, ms1 
+mfcvtl.e5.h md, ms1 
+mfcvtl.h.s md, ms1 
+mfcvtl.bf16.s md, ms1 
+mfcvtl.s.d md, ms1 
+
+
+#matrix-matrix floating point widen convert(fp8tofp16, fp16tofp32, fp32tofp64)
+#convert the 2nd half of ms1 
+mfcvth.h.e4 md, ms1 
+mfcvth.h.e5 md, ms1
+mfcvth.s.h md, ms1
+mfcvth.s.bf16 md, ms1
+mfcvth.d.s md, ms1
+#convert the 1st half of ms1 
+mfcvtl.h.e4 md, ms1 
+mfcvtl.h.e5 md, ms1
+mfcvtl.s.h md, ms1
+mfcvtl.s.bf16 md, ms1
+mfcvtl.d.s md, ms1
+```
+
+
+For conversion from fp32 to fp8,  legal if 'mfew' and 'mmf8f32' of xmisa register are both set to 1, illegal in all other cases.
+
+The mfcvt<l/h>.<e5/e4>.s instructions are used to convert a single float-point source into a 4x narrower destination. The mfcvtl.<e5/e4>.s write back to the first quater of md and the mfcvth.<e5/e4>.s write back to the second quater of md, the rest parts of md are kept undisturbed. 
+
+```
+#matrix-matrix floating point 4x narrow convert(fp32tofp8)
+#convert the 2nd half of ms1 
+mfcvth.e5.s md, ms1
+mfcvth.e4.s md, ms1
+#convert the 1st half of ms1 
+mfcvtl.e5.s md, ms1 
+mfcvtl.e4.s md, ms1
+```
+
+image::float_convert_q_narrow.svg[alt="float_convert_q_narrow", align="center"]

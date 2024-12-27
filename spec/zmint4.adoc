@@ -1,0 +1,36 @@
+For int4 matrix multiplication instructions, the source operand is 4-bit width and the destination is 32-bit width. Two int4 data pair are considered as an 8-bit element, and the mtilek should always be an even value, otherwise reserved. The matrix multiplication instructions mmacc.w.q/mmaccu.w.q/mmaccus.w.q/mmaccsu.w.q are illegal if 'mmi4i32' of xmisa register is 0.
+
+The legal matrix shape of int4 matrix multiplication instructions is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/4 (mtilek must be even)
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/4 (mtilek must be even)
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+The Zmint4 extension requires ELEN>=32. 
+
+```
+#signed matrix multiply
+mmacc.w.q md, ms2, ms1
+
+#unsigned matrix multiply
+mmaccu.w.q md, ms2, ms1
+
+#unsigned-signed matrix multiply
+mmaccus.w.q md, ms2, ms1
+
+#signed-unsigned matrix multiply
+mmaccsu.w.q md, ms2, ms1
+```
+
+Integer conversion instruction is optionally supported in Zmint4 extension. For double widen conversion, Low or high half columns of  matrix register are used by source matrix specified by ms1. The matrix size configurations are ignored.
+
+```
+#matrix-matrix signed integer widen convert(sint4 to sint8)
+mscvtl.w.b.q md, ms1
+mscvth.w.b.q md, ms1
+
+#matrix-matrix unsigned integer widen convert(uint4 to uint8)
+mucvtl.w.b.q md, ms1
+mucvth.w.b.q md, ms1
+```
+For conversion between int8 and int4,  legal if 'miew' and 'mmi4i32' of xmisa register are both set to 1, illegal in all other cases.

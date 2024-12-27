@@ -1,0 +1,24 @@
+Matrix register row slide down instructions move the row[i+imm3] of ms1 to the row[i] of md for each i from 0 to ROWNUM-imm3-1. The remaining rows of md are set to zero. Only log2(ROWNUM) bits of imm3 are used. The source register and destination register must be both tile registers or accumulation registers.
+
+Matrix register row slide up instructions move the row[i-imm3] of ms1 to the row[i] of md for each i from imm3 to ROWNUM-1. The low imm3 rows of md are set to zero. Only log2(ROWNUM) bits of imm3 are used. The source register and destination register must be both tile registers or accumulation registers.
+
+```
+#matrix row slidedown, md[i,:]=ms1[i+imm3,:], when i > ROWNUM-imm3-1, md[i,:] is zero
+mrslidedowne<8/16/32/64> md, ms1, imm3
+
+#matrix row slideup, md[i,:]=ms1[i-imm3,:], when i < imm3, md[i,:] is zero
+mrslideupe<8/16/32/64> md, ms1, imm3
+```
+
+Matrix register column slide down instructions move the column[i+imm3] of ms1 to the column[i] of md for each i from 0 to TRLEN/EEW-imm3-1 or ARLEN/EEW-imm3-1, where the columns are divided by EEW so that a tile register row contains TRLEN/EEW columns or an accumulation register row contains ARLEN/EEW columns. The top imm3 columns of md are set to zero. Only log2(TRLEN/EEW) or log2(ARLEN/EEW) bits of imm3 are used. The src register and dst register must be both tile registers or accumulation registers.
+
+Matrix register column slide up instructions move the column[i-imm3] of ms1 to the column[i] of md for each i from imm3 to TRLEN/EEW-1 or ARLEN/EEW-1, where the columns are divided by EEW so that a tile register row contains TRLEN/EEW columns or an accumulation register row contains ARLEN/EEW columns. The low imm3 columns of md are set to zero. Only log2(TRLEN/EEW) or log2(ARLEN/EEW) bits of imm3 are used.  The src register and dst register must be both tile registers or accumulation registers.
+
+
+```
+#matrix column slidedown, md[:,i]=ms1[:,i+imm3], when i > ROWNUM-imm3-1, md[:,i] is zero
+mcslidedowne<8/16/32/64>.<b/h/w/d> md, ms1, imm3
+
+#matrix column slideup, md[:,i]=ms1[:,i-imm3], when i < imm3, md[:,i] is zero for 
+mcslideupe<8/16/32/64> md, ms1, imm3
+```

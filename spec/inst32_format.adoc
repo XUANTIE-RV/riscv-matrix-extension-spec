@@ -1,0 +1,140 @@
+The 32-bit instruction format fit under the custom-1(0101011) major opcode. There are three main types of instruction formats, as illustrated below.
+
+image::inst_32bit_format.svg[alt="inst_32bit_format", align="center"]
+
+For the matrix instructions only with matrix register, md/ms1/ms2 fields indicate the matrix register indexes for the dest(src3)/src1/src2 matrix operands, d_size field indicates the destination operand size, s_size field indicates the source operand size, imm3/ctrl field indicates the immediate index of matrix row/column or more operation information, and uop field indicates the different micro-operation types.
+
+The md/ms1/ms2 fields are 3-bit width to index the four tile registers and four accumulation registers.
+
+[cols="^1,1"]
+|===
+| *md/ms1/ms2[2:0]*  | *Matrix Register Index*
+|  000               |   tr0
+|  001               |   tr1
+|  010               |   tr2
+|  011               |   tr3
+|  100               |   acc0
+|  101               |   acc1
+|  110               |   acc2
+|  111               |   acc3
+|=== 
+
+For matrix multiplication instructions, ms1/ms2 should be 000-011 for tile registers, and md should be 100-111 for accumulation registers. For matrix element-wise instruction, the md/ms1/ms2 are all accumulation registers, which means md/ms1/ms2 should be 100-111. For matrix misc instructions, md/ms1/ms2 can be 000-111, according to the specific misc instruction.
+
+
+The element sizes of d_size and s_size are as follows:
+
+[cols="^1,1"]
+|===
+| *d/s_size[1:0]* | *Element Size*
+|  00       | 8-bit
+|  01       | 16-bit
+|  10       | 32-bit
+|  11       | 64-bit
+|=== 
+
+
+For the matrix instructions with GPR operand, rd/rs1/rs2 fields indicate the scaler register indexes for the dest/src1/src2 scaler operands.
+
+For the matrix instructions with IMM10, imm10 fields indicates the 10-bit width immediate, usually used in configuration instruction.
+
+
+==== Configuration Instructions
+
+The following figure shows the encoding format for the Configuration instructions. 
+
+image::inst_32bit_config_format.svg[alt="inst_32bit_config_format", align="center"]
+
+The func3 field of Configuration instructions is 000, and the uop field is 00. Except for the major opcode, func3, and uop fields, the rest fields of mrelease instruction are all zero. For mcfg{m/n/k}[i] instructions, the func4 field distinguishes m/n/k, and inst[25] indicates the configuration parameters is from imm10 fields or rs1 register. 
+
+==== Load/Store Instructions
+
+The following figure shows the encoding format for the Load/Store instructions.
+
+image::inst_32bit_ls_format.svg[alt="inst_32bit_ls_format", align="center"]
+
+The func3 field of Load/Store instructions is 000, and the uop field is 01. Inst[25] is the ls field, which means the load/store direction. The d_size field indicates the element size of Load/Store instructions. The func4 field defines load/store types, like A/B/C matrix type, transpose type and whole register load/store.
+
+==== Matrix Multiplication Instructions
+
+The following figure shows the encoding format for the Matrix Multiplication instructions.
+
+image::inst_32bit_mm_format.svg[alt="inst_32bit_mm_format", align="center"]
+
+The func3 field of Matrix Multiplication instructions is 000, and the uop field is 10. The A/B/C matrix come from ms1/ms2/ms3 fields. The d_size field indicates the element size of C matrix. Usually, the s_size indicates the element size of A/B matrix. When the func4 is 0000, the instruction type is float point matrix multiplication, including float point hybrid-precision instruction. When the func4 is 0001, the instruction type is integer matrix multiplication. When the func4 is 0010, the instruction type is integer hybrid-precision matrix multiplication. 
+
+The size_sup field indicates more operand type information. When there exist fp8 source type, inst[23]=0 means the fp8 type is E5M2, and inst[23]=1 means the fp8 type is E4M3. When there exist half-precision float point operand, inst[25]=0 means the operand type is fp16, and inst[25]=1 means the operand type is bf16. For float point operation, inst[24]=1 means the inst type is hybrid-precision matrix multipliacation, inst[23] and inst[25] indicates different types of hybrid-precision matrix multiplication.
+
+For integer matrix multiplication, inst[24:23] indicates source operands are signed/unsigned. When the s_size field is 00 and inst[25] is 1, the source type is 4-bit integer.
+
+For integer hybrid-precision matrix multiplication,  inst[24:23] also indicates source operands are signed/unsigned.
+
+The specific meanings of inst[25] for different instructions are as follows:
+[cols="^2,^2,^2,^2,^2,^2",options="header"]
+|===
+| func4  |    src_size   |   dst_size |  inst[24]    | inst[25]=0    |  inst[25]=1   
+| 0000   |    01         |   !01      |     0        | half is fp16  |  half is bf16
+| 0000   |    !01        |   01       |     0        | half is fp16  |  half is bf16
+| 0000   |    -          |   -        |     1        | ms2 is int8   |  ms2 is int4
+| 0001   |    00         |   -        |     -        | src is int8   |  src is int4 
+|===
+
+
+The specific meanings of inst[24] for different instructions are as follows:
+[cols="^2,^2,^2",options="header"]
+|===
+| func4  |  inst[24]=0      | inst[24]=1
+| 0000   |  same-precision  | hybrid-precision  
+| 0001   |  ms1 unsigned    | ms1 signed
+| 0010   |  ms1 unsigned    | ms1 signed
+|===
+
+
+
+The specific meanings of inst[23] for different instructions are as follows:
+[cols="^2,^2,^2,^2,^2,^2",options="header"]
+|===
+| func4  |    src_size   |   dst_size |  inst[24]    | inst[23]=0   |  inst[23]=1   
+| 0000   |    00         |   -        |     0        | fp8 is E5M2  |  fp8 is E4M3
+| 0000   |    -          |   -        |     1        | ms2 unsigned |  ms2 signed      
+| 0001   |    -          |   -        |     -        | ms2 unsigned |  ms2 signed 
+| 0010   |    -          |   -        |     -        | ms2 unsigne  |  ms2 signed 
+|===
+
+
+
+
+==== MISC Instructions
+
+The following figure shows the encoding format for the MISC instructions.
+
+image::inst_32bit_misc_format.svg[alt="inst_32bit_misc_format", align="center"]
+
+The func3 field of MISC instructions is 000, and the uop field is 11. The func4 field indicates different MISC instruction type.
+
+Format type(1) shows the encoding of MISC instruction only using matrix registers. When the ms1 or ms2 are not used, these fields are set to zero. The imm3 field indicates the row index for row slide/broadcast instructions, the column index for column slide/broadcast, the matrix register index for the mzero instruction.
+
+Format type(2) shows the encoding of matrix-to-scaler data-move instructions. The func4 field is 0010. The e_size field indicates the element size.
+
+Format type(3) shows the encoding of scaler-to-matrix data-move instructions. The func4 field is 0011. When inst[25]=1, the instruction is mmov<b/h/w/d>.m.x.   When inst[25]=0, the instruction is mdup<b/h/w/d>, and the rs1 fields ties to zero.
+
+
+==== Element-wise Instructions
+
+The following figure shows the encoding format for the Element-wise instructions.
+
+image::inst_32bit_ew_format.svg[alt="inst_32bit_ew_format", align="center"]
+
+The func3 field of Element-wise instructions is 001. The uop field of convert instructions is 00, the uop field of integer arithmetic instructions is 01, and the uop field of float point arithmetic instructions is 10. The func4 field indicates more different Element-wise instruction types.
+
+For convert instructions between float point operands, the func4 field is 0000. Inst[25] indicates the operand is bf16 or fp16, when the float point is half precision. Inst[23] indicates the operand is E5M2 or E4M3, when the float point is fp8. Inst[24] indexes the low/high half columns for the double-widen or half-narrow convert instructions. Inst[24] indexes the lowest 1/4 columns or the second lowest 1/4 columns for fp32-to-fp8 convert instructions.
+
+For convert instructions between float point operand and integer operand, the func4 field is 0001. Inst[24] indexes the low/high half columns for the double-widen or half-narrow convert instructions. When inst[25]=0, the convert type is integer to float point, and when inst[25]=0, the convert type is float point to integer. Inst[23] indicates the integer is signed or unsigned.
+
+For mn4clip convert instructions, the func4 field indicates the part selection of columns, the signed or unsigned integer. When the inst[25:23] is 111, the two operands all come from matrix registers. When the inst[25:23] is not 111, the ms1 operand comes from a matrix register, and the ms2 comes from a row of a matrix register indexed by inst[25:23].
+
+For int4-to-int8 convert instructions, the func4 field is 0110. Inst[24] indexes the low/high half columns for ms1. Inst[23] indicates the integer is signed or unsigned. 
+
+For integer or float point arithmetic instructions, the func4 fields indicates different operation types. When the inst[25:23] is 111, the two operands all come from matrix registers. When the inst[25:23] is not 111, the ms1 operand comes from a matrix register, and the ms2 comes from a row of a matrix register indexed by inst[25:23].
+
+

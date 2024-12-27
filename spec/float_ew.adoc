@@ -1,0 +1,65 @@
+For float matrix element-wise arithmetic instructions, matrix-matrix/matrix-vector instruction format are provided. 16-bit, 32-bit and 64-bit floating point element-wise operations are optionally supported. Both the source and destination registers of float matrix element-wise instructions are accumulation registers.
+
+
+*  fp16 operand:  legal at follow cases
+** legal if 'mfew' and 'mmf16f16' of xmisa register are both set to 1
+** legal if 'mfew' and 'mmf8f16' of xmisa register are both set to 1
+** legal if 'mfew' and 'mmf16f32' of xmisa register are both set to 1
+*  fp32 operand:  legal at follow cases
+** legal if 'mfew' and 'mmf32f32' of xmisa register are both set to 1
+** legal if 'mfew' and 'mmf16f32' of xmisa register are both set to 1
+** legal if 'mfew' and 'mmbf16f32' of xmisa register are both set to 1 
+** legal if 'mfew' and 'mmf32f64' of xmisa register are both set to 1 
+** legal if 'mfew' and 'mmf8f32' of xmisa register are both set to 1
+*  fp64 operand: legal at follow cases 
+** legal if 'mfew' and 'mmf64f64' of xmisa register are both set to 1
+** legal if 'mfew' and 'mmf32f64' of xmisa register are both set to 1
+
+The matrix operand shape is configured by mtilem and mtilen. The elements out of bound of `mtilem x mtilen` are set to 0 (agnostic).
+
+The legal matrix shapes for 16-bit width operand are:
+
+* mtilem stem:[\le] ALEN/ARLEN
+* mtilen stem:[\le] ARLEN/16
+
+The legal matrix shapes for 32-bit width operand are:
+
+* mtilem stem:[\le] ALEN/ARLEN
+* mtilen stem:[\le] ARLEN/32
+
+The legal matrix shapes for 64-bit width operand are:
+
+* mtilem stem:[\le] ALEN/ARLEN
+* mtilen stem:[\le] ARLEN/64
+
+
+For matrix-matrix instructions, both sources are matrixs. For matrix-vector instructions, src2 is matrix and src1 is one row of matrix.  Use row0 as an example, the vector operand operates on each row of matrix operand as md[i, j] = ms2[i, j] operations with ms1[0, j].
+
+All floating-point element-wise instructions follow the IEEE-754/2008 standard. All floating-point element-wise instructions that perform rounding can select the rounding mode using the frm field. 
+
+```
+#matrix-matrix fadd
+mfadd.<h/s/d>.mm md, ms2, ms1
+#matrix-vector fadd
+mfadd.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix fsub
+mfsub.<h/s/d>.mm md, ms2, ms1
+#matrix-vector sub
+mfsub.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix fmul
+mfmul.<h/s/d>.mm md, ms2, ms1
+#matrix-vector fmul
+mfmul.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix fmax
+mfmax.<h/s/d>.mm md, ms2, ms1
+#matrix-vector fmax
+mfmax.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix fmin
+mfmin.<h/s/d>.mm md, ms2, ms1
+#matrix-vector fmin
+mfmin.<h/s/d>.mv.i md, ms2, ms1[uimm3]
+```

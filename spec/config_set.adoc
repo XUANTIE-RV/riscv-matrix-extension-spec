@@ -1,0 +1,19 @@
+Due to hardware resource constraints, one of the common ways to handle large-sized matrix multiplication is "tiling", where each iteration of the loop processes a subset of elements, and then continues to iterate until all elements are processed. The Matrix extension provides direct, portable support for this approach.
+
+The block processing of matrix multiplication requires three levels of loops to iterate in the direction of m/k/n of the input application tiles.
+
+For each iteration, most of the matrix multiplication can fully use the input tile registers. But when dealing with the tail of each input application tile's dimension, the length of each multiplication dimension like mtilem/mtiln/mtilek need to be updated to proper tail size.
+
+A set of instructions is provided to allow rapid configuration of the values in mtile* to match application needs.
+
+
+The msettile{m|k|n}[i] instructions set the mtilem/mtilek/mtilen CSRs based on their arguments.
+
+```
+msettilemi imm  # imm = new mtilem
+msettilem  rs1  # rs1 = new mtilem
+msettileki imm  # imm = new mtilek
+msettilek  rs1  # rs1 = new mtilek
+msettileni imm  # imm = new mtilen
+msettilen  rs1  # rs1 = new mtilen
+```

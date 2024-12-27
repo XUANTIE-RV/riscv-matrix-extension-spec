@@ -1,0 +1,22 @@
+Data move instructions between matrix registers and integer registers are used to move elements between matrix registers and integer registers.
+
+The mmov<b/h/w/d>.m.x instruction moves a scalar data to an element of the destination tile or acclumulation register. The elements number within a matrix row is selected by rs1, modulo the number of such elements in a row. The row number is selected by rs1 , divided by the number of such elements in a row. When the destination register is a tile register, the low log2(TLEN/EEW) bits are used. When the destination register is an accumulation register, the low log2(ALEN/EEW) bits are used.
+
+The scalar data is taken from the scalar x register specified by rs2 with XLEN data width.If EEW < XLEN, the least-significant bits are copied and the upper bits are ignored. If EEW > XLEN, the value is sign-extended.
+
+```
+#matrix-scalar move
+mmov<b/h/w/d>.m.x md, rs2, rs1
+```
+
+The mmov<b/h/s/d>.x.m instruction moves a scalar data from a  tile or acclumulation register to a gerneral purpose register specified by rd. The scalar data is indexed by rs1. The elements number within a matrix row is selected by rs1, modulo the number of such elements in a row. The row number is selected by rs1, divided by the number of such elements in a row. When the destination register is a tile register, the low log2(TLEN/EEW) bits are used. When the destination register is an accumulation register, the low log2(ALEN/EEW) bits are used.
+
+If EEW > XLEN, the least-significant XLEN bits are transferred and the upper bits are ignored. If EEW < XLEN, the value is sign-extended to XLEN bits.
+
+```
+#scalar-matrix move
+mmov<b/h/w/d>.x.m rd, ms2, rs1
+```
+
+
+

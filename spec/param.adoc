@@ -1,0 +1,24 @@
+== Implementation-defined Constant Parameters
+
+Each hart supporting a matrix extension defines three parameters:
+
+. ELEN: The maximum size in bits of a matrix element that any operation can produce or consume, stem:[\rm{ELEN} \ge 8], which must be a power of 2.
+. TLEN: The number of bits in a single matrix tile register, TLEN, which must be a power of 2, and must be no greater than 2^32^.
+. TRLEN: The number of bits in a row of a single matrix tile register, TRLEN, which must be a power of 2, and must be no greater than 2^16^.
+
+
+The following parameter can be derived from the above fundamental parameters:
+
+. ROWNUM: The number of rows of tile register and accumulation register, equals to TLEN/TRLEN, which must be a power of 2.
+. ARLEN: The number of bits in a row of a single matrix accumulation register, ARLEN, which must be a power of 2, and must be no greater than 2^16^. ARLEN = TLEN/TRLEN * ELEN.
+. ALEN: The number of bits in a single matrix accumulation register, ALEN, which must be a power of 2, and must be no greater than 2^32^, ALEN = ARLEN * ROWNUM.
+
+
+image::parameter_explanation.svg[alt="parameter explanation", align="center"]
+
+
+The picture show examples for the tile register shape and the `C += A x BT` matrix multiplication operation. For a tile register, when TLEN is 512bit and TRLEN is 128bit, ROWNUM is 4.
+
+
+For `C += A x BT`, A matrix is stored in tile register 0 in normal format(M*K), and B matrix are stored in tile register 1 in transposed format(N*K). The shape of C matrix is M*N. When the ELEN is 32bit, ARLEN = TLEN/TRLEN * ELEN = 512/128 * 32 = 128, and ALEN = ARLEN * ROWNUM = 128*4 = 512.
+

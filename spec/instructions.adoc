@@ -1,0 +1,51 @@
+== Instructions
+
+=== Configuration Instructions
+
+==== Mtilem/n/k Configuration Instructions
+include::config_set.adoc[]
+
+==== Mrelease Instruction
+include::mrelease.adoc[]
+
+=== Matrix Multiplication Instructions
+
+include::matmul.adoc[]
+
+include::matmul_zmabt.adoc[]
+
+=== Load and Store Instructions
+
+include::load-store.adoc[]
+
+=== MISC Instructions
+
+==== Mzero Instructions
+
+include::mzero.adoc[]
+
+==== Data Move Instructions
+
+include::data_move.adoc[]
+
+==== Data Broadcast Instructions
+include::broadcast.adoc[]
+
+==== Matrix Pack Instructions
+include::mpack.adoc[]
+
+==== Matrix Slide Instructions
+include::mslide.adoc[]
+
+=== Element-Wise Instructions
+
+==== Integer Arithmetic Instructions
+include::integer_ew.adoc[]
+
+==== Float-point Arithmetic Instructions
+include::float_ew.adoc[]
+
+==== Type-Convert Instructions
+
+include::type_convert.adoc[]
+

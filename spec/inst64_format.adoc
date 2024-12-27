@@ -1,0 +1,58 @@
+The 64-bit instruction format fit under 0111111 major code, and the inst[38:32] is xxyyy11, where yyy not equal 111.
+
+Other than the major code, inst[31:7] in 64-bit format is the same with the 32-bit instruction format.
+
+
+==== Configuration Instructions
+
+The following figure shows the encoding format for the Configuration instructions. 
+
+image::inst_64bit_config_format.svg[alt="inst_64bit_config_format", align="center"]
+
+The fields in inst[31:7] is the same with the 32-bit instruction format. For the type(1) configuration instructions, the immediate width is 32bit, the imm[9:0] is in inst[24:15], and the imm[31:10] is in inst[60:39].
+
+==== Load/Store Instructions
+
+The following figure shows the encoding format for the Load/Store instructions.
+
+image::inst_64bit_ls_format.svg[alt="inst_64bit_ls_format", align="center"]
+
+The fields in inst[31:7] is the same with the 32-bit instruction format. The inst[63:39] are not used, and is reserved for future extension.
+
+==== Matrix Multiplication Instructions
+
+The following figure shows the encoding format for the Matrix Multiplication instructions.
+
+image::inst_64bit_mm_format.svg[alt="inst_64bit_mm_format", align="center"]
+
+The fields in inst[31:7] is the same with the 32-bit instruction format. 
+The field frm in inst[41:39], indicates the float-point rounding mode.
+The field se in inst[42], indicates the integer saturation mode.
+The inst[63:43] are not used, and is reserved for future extension.
+
+
+
+
+==== MISC Instructions
+
+The following figure shows the encoding format for the MISC instructions.
+
+image::inst_64bit_misc_format.svg[alt="inst_64bit_misc_format", align="center"]
+
+The fields in inst[31:7] is the same with the 32-bit instruction format. 
+The inst[63:39] are not used, and is reserved for future extension.
+
+
+==== Element-wise Instructions
+
+The following figure shows the encoding format for the Element-wise instructions.
+
+image::inst_64bit_ew_format.svg[alt="inst_64bit_ew_format", align="center"]
+
+The fields in inst[31:7] is the same with the 32-bit instruction format. 
+The field frm in inst[41:39], indicates the float-point rounding mode.
+The field se in inst[42], indicates the integer saturation mode for integer arithmetic instruction, and fp8 saturation mode for fp8 conversion instructions.
+The field xrm in inst[45:44], indicates the fixed-point rounding mode.
+The inst[63:46] are not used, and is reserved for future extension.
+
+

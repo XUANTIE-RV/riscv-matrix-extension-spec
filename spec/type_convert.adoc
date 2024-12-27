@@ -1,0 +1,12 @@
+The input and output matrices of type-convert instructions are both accumulation registers. And the matrix size configurations are ignored.
+
+===== Float-point Conversion Instructions
+include::float_convert.adoc[]
+
+===== Float-point Interger Instructions
+include::float_int_convert.adoc[]
+
+===== Fixed-point Conversion Instructions
+include::fix_point_convert.adoc[]
+
+

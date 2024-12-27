@@ -1,0 +1,80 @@
+For integer matrix element-wise arithmetic instructions, matrix-matrix/matrix-vector instruction format are provided. 32-bit integer instructions are optionally supported. Both the source and destination registers of integer matrix element-wise instructions are accumulation registers.
+
+*  32-bit width operand:  legal if 'miew' and 'mmi8i32' of xmisa register are both set to 1
+
+The matrix operand shape is configured by mtilem and mtilen. 
+The legal matrix shapes for 32-bit width operand are:
+
+* mtilem stem:[\le] ALEN/ARLEN
+* mtilen stem:[\le] ARLEN/32
+
+The elements out of bound of `mtilem x mtilen` are set to 0 (agnostic).
+
+
+For matrix-matrix instructions, both sources are matrix. For matrix-vector instructions, src2 is matrix and src1 is one row of matrix.  Use row0 as an example, the vector operand operates on each row of matrix operand as md[i, j] = ms2[i, j] op ms1[0, j].
+
+madd performs the addition of src1 and src2. msub performs the subtraction of src2 from src1. mmul performs the multiplication of src1 and src2. If xmsaten is 0, overflows are ignored and the low MSEW bits of results are written to the destination md. If xmsaten is 1, overflows will generate the saturated results. The mmul versions write the low bits of the product to the destination register, while the mmulh versions write the high bits of the product to the destination register. mmax and mmin perform signed/unsigned compares, writing the max or min element to the destination respectively. 
+
+
+```
+#matrix-matrix add
+madd.w.mm md, ms2, ms1
+#matrix-vector add
+madd.w.mv.i md, ms2, ms1[imm3]
+
+#matrix-matrix sub
+msub.w.mm md, ms2, ms1
+#matrix-vector sub
+msub.w.mv.i md, ms2, ms1[imm3]
+
+#matrix-matrix mul
+mmul.w.mm md, ms2, ms1
+#matrix-vector mul
+mmul.w.mv.i md, ms2, ms1[imm3]
+
+#matrix-matrix mulh
+mmulh.w.mm md, ms2, ms1
+#matrix-vector mulh
+mmulh.w.mv.i md, ms2, ms1[imm3]
+
+#matrix-matrix max
+mmax.w.mm md, ms2, ms1
+#matrix-vector max
+mmax.w.mv.i md, ms2, ms1[imm3]
+
+#matrix-matrix unsigned max
+mumax.w.mm md, ms2, ms1
+#matrix-vector unsigned max
+mumax.w.mv.i md, ms2, ms1[imm3]
+
+#matrix-matrix min
+mmin.w.mm md, ms2, ms1
+#matrix-vector min
+mmin.w.mv.i md, ms2, ms1[imm3]
+
+#matrix-matrix unsigned min
+mumin.w.mm md, ms2, ms1
+#matrix-vector unsigned min
+mumin.w.mv.i md, ms2, ms1[imm3]
+```
+
+Matrix shift instructions including msll/msrl/msra.
+msll msrl and msra perform logical left logic right and arithmetic right shift, the source data is in ms2, and the shift amount is provided by a matrix/vector data specified by ms1/ms1[imm3].
+
+```
+#matrix-matrix logical left shift
+msll.w.mm md, ms2, ms1
+#matrix-vector logical left shift
+msll.w.mv.i md, ms2, ms1[imm3]
+
+#matrix-matrix logic right shift
+msrl.w.mm md, ms2, ms1
+#matrix-vector logic right shift
+msrl.w.mv.i md, ms2, ms1[imm3]
+
+
+#matrix-matrix arithmetic right shift
+msra.w.mm md, ms2, ms1
+#matrix-vector arithmetic right shift
+msra.w.mv.i md, ms2, ms1[imm3]
+```

@@ -1,0 +1,9 @@
+== Instruction Format
+
+=== 32-bit instruction
+
+include::inst32_format.adoc[]
+
+=== 64-bit instruction
+
+include::inst64_format.adoc[]

@@ -1,0 +1,24 @@
+Matrix extension adds eight two-dimensional matrix registers and eight CSRs.
+[cols="^2,^2,^2,10",options="header"]
+|===
+| Address | Privilege | Name | Description
+| 0x802   |    URW       | xmcsr     | matrix control and status register
+| 0x803   |    URW       | mtilem    | Tile length in m direction.
+| 0x804   |    URW       | mtilen    | Tile length in n direction.
+| 0x805   |    URW       | mtilek    | Tile length in k direction.
+| 0xcc0   |    URO       | xmisa     | matrix instruction subset
+| 0xcc1   |    URO       | xtlenb    | tile register size in byte, ROWNUM*TRLEN/8
+| 0xcc2   |    URO       | xtrlenb   | tile register row size in byte, TRLEN/8
+| 0xcc3   |    URO       | xalenb    | accumulation register size in byte, ROWNUM^2^ * ELEN/8
+|===
+
+Matrix extention gives seperate CSR address to allow independent access of xmxrm/xmsat/xmfflags/xmfrm/xmsat which is also reflected as a field in xmcsr.
+[cols="^2,^2,^2,10",options="header"]
+|===
+| Address | Privilege | Name | Description
+| 0x806   |    URW       | xmxrm     | Fixed-point rounding mode
+| 0x807   |    URW       | xmsat     | Fixed-point accrued saturation flag
+| 0x808   |    URW       | xmfflags  | float-point accrued exception flags
+| 0x809   |    URW       | xmfrm     | float-point rounding mode
+| 0x80a   |    URW       | xmsaten   | saturation  mode enable for fp8 or integer matrix multiplication instructions 
+|===

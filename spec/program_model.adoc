@@ -1,0 +1,136 @@
+== Programmer's Model
+
+include::csr.adoc[]
+
+=== Matrix Registers
+
+include::tilereg.adoc[]
+
+=== Matrix ISA Register, misa
+
+The read-only XLEN-wide CSR, `misa`, specifying the supported matrix arithmetic feature of the current hardware implementation. 
+
+include::misa.adoc[]
+
+
+=== Matrix Tile Size Registers, mtilem/mtilek/mtilen
+
+The XLEN-bit-wide read-only `mtilem/mtilek/mtilen` CSRs can only be updated by the `msettile{m|k|n}{i}` instructions. The registers holds 3 unsigned integers specifying the tile shapes for tiled matrix.
+
+=== Matrix Control and Status Register, mcsr
+
+The `xmcsr` CSR is a WARL read-write register. Bits[XLEN-1:12] are reserved and should be written with zero. 
+The `mcsr` register has 5 fields. The xmxrm, xmsat, xmfflags, xmfrm, xmsaten separate CSRs can also be accessed via fields in the matrix control and status CSR, xmcsr.
+
+.`xmcsr` register layout
+[cols="^2,^2,8"]
+|===
+|     Bits | Name       | Description
+| XLEN-1:12| 0          | Reserved if non-zero.
+|       11 | xmsaten    | integer and fp8 saturation mode.
+|     10:8 | xmfrm      | Float-point arithmetic instruction rounding mode.
+|      7:3 | xmfflags	| Float-point arithmetic instruction accrued exception flags
+|        2 | xmsat      | Fixed-point arithmetic instruction accrued saturation flag.
+|      1:0 | xmxrm      | Fixed-point arithmetic instruction rounding mode.
+|===
+
+=== Matrix Fixed-Point Rounding Mode, xmxrm
+
+`xmrm` field indicates the rounding mode of fixed-point instructions. Suppose the pre-rounding result is v, and d bits of that result are to be rounded off. Then the rounded result is (v >> d) + r, where r depends on the rounding mode as specified in the following table.
+
+[cols="^2,^4,^9,7"]
+|===
+|  mrm  |  Mnemonic  |  meaning                                      |  Rounding Increment r
+
+|  00   |  RNU       |  round-to-nearest-up (add +0.5 LSB)           |  v[d-1]
+|  01   |  RNE       |  round-to-nearest-even                        |  v[d-1] & (v[d-2:0] != 0 \| v[d])
+|  10   |  RDN       |  round-down (truncate)                        |  0
+|  11   |  ROD       |  round-to-odd (OR bits into LSB)              |  !v[d] & v[d-1:0] != 0
+|===
+
+The rounding functions are used to represent this operation in the instruction descriptions below:
+
+        roundoff_unsigned(v, d) = (unsigned(v) >> d) + r
+        roundoff_signed(v, d)   = (signed(v) >> d) + r
+
+=== Matrix Fixed-Point Saturation Flag, xmsat
+
+The matrix fixed-point saturation flag `xmxsat` holds a single read-write least-significant bit(xmxsat[0]) that indicates if a fixed-point instruction has had to saturate an output value to fit into a destination format. The upper bits, xmxsat[XLEN-1:1] , should be written as zeros.
+The matrix fixed-point saturation flag(xmxsat)  is given a separate CSR address to allow independent access, but is also reflected as a field in xmcsr.
+
+=== Matrix Float-Point Exception Flags, xmfflags
+The matrix float-point exception flags(xmfflags)  holds a five-bit read-write fields in the least-significant bits(xmfflags[4:0]). The upper bits, xmfflags[XLEN-1:5] , should be written as zeros.
+The matrix float-point exception flags(xmfflags)  is given a separate CSR address to allow independent access, but is also reflected as a field in xmcsr.
+The float matrix multiplication and float pointwise instructions update accrued exception fflags in xmfflags.
+[cols="^2,^5"]
+|===
+|  bits     |  Meaning      
+
+|  0        |  NX
+|  1        |  UF
+|  2        |  OF
+|  3        |  reserved for future use
+|  4        |  NV
+|===
+
+=== Matrix Float-Point Rounding Mode, xmfrm
+
+The matrix float-point rounding mode`xmfrm` holds a three-bit read-write fiels in the least-significant bits(xmfrm[2:0]). The upper bits, xmfrm[XLEN-1:3] , should be written as zeros.
+The matrix float-point rounding mode `xmfrm` is given a separate CSR address to allow independent access, but is also reflected as a field in xmcsr.
+
+[cols="^1,^1,<4"]
+|===
+| *mfrm* | *Mnemonic* | *Meaning*
+|  000  |  RNE       | Round to Nearest, ties to Even
+|  001  |  RTZ       | Round towards Zero
+|  010  |  RDN       | Round Down (towards stem:[-\infty])
+|  011  |  RUP       | Round Up (towards stem:[+\infty])
+|  100  |  RMM       | Round to Nearest, ties to Max Magnitude
+|  101  |            | Invalid
+|  110  |            | Invalid
+|  111  |            | Invalid
+|===
+
+If `xmfrm` is set to an invalid value (101-111), any subsequent attempt to execute a floating-point operation with a dynamic rounding mode will cause an illegal instruction exception. 
+
+=== Matrix Saturation Mode Enable, xmsaten
+The matrix saturation mode `xmsaten` holds a single read-write least-significant bit(xmsaten[0]) that defines the saturation mode when the operation result is fp8 or integer. The upper bits, xmfp8sat[XLEN-1:1] , should be written as zeros.
+The matrix saturation mode(xmsaten)  is given a separate CSR address to allow independent access, but is also reflected as a field in xmcsr.
+
+[cols="^2,^5"]
+|===
+|  msaten   |  Meaning      
+
+|  0        |  non-saturation mode
+|  1        |  saturation mode
+|===
+
+Conversion from all other values first applies rounding to reduce the mantissa bit count to that of the destination FP8 format. After that, if the rounded magnitude is above the maximum destination magnitude: 
+
+    if `msaten` = 1: 
+        fp8 conversions: generate the max normal FP8 magnitude 
+        mmacc operations: the result should be saturated
+        integer arithmetic operations: the result should be saturated
+    if `msaten` = 0:  
+        fp8 conversion:E4M3 destination: generate a NaN 
+                       E5M2 destination: generate an infinity
+        mmacc operations: ignore the overflow and wrap around the result       
+        integer arithmetic operations: ignore the overflow and wrap around the result       
+
+
+=== Matrix Context Status in mstatus and sstatus
+
+A 2-bit matrix context status field, MS, should be added to mstatus and shadowed in sstatus. It is defined analogously to the vector context status field, VS.
+
+[cols="^1,1"]
+|===
+| *ms[1:0]* | *Meaning*
+|  00       | All Off
+|  01       | Initial
+|  10       | Clean
+|  11       | Dirty
+|=== 
+
+Attempts to execute any matrix instructions, or to access the matrix CSRs raise an illegal instruction exception when MS is set to off. If MS is set to initial or clean, executing any instructions that change the matrix state will change the ms to dirty. 
+
+An implementation can use the activity of the Initial state to influence the choice of power-saving states.

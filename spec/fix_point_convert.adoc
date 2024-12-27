@@ -1,0 +1,23 @@
+The mn4clip instructions belong to fixed-point conversion instructions, and support rounding with rounding mode specified in the xmxrm CSR. For clip instructions, rounding occurs before saturation.
+
+*  mn4clip<h/l>(u).w.mm: legal if 'miew' and 'mmi8i32' of xmisa register are both set to 1
+
+mn4cliph/mn4cliphu/mn4clipl/mn4cliplu instructions are used to pack a fixed-point value into a 4x narrower destination. Rounding, scaling and saturation are supported. The scaling shift amount comes from a matrix (specified by ms1), a vector(ms1[imm3]). The low 6-bits for 64-bit and 5-bits for 32-bit source data width are used, the higher bits are ignored. Saturation sets xmsat if the destination overflows. mn4clipl/mn4clipul write back to the first quater of md and the mn4cliph/mn4clipuh to the second quater of md, the other parts of md are kept undisturbed.
+
+image::fix_point_convert.svg[alt="fix_point_convert", align="center"]
+
+```
+#matrix-matrix signed clip
+mn4cliph.w.mm md, ms2, ms1
+mn4clipl.w.mm md, ms2, ms1
+#matrix-vector signed clip,uimm3
+mn4cliph.w.mv.i md, ms2, ms1[uimm3]
+mn4clipl.w.mv.i md, ms2, ms1[uimm3]
+
+#matrix-matrix unsigned clip
+mn4cliphu.w.mm md, ms2, ms1
+mn4cliplu.w.mm md, ms2, ms1
+#matrix-vector unsigned clip,uimm3
+mn4cliphu.w.mv.i md, ms2, ms1[uimm3]
+mn4cliplu.w.mv.i md, ms2, ms1[uimm3]
+```

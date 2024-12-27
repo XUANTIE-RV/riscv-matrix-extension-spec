@@ -1,0 +1,49 @@
+Float integer conversion instructions are optionally supported. 
+
+*  m<fs/fu/sf/uf>cvt.<s/w>.<w/s>: legal at follow cases
+** legal if 'mfic' and 'mmf32f32' of xmisa register are both set to 1
+** legal if 'mfic' and 'mmf16f32' of xmisa register are both set to 1
+** legal if 'mfic' and 'mmbf16f32' of xmisa register are both set to 1
+** legal if 'mfic' and 'mmf8f32' of xmisa register are both set to 1
+*  m<fs/fu/sf/uf>cvt<h/l>.<h/b>.<b/h>: legal at follow cases
+** legal if 'mfic' and 'mmf16f16' of xmisa register are both set to 1
+** legal if 'mfic' and 'mmf8f16' of xmisa register are both set to 1
+** legal if 'mfic' and 'mmf16f32' of xmisa register are both set to 1
+
+
+The conversion from integer to floating point supports non-widen conversion/double widen conversion. Integers support signed and unsigned integers. For double widen conversion, Low or high half columns of  matrix register are used by source matrix specified by ms1. 
+
+```
+#matrix-matrix unsigned integer floating point convert(uint32 to fp32)
+mufcvt.s.w md, ms1
+#matrix-matrix unsigned integer floating point widen convert (uint8 to fp16), the low half of ms1
+mufcvtl.h.b md, ms1
+#matrix-matrix unsigned integer floating point widen convert (uint8 to fp16), the high half of ms1
+mufcvth.h.b md, ms1
+
+
+#matrix-matrix signed integer floating point convert(sint32 to fp32)
+msfcvt.s.w md, ms1
+#matrix-matrix signed integer floating point widen convert(sint8 to fp16),the low half
+msfcvtl.h.b md, ms1
+#matrix-matrix signed integer floating point widen convert(sint8 to fp16), the high half
+msfcvth.h.b md, ms1
+```
+
+
+The conversion from floating point to integer supports non-narrow conversion/half narrow conversion. Integers support signed and unsigned integers. For half narrow conversion, Low or high half columns of  matrix register is used by destination matrix specified by md with another half columns kept undisturbed.
+
+```
+#matrix-matrix floating point unsigned integer convert(fp32 to uint32)
+mfucvt.w.s md, ms1
+#matrix-matrix floating point unsigned integer narrow convert(fp16 to uint8)
+mfucvtl.b.h md, ms1
+mfucvth.b.h md, ms1
+
+
+#matrix-matrix floating point signed integer convert(fp32 to sint32)
+mfscvt.w.s md, ms1
+#matrix-matrix floating point signed integer narrow convert(fp16 to sint8)
+mfscvtl.b.h md, ms1
+mfscvth.b.h md, ms1
+```

@@ -1,0 +1,89 @@
+Matrix multiplication operations take two matrix tiles, matrixA and matrixB,from matrix **tile registers** specified by `ms1` and `ms2`, and accumulate the multiplication result to matrixC specified by `md`, the output will overwrite the `md` **accumulation register** .
+
+If the accmulation register is larger than the output matrix tile(matrixC) in bits, only the lower columns are updated and the higher parts keep undisturbed. 
+
+The ISA specification provides different instructions to support float and integer matrix multiplication operation. Hardware design has the flexibility of supported data types. 
+
+[cols="^2,^3,^3,^3"]
+|===
+| category   | instructions             | Operand Type            | Accumulator Type
+|     Float  |   mfmacc.h               |    fp16                 |  fp16 
+|     Float  |   mfmacc.s               |    fp32                 |  fp32 
+|     Float  |   mfmacc.d               |    fp64                 |  fp64
+|     Float  |   mfmacc.h.<e4.e5>       |    fp8(e4m3/e5m2)       |  fp16
+|     Float  |   mfmacc.bf16.<e4.e5>    |    fp8(e4m3/e5m2)       |  bf16
+|     Float  |   mfmacc.s.h             |    fp16                 |  fp32
+|     Float  |   mfmacc.s.bf16          |    bf16                 |  fp32
+|     Float  |   mfmacc.d.s             |    fp32                 |  fp64
+|     Float  |   mfmacc.s.<e4.e5>       |    fp8(e4m3/e5m2)       |  fp32
+|     Int    |   mmacc.w.b              |    int8                 |  int32
+|     Int    |   mmaccu.w.b             |    uint8                |  int32
+|     Int    |   mmaccsu.w.b            |    (su)int8             |  int32
+|     Int    |   mmaccus.w.b            |    (us)int8             |  int32
+|===
+
+
+
+//[cols="^2,^5,^3,^3"]
+//|===
+//| category   | instructions                   | Operand Type            | Accumulator Type
+//|     Float  |   mfmacc.h                     |    fp16                 |  fp16 
+//|     Float  |   mfmacc.s                     |    fp32                 |  fp32 
+//|     Float  |   mfmacc.d                     |    fp64                 |  fp64
+//|     Float  |   mfmacc.s.h                   |    fp16                 |  fp32
+//|     Float  |   mfmacc.d.s                   |    fp32                 |  fp64
+//|     Float  |   mfmacc.s.bf16                |    bf16                 |  fp32
+//|     Float  |   mfmacc.<h/bf16/s>.<e4/e5>    |    fp8(e4m3/e5m2)       |  fp16/bf16/fp32
+//|     Int    |  mmacc.w.b                     |    int8                 |  int32
+//|     Int    |  mmaccu.w.b                    |    uint8                |  int32
+//|     Int    |  mmaccsu.w.b                   |    (su)int8             |  int32
+//|     Int    |  mmaccus.w.b                   |    (us)int8             |  int32
+//|     Int    |  mmacc.w.hb                    |    int4                 |  int32
+//|     Int    |  mmaccu.w.hb                   |    uint4                |  int32
+//|     Int    |  mmaccsu.w.hb                  |    (su)int4             |  int32
+//|     Int    |  mmaccus.w.hb                  |    (us)int4             |  int32
+//|===
+
+
+The  mfmacc.x.y is float matrix multiplication operation, where x is destination operand  width and y is source operand width. If x=y, y can be eliminated. 
+The basic operation of float matrix multiplication is float dot-product, the float dot-product operations follow the IEEE-754/2008 standard. IEEE754/2008 standard's definition gives the implementation-specific flexibility of matrix-multiplication operation. The definitions are as followings:
+
+. Subnormal input/output: subnormal inputs and output are correctly computed and not treated as zero, tininess is detected after rounding.
+. The floating-point matrix-multiplication instructions which multiply single elements from each source operand and accumulate their product to each accumulator element.  The reduction is done as an unordered-sum.Rounding are done after addition to accumulator.
+
+The mmacc.x.y is int matrix multiplication operation, where x is destination operation  width and y is source operation. If x=y, y can be eliminated. If `xmsaten` equals 1, the output should be saturated. Otherwise, the mmacc operations ignore the overflow and wrap around the result .
+
+NOTE: As integer matrix multiplication operation with non-widen or widen output is uncommon in AI scenarios, the matrix instruction set does not include such instructions by default.The hardware can extend the mmacc.<b/h/w/d> or mmacc.<h/w/d>.<b/h/w> instructions as needed.
+
+
+```
+# integer matrix multiplication and add, md = md + ms1 * ms2.
+mmacc.w.b   md, ms2, ms1    #signed 8bit,  output quad-widen
+mmaccu.w.b  md, ms2, ms1    #unsigned 8bit,  output quad-widen 
+mmaccus.w.b md, ms2, ms1    #unsigned-signed 8bit,  output quad-widen 
+mmaccsu.w.b md, ms2, ms1    #signed-unsigned 8bit,  output quad-widen
+
+# Float point matrix multiplication and add, md = md + ms1 * ms2.
+mfmacc.h        md, ms2, ms1  # 16-bit float point
+mfmacc.s        md, ms2, ms1  # 32-bit float point
+mfmacc.d        md, ms2, ms1  # 64-bit float point
+mfmacc.h.e4     md, ms2, ms1  # 8-bit float point, output double-widen
+mfmacc.h.e5     md, ms2, ms1  # 8-bit float point, output double-widen
+mfmacc.bf16.e4  md, ms2, ms1  # 8-bit float point, output double-widen
+mfmacc.bf16.e5  md, ms2, ms1  # 8-bit float point, output double-widen
+mfmacc.s.h      md, ms2, ms1  # 16-bit float point, output double-widen
+mfmacc.s.bf16   md, ms2, ms1  # 16-bit float point, output double-widen
+mfmacc.d.s      md, ms2, ms1  # 32-bit float point, output double-widen
+mfmacc.s.e4     md, ms2, ms1  # 8-bit float point, output quad-widen
+mfmacc.s.e5     md, ms2, ms1  # 8-bit float point, output quad-widen
+```
+
+Hardware can support a subset of these instructions above. Executing of unsupported instructions will raise illegal instruction exception. The supported instructions are shown in `misa` registers.
+
+The field `mfrm` in `mcsr` register indicates the rounding mode of float-point matrix instructions. 
+
+For both integer and float point instructions, the output matrix register may not be filled. If the accumulation register is larger than the matrixC in bits, only the lower columns are updated. The elements out of bound of `mtilem x mtilen` are set to 0 (agnostic).
+
+For executing matrix multiplication instructions, illegal instruction exception will occur under unsupported corresponding mtilem/mtilen/mtilek setting. The illegal condition for upper instructions is mtilem/mtilk/mtilen is bigger than TMMAX/TKMAX/TNMAX/.
+
+

@@ -1,0 +1,138 @@
+
+Matrix load instructions load a matrix tile from memory to matrix register. and matrix store instructions store a matrix tile from matrix register to memory. 
+
+The element data width is in instruction encoding, including 8/16/32/64 bits, other data widths are reserved. The base address is in rs1 and row stride in byte is in rs2, md/ms3 is the register index for destination of matrix load  and source for matrix store.
+
+Due to the difference in matrix tile shapes of matrix A, B, and C, three types of load/store instructions are provided to separately implement memory access operations for matrix A(mla*/msa*), B(mlb*msb*), and C(mlc*/msc*).
+
+The shape of the tile that load to or store from matrix register is based on `C = A x BT` matrix multiplication mode,  the shape of left matrix A that load to matrix register is `mtilem x mtilek`. the shape of right matrix B that load to matrix register is `mtilen x mtilek`, and  the shape of output matrix C that load to matrix register is `mtilem x mtilen`. 
+
+
+==== Load Instructions
+
+```
+# md destination, rs1 base address, rs2 row byte stride
+
+# For left matrix, A
+mlae8  md, (rs1), rs2         #  8-bit left tile load
+mlae16 md, (rs1), rs2         # 16-bit left tile load
+mlae32 md, (rs1), rs2         # 32-bit left tile load
+mlae64 md, (rs1), rs2         # 64-bit left tile load
+
+# For right matrix, B
+mlbe8  md, (rs1), rs2         #  8-bit right tile load
+mlbe16 md, (rs1), rs2         # 16-bit right tile load
+mlbe32 md, (rs1), rs2         # 32-bit right tile load
+mlbe64 md, (rs1), rs2         # 64-bit right tile load
+
+# For output matrix, C
+mlce8  md, (rs1), rs2         #  8-bit output tile load
+mlce16 md, (rs1), rs2         # 16-bit output tile load
+mlce32 md, (rs1), rs2         # 32-bit output tile load
+mlce64 md, (rs1), rs2         # 64-bit output tile load
+
+```
+==== Store Instructions
+
+```
+# ms3 store data, rs1 base address, rs2 row byte stride
+
+# For left matrix, A
+msae8  ms3, (rs1), rs2        #  8-bit left tile store
+msae16 ms3, (rs1), rs2        # 16-bit left tile store
+msae32 ms3, (rs1), rs2        # 32-bit left tile store
+msae64 ms3, (rs1), rs2        # 64-bit left tile store
+
+# For right matrix, B
+msbe8  ms3, (rs1), rs2        #  8-bit right tile store
+msbe16 ms3, (rs1), rs2        # 16-bit right tile store
+msbe32 ms3, (rs1), rs2        # 32-bit right tile store
+msbe64 ms3, (rs1), rs2        # 64-bit right tile store
+
+# For output matrix, C
+msce8  ms3, (rs1), rs2        #  8-bit output tile store
+msce16 ms3, (rs1), rs2        # 16-bit output tile store
+msce32 ms3, (rs1), rs2        # 32-bit output tile store
+msce64 ms3, (rs1), rs2        # 64-bit output tile store
+
+```
+
+In addition, considering that matrices are stored in memory either in row-major or column-major order, load/store instructions provide both non-transposed and transposed instructions. For non-transposed instructions, the matrix tile in memory is row-major of A, BT, and C matrix. And for transposed instructions, the matrix tile in memory is column major.
+
+==== Load Transposed Instructions
+```
+# md destination, rs1 base address, rs2 row byte stride
+
+# For left matrix, A
+mlate8  md, (rs1), rs2        #  8-bit left tile load
+mlate16 md, (rs1), rs2        # 16-bit left tile load
+mlate32 md, (rs1), rs2        # 32-bit left tile load
+mlate64 md, (rs1), rs2        # 64-bit left tile load
+
+# For right matrix, B
+mlbte8  md, (rs1), rs2        #  8-bit right tile load
+mlbte16 md, (rs1), rs2        # 16-bit right tile load
+mlbte32 md, (rs1), rs2        # 32-bit right tile load
+mlbte64 md, (rs1), rs2        # 64-bit right tile load
+
+# For output matrix, C
+mlcte8  md, (rs1), rs2        #  8-bit output tile load
+mlcte16 md, (rs1), rs2        # 16-bit output tile load
+mlcte32 md, (rs1), rs2        # 32-bit output tile load
+mlcte64 md, (rs1), rs2        # 64-bit output tile load
+
+```
+
+==== Store Transposed Instructions
+
+```
+# ms3 store data, rs1 base address, rs2 row byte stride
+
+# For left matrix, A
+# tile size = mtilek * mtilem
+msate8  ms3, (rs1), rs2       #  8-bit left tile store
+msate16 ms3, (rs1), rs2       # 16-bit left tile store
+msate32 ms3, (rs1), rs2       # 32-bit left tile store
+msate64 ms3, (rs1), rs2       # 64-bit left tile store
+
+# For right matrix, B
+# tile size = mtilen * mtilek
+msbte8  ms3, (rs1), rs2       #  8-bit right tile store
+msbte16 ms3, (rs1), rs2       # 16-bit right tile store
+msbte32 ms3, (rs1), rs2       # 32-bit right tile store
+msbte64 ms3, (rs1), rs2       # 64-bit right tile store
+
+# For output matrix, C
+# tile size = mtilen * mtilem
+mscte8  ms3, (rs1), rs2       #  8-bit output tile store
+mscte16 ms3, (rs1), rs2       # 16-bit output tile store
+mscte32 ms3, (rs1), rs2       # 32-bit output tile store
+mscte64 ms3, (rs1), rs2       # 64-bit output tile store
+```
+
+Executing matrix load or store instructions will result in illegal instruction exception under unsupported corresponding mtilem/mtilek/mtilen settings.
+
+For mla*/msa*/mlb*/msb*, the destination matrix register or the source matrix register is tile register, and the index of ms3/md must be 0-3. For mlc*/msc*, the destination matrix register or the source matrix register is accumulation register, and the index of ms3/md must be 4-7.
+
+==== Whole Matrix Load & Store Instructions
+
+Load a whole Tile/Accumulation matrix from memory without considering the tile size.
+
+```
+mlme<8/16/32/64>   md, (rs1), rs2        #  <8/16/32/64>-bit whole tile matrix load
+```
+
+Store a whole Tile/Accumulation matrix register to  memory without considering the tile size.
+
+```
+msme<8/16/32/64>   ms3, (rs1), rs2       #  <8/16/32/64>-bit whole tile matrix store
+```
+
+The destination matrix register or the source matrix register for mlme<8/16/32/64> and msme<8/16/32/64> can be either tile register or accumulation register.
+
+
+NOTE: Whole matrix load and store instructions are usually used for context saving and restoring.
+
+==== Examples for Load and Store Instructions
+
+include::load-store_zmabt.adoc[]

@@ -1,0 +1,32 @@
+This extension provides a matrix widening BF16 mul-add instruction that accumulates into FP32, illegal if bit[7] of xmisa register is 0.
+
+The legal matrix shape of  mfmacc.s.bf16 is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/16
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/16
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+Zmbf16 extension requires ELEN>=32.
+
+```
+#the input is bf16, the output is fp32, md = md + ms1*ms2
+ mfmacc.s.bf16 md, ms2, ms1
+```
+
+The matrix extension provides conversion between BF16 values and FP32 values, legal if bit[XLEN-2] and bit[8] of xmisa register are both set to 1. The widen convert instructions use high or low half columns of source register and write to 1 destination register. The narrow covert instructions only modify high or low half columns of destination register. The convert instructions do not depend upon matrix size.
+
+```
+#bf16 floating point widen convert to fp32
+#convert to high part of md
+mfcvth.s.bf16 md, ms1   
+#convert to low part of md
+mfcvtl.s.bf16 md, ms1   
+
+#fp32 narrow convert to bf16(fp32tobf16)
+#convert using high part of ms1
+mfcvth.bf16.s md, ms1
+#convert using low part of ms1
+mfcvtl.bf16.s md, ms1
+```
+
+For conversion between fp32 and bf16 , legal if bit[XLEN-2] and bit[7] of xmisa register are both set to 1, illegal in other cases.

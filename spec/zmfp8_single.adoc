@@ -1,0 +1,30 @@
+For mfmacc.s.<e5/e4> instruction, the source is E5M2/E4M3 8-bit floating-point, and the result is fp32 result, these instructions are illegal if bit[9]  of xmisa register is 0.
+
+The legal matrix shape of  mfmacc.s.<e5/e4> is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+The mfmacc.s.<e5/e4> instructions requires ELEN>=32.
+
+```
+#the input is fp8(E5M2), the output is fp32, md = md + ms1*ms2
+ mfmacc.s.e5 md, ms2, ms1
+#the input is fp8(E4M3), the output is fp32, md = md + ms1*ms2
+ mfmacc.s.e4 md, ms2, ms1
+```
+
+For conversion between fp8 and fp32,  legal if bit[XLEN-2] and bit[9] of xmisa register are both set to 1, illegal in all other cases.
+
+The mfcvt<l/h>.<e5/e4>.s instructions are used to convert a single float-point source into a 4x narrower destination. The mfcvtl.<e5/e4>.s write back to the first quater of md and the mfcvth.<e5/e4>.s write back to the second quater of md, the rest parts of md are kept undisturbed.  The matrix size configurations are ignored for mfcvt<l/h>.<e5/e4>.s instructions. 
+
+```
+#matrix-matrix floating point 4x narrow convert(fp32tofp8)
+#convert the 2nd half of ms1 
+mfcvth.e5.s md, ms1
+mfcvth.e4.s md, ms1
+#convert the 1st half of ms1 
+mfcvtl.e5.s md, ms1 
+mfcvtl.e4.s md, ms1
+```

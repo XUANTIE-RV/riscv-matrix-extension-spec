@@ -1,0 +1,46 @@
+For mfmacc.<h/bf16>.<e5/e4> instructions, the source is E5M2/E4M3 8-bit floating-point, and the result is fp16/bf16. these instructions are illegal if bit[5] of xmisa register is 0.
+
+The legal matrix shape of mfmacc.<h/bf16>.<e5/e4> is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+The mfmacc.<h/bf16>.<e5/e4> instructions requires ELEN>=16.
+
+
+```
+#the input is fp8(E5M2), the output is fp16, md = md + ms1*ms2
+ mfmacc.h.e5 md, ms2, ms1
+#the input is fp8(E4M3), the output is fp16, md = md + ms1*ms2
+ mfmacc.h.e4 md, ms2, ms1
+
+#the input is fp8(E5M2), the output is bf16, md = md + ms1*ms2
+ mfmacc.bf16.e5 md, ms2, ms1
+#the input is fp8(E4M3), the output is bf16, md = md + ms1*ms2
+ mfmacc.bf16.e4 md, ms2, ms1
+
+```
+
+For conversion between fp8 and fp16,  legal if bit[XLEN-2] and bit[5] of xmisa register are both set to 1, illegal in all other cases.
+
+For double widen conversion, mfcvt<l/h>.h.<e5/e4>, Low or high half columns of  matrix register are used by source matrix specified by ms1. The matrix size configurations are ignored.
+For narrow conversion, mfcvt<l/h>.<e5/e4>.h, source elements are twice as wide as destination elements. Low or high half columns of  matrix register are used by destination matrix specified by md, and another half columns kept undisturbed.  The matrix size configurations are ignored. 
+
+```
+#matrix-matrix floating point narrow convert(fp16tofp8)
+#write back to the 2nd half of md 
+mfcvth.e5.h md, ms1
+mfcvth.e4.h md, ms1
+#write back to the 1st half of md 
+mfcvtl.e5.h md, ms1
+mfcvtl.e4.h md, ms1
+
+#matrix-matrix floating point widen convert(fp8tofp16)
+#convert the 2nd half of ms1 
+mfcvth.h.e5 md, ms1
+mfcvth.h.e4 md, ms1
+#convert the 1st half of ms1 
+mfcvtl.h.e5 md, ms1
+mfcvtl.h.e4 md, ms1
+```

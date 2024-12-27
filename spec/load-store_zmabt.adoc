@@ -1,0 +1,51 @@
+
+The legal matrix shapes of ml<a/b/c/at/bt/ct>e<8/16/32/64> instructions are:
+
+*  mlae<8/16/32/64>: matrixA, mtilem stem:[\le] TLEN/TRLEN, mtilek stem:[\le] TRLEN/<8/16/32/64>
+*  mlbe<8/16/32/64>: matrixB, mtilen stem:[\le] TLEN/TRLEN, mtilek stem:[\le] TRLEN/<8/16/32/64>
+*  mlbc<8/16/32/64>: matrixC, mtilem stem:[\le] TLEN/TRLEN, mtilen stem:[\le] ARLEN/<8/16/32/64>
+
+The matrix tile loading to tile register is X rows and Y colunms elements.
+
+*  ml<a/at>e<8/16/32/64>: X =  mtilem, Y =  mtilek
+*  ml<b/bt>e<8/16/32/64>: X =  mtilen, Y =  mtilek
+*  ml<c/ct>e<8/16/32/64>: X =  mtilem, Y =  mtilen
+
+
+Taking TLEN=512, TRLEN=128 , ELEN=32 and ALEN=512 as an example, the max matrix shapes are:
+
+*  ml<a/b/c/at/bt/ct>e8
+** matrixA: M = 4, K = 16
+** matrixB: N = 4, K = 16
+** matrixC: M = 4, N = 16
+
+
+*   ml<a/b/c/at/bt/ct>e16
+** matrixA: M = 4, K = 8
+** matrixB: N = 4, K = 8
+** matrixC: M = 4, N = 8
+
+
+*  ml<a/b/c/at/bt/ct>e32
+** matrixA: M = 4, K = 4
+** matrixB: N = 4, K = 4
+** matrixC: M = 4, N = 4
+
+*  ml<a/b/c/at/bt/ct>e64
+** matrixA: M = 4, K = 2
+** matrixB: N = 4, K = 2
+** matrixC: M = 4, N = 2
+
+The  memory layout and matrix register layout is shown below:
+
+image::matrix_load_example_0.svg[alt="mlbe16", align="center"]
+
+
+with mtilen is 2 and mtilek is 4, the mlbe16 operation  is shown below:
+
+image::mlbe16.svg[alt="  mlbe16", align="center"]
+
+with mtilen is 2 and mtilek is 4, the mlbte16 operation is shown below:
+
+image::mlbte16.svg[alt="  mlbte16", align="center"]
+

@@ -1,0 +1,14 @@
+Matrix register pack instructions merge half column of ms1 and ms2. The source matrix registers and destination matrix registers must be all tile registers or accumulation registers. The ms1, ms2 and md must be the same register type.
+
+image::mpack.svg[alt="Mpack Instruction", align="center"]
+
+```
+#pack the low part of ms2 and low part of ms1 into md
+mpack.mm md, ms2, ms1
+
+#pack the high part of ms2 and low part of ms1 into md
+mpackhl.mm md, ms2, ms1
+
+#pack the high part of ms2 and high part of ms1 into md
+mpackhh.mm md, ms2, ms1
+```

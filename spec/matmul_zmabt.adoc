@@ -1,0 +1,289 @@
+The function description of `C = A x BT` is as follows:
+```
+#A[i,k] means the i row and j column element of ms1
+#B[j,k]  means the j row and k columns element of ms2
+
+for(int i=0; i<sizeM; i++) {
+  for(int j=0; j<sizeN; j++) {
+      for(int k=0; k<sizeK; k++){
+         C[i,j] += A[i,k]*B[j,k];
+}}}
+
+```
+==== Float Matrix Multiplication(non-widen)
+
+Non-widen float matrix multiplication indicates the source and destination operands data width keep the same which are encoded in the instruction.
+
+*   mfmacc.h:  fp16  floating-point,  illegal if 'mmf16f16' of xmisa register is 0
+*   mfmacc.s:  fp32  floating-point,  illegal if 'mmf32f32' of xmisa register is 0
+*   mfmacc.d:  fp64  floating-point,  illegal if 'mmf64f64' of xmisa register is 0
+
+```
+#float matrix multiplication, md = md + ms1*ms2
+ mfmacc.h md, ms2, ms1
+ mfmacc.s md, ms2, ms1
+ mfmacc.d md, ms2, ms1
+```
+
+For mfmacc.h, the legal matrix shape is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/16
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/16
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+For mfmacc.s, the legal matrix shape is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/32
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/32
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+
+For mfmacc.d, the legal matrix shape is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/64
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/64
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+Taking TLEN=512, TRLEN=128 as an example, the max matrix shapes of mfmacc.h, mfmacc.s and mfmacc.d are:
+
+*   mfmacc.h
+** matrixA: M = 4, K = 8
+** matrixB: N = 4, K = 8
+** matrixC: M = 4, N = 4
+
+*  fmmmacc.s
+** matrixA: M = 4, K = 4
+** matrixB: N = 4, K = 4
+** matrixC: M = 4, N = 4
+
+*   mfmacc.d
+** matrixA: M = 4, K = 2
+** matrixB: N = 4, K = 2
+** matrixC: M = 4, N = 4
+
+If ELEN is 32bits,  the ALEN is 512 bits. The operation is shown below, where each cell in the figure represents a 64-bit, 32-bit or 16-bit element:
+
+*   mfmacc.d
+
+When ELEN=32,   mfmacc.d is reserved.
+
+*   mfmacc.s
+
+When ELEN=32,   mfmacc.s is as follow:
+
+image::mfmacc_s_elen32.svg[alt="mfmacc.s with ELEN=32", align="center"]
+
+*   mfmacc.h
+
+When ELEN=32,   mfmacc.h is as follow:
+
+image::mfmacc_h_elen32.svg[alt="mfmacc.h with ELEN=32", align="center"]
+
+As ELEN is 32bit, only half accumulation register is used, the instruction writes back to the first half of md and the other parts of md are updated to 0.
+
+
+If ELEN is 64bits,  the ALEN is 1024 bits. The operation is shown below:
+
+*   mfmacc.d
+
+image::mfmacc_d_elen64.svg[alt="mfmacc.d with ELEN=64", align="center"]
+
+*   mfmacc.s
+
+image::mfmacc_s_elen64.svg[alt="mfmacc.s with ELEN=64", align="center"]
+
+As ELEN is 64-bit, only half accumulation register is used, the instruction writes back to the lowest half columns of md and the other parts of md are updated to 0.
+
+*   mfmacc.h
+
+image::mfmacc_h_elen64.svg[alt="th. mfmacc.h with ELEN=64", align="center"]
+
+As ELEN is 64-bit, only 1/4 accumulation register are used. The instruction writes back to the lowest quarter columns of md and the other parts of md are updated to 0.
+
+
+==== Float Matrix Multiplication(double-widen)
+
+Double-widen float matrix multiplication indicates destination operand data width is twice that of the source operand. The data width of source operand is in instruction encoding.
+
+*   mfmacc.h.<e4/e5>:  fp8(e4m3/e5m2) floating-point source and fp16 result ,illegal if 'mmf8f16' of xmisa register is 0.
+*   mfmacc.bf16.<e4/e5>:  fp8(e4m3/e5m2) floating-point source and bf16 result ,illegal if 'mmf8bf16' of xmisa register is 0.
+*   mfmacc.s.h:  fp16 floating-point source and fp32 result ,illegal if 'mmf16f32' of xmisa register is 0.
+*   mfmacc.s.bf16:  bf16 floating-point source and fp32 result ,illegal if 'mmbf16f32' of xmisa register is 0.
+*   mfmacc.d.s:  fp32 floating-point source and fp64 result ,  illegal if 'mmf32f64' of xmisa register is 0.
+
+
+
+```
+#float matrix multiplication, output double_widen, md = md + ms1*ms2
+mfmacc.h.e4 md, ms2, ms1
+mfmacc.h.e5 md, ms2, ms1
+mfmacc.bf16.e4 md, ms2, ms1
+mfmacc.bf16.e5 md, ms2, ms1
+mfmacc.s.bf16 md, ms2, ms1
+mfmacc.s.h md, ms2, ms1
+mfmacc.d.s md, ms2, ms1
+```
+
+For mfmacc.<h/bf16>.<e5/e4> , 8-bit float widen matrix multiplication and add instruction. The legel matrix shape is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+
+For mfmacc.s.h, 16-bit float widen matrix multiplication and add instruction. The legel matrix shape is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/16
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/16
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+For mfmacc.d.s, 32-bit float widen matrix multiplication and add instruction, The legal matrix shape is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/32
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/32
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+Taking TLEN=512, TRLEN=128 as an example, the max matrix shapes are:
+
+*  mfmacc.<h/bf16>.<e5/e4>
+** matrixA: M = 4, K = 16
+** matrixB: N = 4, K = 16
+** matrixC: M = 4, N = 4
+
+
+*  mfmacc.s.<h/bf16>
+** matrixA: M = 4, K = 8
+** matrixB: N = 4, K = 8
+** matrixC: M = 4, N = 4
+
+*   mfmacc.d.s
+** matrixA: M = 4, K = 4
+** matrixB: N = 4, K = 4
+** matrixC: M = 4, N = 4
+
+If ELEN is 32bits,  the ALEN is 512 bits. The operation is shown below, where each cell in ms1/sm2 is the source operand width, and each cell in md is the destinations operand width:
+
+*   mfmacc.d.s
+
+When ELEN=32,   mfmacc.d.s is reserved
+
+*   mfmacc.s.<h/bf16>
+
+image::mfmacc_s_h_elen32.svg[alt="mfmacc.s.h with ELEN=32", align="center"]
+
+*  mfmacc.<h/bf16>.<e5/e4>
+
+image::mfmacc_h_fp8_elen32.svg[alt="mfmacc.<h/bf16>.<e5/e4> with ELEN=32", align="center"]
+
+As ELEN is 32-bit, only half accmulation register is used, the instruction writes back to the lowest half columns of md and the other parts of md are updated to 0.
+
+If ELEN is 64bits,  the ALEN is 1024 bits. The operation is shown below, where each cell in ms1/sm2 is the source operand width, and each cell in md is the destinations operand width:
+
+*   mfmacc.d.s
+
+image::mfmacc_d_s_elen64.svg[alt="mfmacc.d.s with ELEN=64", align="center"]
+
+*   mfmacc.s.<h/bf16>
+
+image::mfmacc_s_h_elen64.svg[alt="mfmacc.s.h with ELEN=64", align="center"]
+
+As ELEN is 64-bit, only half accmulation register is used, the instruction writes back to the lowest half columns of md and the other parts of md are updated to 0.
+
+*   mfmacc.<h/bf16>.<e5/e4>
+
+image::mfmacc_h_fp8_elen64.svg[alt="mfmacc.<h/bf16>.<e5/e4> with ELEN=64", align="center"]
+
+As ELEN is 64-bit, only quarter accmulation register is used, the instruction writes back to the lowest quarter columns of md and the other parts of md are updated to 0.
+
+
+==== Float Matrix Multiplication(quad-widen)
+
+
+Quad-widen float matrix multiplication indicates destination operand data width is quadruple that of the source operand. The data width of source operand is in instruction encoding.
+
+*   mfmacc.s.<e4/e5>:  fp8(e4m3/e5m2) floating-point source and fp32 result ,illegal if 'mmf8f32' of xmisa register is 0.
+
+
+
+```
+#float matrix multiplication, output quad_widen, md = md + ms1*ms2
+mfmacc.s.e4 md, ms2, ms1
+mfmacc.s.e5 md, ms2, ms1
+```
+
+
+For mfmacc.s.<e4/e5>, the legal matrix shape is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+
+If ELEN is 32bits,  the ALEN is 512 bits. The operation is shown below, where each cell in ms1/sm2 is 8-bit, and each cell in md is 32bit:
+
+*  mfmacc.s.<e4/e5>
+
+image::mfmacc_s_fp8_elen32.svg[alt="mfmacc.s.<e5/e4> with ELEN=32", align="center"]
+
+
+
+If ELEN is 64bits,  the ALEN is 1024 bits. The operation is shown below, where each cell in ms1/sm2 is 8-bit, and each cell in md is 32bit:
+
+*   mfmacc.s.<e4/e5>
+
+image::mfmacc_s_fp8_elen64.svg[alt="mfmacc.s.<e5/e4> with ELEN=64", align="center"]
+
+As ELEN is 64-bit, only half accmulation register is used, the instruction writes back to the lowest half columns of md and the other parts of md are updated to 0.
+
+
+
+==== Integer Matrix Multiplication
+
+The integer matrix multiplication with destination data width is quad-widen that of the source data width. The source operand data width in instruction encoding supported are int8, other data widths are reserved. Both signed/unsigned versions are provided . Thus, the source operand can be both signed/both unsigned/signed-unsigned/unsigned-signed, the result of multiplication is sign-extended before addition  and accumulation. The overflow is processed depends on the msaten mode. If the msaten is 1, the overflow result should be saturated to the maximum number, and if the msaten is 0, the overflow result should be wrap around.
+
+*  mmaqa.b/mmaqau.b/mmaqaus.b/mmaqasu.b:  int8 quad-widen matrix multiplication, illegal if bit[1] of xmisa register is 0.
+
+```
+#8bit data width
+mmacc.w.b   md, ms2, ms1          #signed matrix multiply
+mmaccu.w.b  md, ms2, ms1          #unsigned matrix multiply
+mmaccus.w.b md, ms2, ms1          #unsigned-signed matrix multiply
+mmaccsu.w.b md, ms2, ms1          #signed-unsigned matrix multiply
+
+```
+For int8 quad-widen  matrix-multiplication, the maximum matrix shape is:
+
+* matrixA: M stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixB: N stem:[\le] TLEN/TRLEN, K stem:[\le] TRLEN/8
+* matrixC: M stem:[\le] TLEN/TRLEN, N stem:[\le] TLEN/TRLEN
+
+Taking TLEN=512, TRLEN=128 as an example, the max matrix shapes are:
+
+*  mmaqa.b/mmaqau.b/mmaqaus.b/mmaqasu.b
+** matrixA: M = 4, K = 16
+** matrixB: N = 4, K = 16
+** matrixC: M = 4, N = 4
+
+==== Examples Summary
+
+Summary for max Matrix size of matrix multiply and add instructions  for typical TLEN and TRLEN, assuming ELEN is 32bit:
+
+[cols="^2,^2,^2,^2,^2,^2,^2",options="header"]
+|===
+| TLEN   | TRLEN   | ALEN   | Instruction    | Matrix A:MxK |Matrix B: KxN| Matrix C: MxN
+| 512    |   128   | 512    |   mfmacc.h     | 4x8          |  8x4        | 4x4
+| 512    |   128   | 512    |   mfmacc.s.h   | 4x8          |  8x4        | 4x4
+| 512    |   128   | 512    |   mmacc.w.b    | 4x16         |  16x4       | 4x4
+| 2048   |   256   | 2048   |   mfmacc.h     | 8x16         |  16x8       | 8x8
+| 2048   |   256   | 2048   |   mfmacc.s.h   | 8x16         |  16x8       | 8x8
+| 2048   |   256   | 2048   |   mmacc.w.b    | 8x32         |  32x8       | 8x8
+| 8192   |   512   | 8192   |   mfmacc.h     | 16x32        |  32x16      | 16x16
+| 8192   |   512   | 8192   |   mfmacc.s.h   | 16x32        |  32x16      | 16x16
+| 8192   |   512   | 8192   |   mmacc.w.b    | 16x64        |  64x16      | 16x16
+|===
+
+
+
+
+
+

@@ -1,0 +1,5 @@
+== Introduction
+
+This document is a matrix extension proposal for RISC-V. 
+
+The extension chooses a decoupled architecture from the vector extension for the flexibility and implementation considerations. This extension defines extra matrix registers, including matrix multiplication instructions(C += A x BT), matrix load/store instructions, matrix element-wise operation instructions, and matrix misc instructions, which supports matrix multiplication and other basic matrix operation.

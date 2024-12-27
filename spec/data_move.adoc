@@ -1,0 +1,16 @@
+Matrix data move Instructions are provided to define the data movement between scalar registers and matrix registers. Matrix data move instructions ignore the matix size configuration.
+
+===== Data Move Instructions between Matrix Registers
+Data move instructions between matrix registers are used to move elements between two tile registers, two accumulation registers, or one tile register and one accumulation register. The suffix of mmov.mm is ".mm", which means the source and destination matrix register can be either tile register or accumulation register.
+
+When the source register and destination register are all tile registers or accumulation regsiters, there are no out-of-bound issue. 
+When the source register and destination register are not the same type, the effective length in a row is minimum(TRLEN, ARLEN), the out-of-bound bits of md stay undisturbed. 
+
+```
+#md = ms1, md and ms1 can be tile register or accumulation register
+mmov.mm md, ms1
+```
+
+===== Data Move Instructions between Integer and Matrix
+
+include::data_move_gpr.adoc[]

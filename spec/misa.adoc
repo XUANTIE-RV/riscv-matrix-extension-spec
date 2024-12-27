@@ -1,0 +1,53 @@
+
+//The `msew` field is used to specify the element width of source operands. It is used to calculate the maximum values of matrix size.
+
+[cols="^3,^3,^3",options="header"]
+|===
+|  Bits       | Feature   | Support Type 
+|  XLEN-1     | miew      | optional 
+|  XLEN-2     | mfew      | optional 
+|  XLEN-3     | mfic      | optional 
+|  XLEN-4:10  | 0         | reserved
+|  9          | mmf8f32   | compulsory 
+|  8          | mmf32f64  | optional 
+|  7          | mmbf16f32 | compulsory
+|  6          | mmf16f32  | compulsory 
+|  5          | mmf8bf16  | compulsory 
+|  5          | mmf8f16   | compulsory 
+|  4          | mmf64f64  | optional 
+|  3          | mmf32f32  | optional 
+|  2          | mmf16f16  | compulsory
+|  1          | mmi8i32   | compulsory
+|  0          | mmi4i32   | optional  
+|===
+
+
+For each field, a value 0 means the corresponding feature is not supported, a value 1 means the corresponding feature is supported. 
+
+For `mmi4i32` field, a value 1 means the corresponding int4/uint4 oct-widen matrix multiplication instructions are supported. The source operands type of this field are (su)int4 and the destination operand is int32. This field is optional for hardware implementation.
+
+For `mmi8i32` field, a value 1 means the corresponding int8/uint8 quad-widen matrix multiplication instructions are supported. The source operands type of this field are (su)int8 and the destination operand is int32. This field is compulsory for hardware implementation.
+
+For `mmf16f16` field, a value 1 means the corresponding fp16 no-widen matrix multiplication instructions are supported. The source operands type of this field are fp16 and the destination operand is fp16. This field is compulsory for hardware implementation.
+
+For `mmf32f32` field, a value 1 means the corresponding fp32 no-widen matrix multiplication instructions are supported. The source operands type of this field are fp32 and the destination operand is fp32. This field is optional for hardware implementation.
+
+For `mmf64f64` field, a value 1 means the corresponding fp64 no-widen matrix multiplication instructions are supported. The source operands type of this field are fp64 and the destination operand is fp64. This field is optional for hardware implementation.
+
+For `mmf8f16` field, a value 1 means the corresponding fp8 double-widen matrix multiplication instructions are supported. The source operands type of this field are fp8(E4M3 and E5M2) and the destination operand is fp16. This field is compulsory for hardware implementation.
+
+For `mmf8bf16` field, a value 1 means the corresponding fp8 double-widen matrix multiplication instructions are supported. The source operands type of this field are fp8(E4M3 and E5M2) and the destination operand is bf16. This field is compulsory for hardware implementation.
+
+For `mmf16f32` field, a value 1 means the corresponding fp16 double-widen matrix multiplication instructions are supported. The source operands type of this field are fp16 and the destination operand is fp32. This field is compulsory for hardware implementation.
+
+For `mmbf16f32` field, a value 1 means the corresponding bf16 double-widen matrix multiplication instructions are supported. The source operands type of this field are bf16 and the destination operand is fp32. This field is compulsory for hardware implementation.
+
+For `mmf32f64` field, a value 1 means the corresponding fp32 double-widen matrix multiplication instructions are supported. The source operands type of this field are fp32 and the destination operand is fp64. This field is optional for hardware implementation.
+
+For `mmf8f32` field, a value 1 means the corresponding fp32 quad-widen matrix multiplication instructions are supported. The source operands type of this field are fp8 and the destination operand is fp32. This field is compulsory for hardware implementation.
+
+For `mfic` field, a value 1 means the conversion between integer and float point extension is supported. This field is optional for hardware implementation.
+
+For `mfew` field, a value 1 means float point element wise extension(including arithmetic instruction and conversion instructions) is supported, including the . This field is optional for hardware implementation.
+
+For `miew` field, a value 1 means integer element wise extension(including arithmetic instruction and conversion instructions) is supported. This field is optional for hardware implementation.

@@ -1,0 +1,23 @@
+Mzero instruction sets the destination register to zero. imm3 field is reused to specify the register number, encoding how many matrix registers to zero. md  register index should be aligned with the register number.
+
+[cols="^2,^2"]
+|===
+|  imm3  |  register number      
+
+|  000    |     1
+|  001    |     2
+|  011    |     4
+|  111    |     8
+| others  |  reserved 
+|===
+
+```
+#zero 1 matrix register
+mzero md  
+#zero 2 matrix registers
+mzero2r md  
+#zero 4 matrix registers
+mzero4r md  
+#zero 8 matrix registers
+mzero8r md 
+```
