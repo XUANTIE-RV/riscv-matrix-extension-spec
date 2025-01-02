@@ -55,6 +55,8 @@ For more information on AsciiDoctor, specification guidelines, or building local
 [RISC-V Documentation Developer Guide](https://github.com/riscv/docs-dev-guide).
 
 RISC-V Matrix Extension Specification is kept in ./spec.
+The recommended method for building the PDF files is to use the Docker Image, as described in the [RISC-V Docs Base Container Image repository](https://github.com/riscv/riscv-docs-base-container-image).
+
 User guide and reference manual for RISC-V Matrix Extension tools are kept in ./doc.
 
 The final documents form of PDF can be generated using the `make` command under corresponding folder. The generation method of each document is as follows.
