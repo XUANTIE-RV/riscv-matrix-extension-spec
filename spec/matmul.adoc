@@ -1,6 +1,6 @@
 Matrix multiplication operations take two matrix tiles, matrixA and matrixB,from matrix **tile registers** specified by `ms1` and `ms2`, and accumulate the multiplication result to matrixC specified by `md`, the output will overwrite the `md` **accumulation register** .
 
-If the accmulation register is larger than the output matrix tile(matrixC) in bits, only the lower columns are updated and the higher parts keep undisturbed. 
+If the accmulation register is larger than the output matrix tile(matrixC) in bits, only the lower columns are updated and the higher parts are set by zeros. 
 
 The ISA specification provides different instructions to support float and integer matrix multiplication operation. Hardware design has the flexibility of supported data types. 
 
@@ -10,12 +10,12 @@ The ISA specification provides different instructions to support float and integ
 |     Float  |   mfmacc.h               |    fp16                 |  fp16 
 |     Float  |   mfmacc.s               |    fp32                 |  fp32 
 |     Float  |   mfmacc.d               |    fp64                 |  fp64
-|     Float  |   mfmacc.h.<e4.e5>       |    fp8(e4m3/e5m2)       |  fp16
-|     Float  |   mfmacc.bf16.<e4.e5>    |    fp8(e4m3/e5m2)       |  bf16
+|     Float  |   mfmacc.h.<e4/e5>       |    fp8(e4m3/e5m2)       |  fp16
+|     Float  |   mfmacc.bf16.<e4/e5>    |    fp8(e4m3/e5m2)       |  bf16
 |     Float  |   mfmacc.s.h             |    fp16                 |  fp32
 |     Float  |   mfmacc.s.bf16          |    bf16                 |  fp32
 |     Float  |   mfmacc.d.s             |    fp32                 |  fp64
-|     Float  |   mfmacc.s.<e4.e5>       |    fp8(e4m3/e5m2)       |  fp32
+|     Float  |   mfmacc.s.<e4/e5>       |    fp8(e4m3/e5m2)       |  fp32
 |     Int    |   mmacc.w.b              |    int8                 |  int32
 |     Int    |   mmaccu.w.b             |    uint8                |  int32
 |     Int    |   mmaccsu.w.b            |    (su)int8             |  int32
