@@ -64,6 +64,7 @@ include::contributors.adoc[]
 include::body.adoc[]
 include::extensions.adoc[]
 include::mem_model.adoc[]
+include::instruction_list.adoc[]
 //include::inst-list.adoc[]
 //the index must precede the bibliography
 //include::index.adoc[]
